@@ -9,8 +9,7 @@ package shoe3d;
 class System
 {
 
-	public function new() 
-	{
+	public static function init() {
 		
 	}
 	
