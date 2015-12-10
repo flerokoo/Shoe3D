@@ -7,16 +7,19 @@ import three.Object3D;
  */
 @:final
 @:allow(shoe3d)
-class GameObject extends Object3D implements GameObjectContainer
+class GameObject implements ComponentContainer
 {
-	public var components:Array<Component>;
-	public var gameObjectList:Array<Object3D>;
+	public var components(default,null):Array<Component>;
+	public var children(default,null):Array<GameObject>;
+	public var transform(default, null):Object3D;
+	public var name:String;
 	
 	public function new( ?name:String ) 
 	{
-		super();
 		this.name = name;
 		components = [];
+		children = [];
+		transform = new Object3D();
 		
 	}	
 	
@@ -43,6 +46,18 @@ class GameObject extends Object3D implements GameObjectContainer
 			component.onRemoved();
 		}		
 		return this;	
+	}
+	
+	public function addChild( child:GameObject ) 
+	{
+		children.push( child );
+		transform.add( child.transform );
+	}
+	
+	public function removeChild( child:GameObject ) 
+	{
+		children.remove( child );
+		transform.remove( child.transform );
 	}
 	
 	private function onAdded() 

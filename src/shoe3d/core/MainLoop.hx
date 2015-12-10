@@ -1,5 +1,6 @@
 package shoe3d.core;
 import js.Browser;
+import shoe3d.screen.ScreenManager;
 
 /**
  * ...
@@ -23,7 +24,12 @@ class MainLoop
 		System.time.update();
 		
 		
-		updateGameObject( System.screen._base );
+		for ( i in ScreenManager._currentScreen.gameScene.gameObjects )
+			updateGameObject( i );
+		
+		for ( i in ScreenManager._currentScreen.uiScene.gameObjects )
+			updateGameObject( i );	
+			
 		render();
 		
 		Browser.window.requestAnimationFrame( update );
@@ -37,10 +43,10 @@ class MainLoop
 	
 	
 	
-	public function updateGameObject( go:GameObjectContainer ) 
+	public function updateGameObject( go:GameObject ) 
 	{
-		
 		for ( i in go.components ) {
+			
 			if ( ! i._started ) {
 				i.onStart();
 				i._started = true;
@@ -50,10 +56,9 @@ class MainLoop
 		}
 			
 		
-		for ( i in go.children )
-		{
-			for ( k in i.children ) updateGameObject( cast( k, GameObjectContainer ) );
-		}
+		for ( child in go.children )		
+			updateGameObject( child );
+		
 	}
 	
 }

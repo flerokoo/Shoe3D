@@ -14,7 +14,7 @@ import three.MeshPhongMaterial;
  * ...
  * @author as
  */
-class TestScreen extends GameScreen
+class TestScreen2 extends GameScreen
 {
 
 	@:keep
@@ -34,7 +34,7 @@ class TestScreen extends GameScreen
 		
 		
 		var go2 = new GameObject( "INSIDE" )
-			.addComponent( new MeshDisplay( new BoxGeometry(0.5, 0.5, 0.5) ) )
+			.addComponent( new MeshDisplay( new BoxGeometry(0.9, 0.9, 0.9) ) )
 			//.addComponent( new RandomRotator() )
 			;
 		Main.trace2(go2.components.length);

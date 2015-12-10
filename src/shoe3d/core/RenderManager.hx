@@ -22,13 +22,15 @@ class RenderManager
 		renderer.setSize( 800, 600);
 		Browser.document.body.appendChild( renderer.domElement );
 		
-		camera =  new PerspectiveCamera( 60, 800 / 600, 0.1 , 1000 );
+		renderer.setClearColor(0xF28313);
+		renderer.autoClear = false;		
 		uiCamera = new OrthographicCamera( -1, 1, 10, -10 , 0.1, 1000 );
 		
 	}
 	
 	private static function render() {
-		renderer.render( System.screen._currentScreen.gameScene, camera );
+		renderer.clear( );
+		renderer.render( System.screen._currentScreen.gameScene, System.screen._currentScreen.cameraHandle.camera );
 		renderer.render( System.screen._currentScreen.uiScene, uiCamera );
 	}
 	

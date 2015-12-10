@@ -1,5 +1,6 @@
 package tests;
 
+import haxe.Timer;
 import haxe.unit.TestRunner;
 import haxe.unit.TestStatus;
 import js.Browser;
@@ -40,7 +41,11 @@ class Main
 		System.init();
 		
 		System.screen.addScreen( "game", TestScreen );
+		System.screen.addScreen( "game2", TestScreen2 );
+		
 		System.screen.show( "game" );
+		
+		Timer.delay( function() System.screen.show("game2") , 1100 );
 		
 		System.start();
 		
@@ -53,7 +58,7 @@ class Main
 		trace2("CONSOLE CREATED");
 	}
 	
-	static function trace2( a:Dynamic ) {
+	public static function trace2( a:Dynamic ) {
 		console.innerHTML = console.innerHTML + "<br/>" + Std.string( a );
 	}
 	

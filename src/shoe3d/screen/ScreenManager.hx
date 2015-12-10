@@ -21,10 +21,12 @@ class ScreenManager
 	
 	private static function init() 
 	{
+		_transitions = new Map();
+		_screens = new Map();
 		_base = new GameObject();
 		defaultTransition = new Transition();
-		defaultTransition.setHolder(_base);
-		System._baseScene.add( _base );
+		//defaultTransition.setHolder(_base);
+		//System._baseScene.add( _base );
 	}
 	
 	public static function show( name:String, ?changeFn:Void->Void ) 
@@ -45,7 +47,8 @@ class ScreenManager
 		} 
 		else 
 		{
-			_base.add( _targetScreen.scene );
+			//_base.add( _targetScreen.scene );
+			_currentScreen = _targetScreen;
 		}
 		
 	}

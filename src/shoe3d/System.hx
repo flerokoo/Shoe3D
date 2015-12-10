@@ -21,10 +21,10 @@ class System
 	public static var renderer(default, null) = RenderManager;
 	
 	private static var loop:MainLoop;
-	private static var _baseScene:Scene;
+	//private static var _baseScene:Scene;
 	
 	public static function init() {
-		_baseScene = new Scene();
+		//_baseScene = new Scene();
 		WindowManager.init();
 		RenderManager.init();
 		ScreenManager.init();

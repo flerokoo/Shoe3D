@@ -19,8 +19,10 @@ class Transition
 	
 	public function start( currentScreen:GameScreen, targetScreen:GameScreen ) 
 	{
-		_holder.remove( currentScreen.scene );
-		_holder.add( targetScreen.scene );
+		//_holder.remove( currentScreen.scene );
+		//_holder.add( targetScreen.scene );
+		
+		ScreenManager._currentScreen = targetScreen;
 	}
 	
 	public function setHolder( holder:GameObject ) 

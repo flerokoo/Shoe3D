@@ -21,11 +21,12 @@ class MeshDisplay extends Component
 		geometry = geom;
 		material = mat;
 		mesh = new Mesh( geometry, material );
-		if( owner != null ) owner.add( mesh );
+		if ( owner != null ) owner.transform.add( mesh );
 	}
 	
-	override public function onAdded() {
-		owner.add( mesh );
+	override public function onAdded() 
+	{
+		owner.transform.add( mesh );
 	}
 	
 }

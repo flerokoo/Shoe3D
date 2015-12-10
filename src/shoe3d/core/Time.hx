@@ -1,4 +1,5 @@
 package shoe3d.core;
+import haxe.Timer;
 
 /**
  * ...
@@ -8,16 +9,27 @@ package shoe3d.core;
 class Time
 {
 
+	public static var dt(default, null):Float;
+	public static var timeSingleGameStart(default, null):Float;
+	private static var gameStartTime:Float;
+	private static var lastUpdateTime:Float;
+	
 	public function new() 
 	{
 		
 	}
 	
 	private static function init() {
-		
+		lastUpdateTime = gameStartTime = Timer.stamp();
 	}
 	
 	public static function update() {
+		var cur = Timer.stamp();
+		
+		dt = cur - lastUpdateTime;
+		lastUpdateTime = cur;
+		
+		timeSingleGameStart = cur - gameStartTime;
 		
 	}
 	
