@@ -9,7 +9,6 @@ class Component
 {
 
 	public var owner:GameObject;
-	private var _next:Component;
 	private var _started:Bool = false;
 	
 	

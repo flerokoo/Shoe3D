@@ -1,4 +1,5 @@
 package shoe3d.core;
+import three.Object3D;
 
 /**
  * ...
@@ -6,130 +7,59 @@ package shoe3d.core;
  */
 @:final
 @:allow(shoe3d)
-class GameObject
+class GameObject extends Object3D implements GameObjectContainer
 {
-	public var parent(default, null):GameObject;
-	public var transform(default, null):Transform;
-	public var firstChild(default, null):GameObject;
-	public var firstComponent(default, null):Component;
+	public var components:Array<Component>;
+	public var gameObjectList:Array<Object3D>;
 	
-
-	private var _next:GameObject;
-	
-	public function new() 
+	public function new( ?name:String ) 
 	{
-		transform = new Transform();
-	}
+		super();
+		this.name = name;
+		components = [];
+		
+	}	
 	
-	private function update() 
+	public function addComponent( component:Component ):GameObject
 	{
-		
-	}
-	
-	public function addChild( child:GameObject ):GameObject
-	{
-		var k:shoe3d.core.GameObject = null;
-		if ( firstChild != null ) 
-		{
-			k = firstChild;
-			while ( k._next != null )
-				k = k._next;
-			k._next = child;
-		} 
-		else 
-		firstChild = child;	
-		child.setParent( this );
-		
-		return this;
-	}
-	
-	public function removeChild( child:GameObject ):GameObject 
-	{
-		if ( child == firstChild ) 
-			firstChild = firstChild._next
-		else {
-			var k = firstChild._next;
-			var p = firstChild;
-			
-			while ( k != child ) 
-			{
-				p = k;
-				k = k._next;
-			}
-			
-			p._next = k._next;				
-		}
-		
-		child.parent = null;
-		
-		return this;		
-	}
-	
-	public function add( component:Component ):GameObject
-	{
-		if ( firstComponent != null ) 
-		{
-			var k = firstComponent;
-			while ( k._next != null )
-				k = k._next;
-			k._next = component;
-		} 
-		else 
-		firstComponent = component;	
-		
+		components.push( component );
 		component.owner = this;
-		
+		component.onAdded();		
 		return this;
 	}
 	
-	public function has<T>( cl:Class<T> ):Bool
+	public function hasComponent<T>( cl:Class<T> ):Bool
 	{
-		var k = firstComponent;
-		
-		while ( k != null ) {
-			if ( Std.is(k, cl) ) return true;
-			k = k._next;
-		}
-		
+		for ( i in components )
+			if ( Std.is( i, cl ) ) return true;
 		return false;
 	}
 	
-	public function remove( component:Component ):GameObject
+	public function removeComponent( component:Component ):GameObject
 	{
-		if ( component == firstComponent ) 
-			firstComponent = firstComponent._next
-		else {
-			var k = firstComponent._next;
-			var p = firstComponent;
-			
-			while ( k != component ) 
-			{
-				p = k;
-				k = k._next;
-			}
-			
-			p._next = k._next;				
-		}
-		
-		component.owner = null;
-		component.onRemoved();
-		
+		var i = components.indexOf( component );
+		if ( i >= 0 ) {
+			components.splice( i , 1 );
+			component.onRemoved();
+		}		
 		return this;	
 	}
 	
+	private function onAdded() 
+	{
+		// TODO Make onAddedToStage()
+		//for ( i in components ) i.onAdded();
+		//for ( i in _children ) i.onAdded();
+	}
 	
-	
-	public function setParent( go:GameObject, append:Bool = true ):GameObject {
-		if ( go != null )
-			go.addChild( this )
-		else if ( this.parent != null ) 
-			this.parent.removeChild( this );
-			
-		return this;
+	private function onRemoved() 
+	{
+		//for ( i in components ) i.onRemoved();
+		//for ( i in _children ) i.onRemoved();
 	}
 	
 	
-	public var numChildren(get, null):Int;
-	function get_numChildren() return { var n = 0; var k = firstChild; while ( k != null ) { n++; k = k._next; }; return n; }
+	
+	public var numComponents(get, null):Int;	function get_numComponents() return components.length;
 	
 }

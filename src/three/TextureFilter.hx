@@ -1,4 +1,4 @@
-package js.three;
+package three;
 
 import js.html.*;
 

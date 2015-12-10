@@ -1,4 +1,5 @@
-package js.three.controls;
+package three.controls;
+import three.Camera;
 
 @:native("THREE.TrackballControls")
 extern class TrackballControls

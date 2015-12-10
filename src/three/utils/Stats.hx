@@ -1,4 +1,4 @@
-package js.three.utils;
+package three.utils;
 
 @:native("Stats")
 extern class Stats
