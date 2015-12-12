@@ -1,7 +1,9 @@
 package tests;
+import shoe3d.component.CameraHolder;
 import shoe3d.component.MeshDisplay;
 import shoe3d.component.RandomRotator;
 import shoe3d.core.GameObject;
+import shoe3d.core.Layer;
 import shoe3d.screen.GameScreen;
 import shoe3d.System;
 import three.AmbientLight;
@@ -22,15 +24,15 @@ class TestScreen2 extends GameScreen
 	{
 		super();
 		
-		var msh = new MeshDisplay( new BoxGeometry(1, 1, 1), new MeshPhongMaterial( { color : 0xF7CF33 } ) );		
+		/*var msh = new MeshDisplay( new BoxGeometry(1, 1, 1), new MeshPhongMaterial( { color : 0xF7CF33 } ) );		
 		var go = new GameObject("out")
 			.addComponent(msh)
 			//.addComponent( new RandomRotator() )
 			;
 		
-		/*go.transform.rotateX( 0.34 );
+		go.transform.rotateX( 0.34 );
 		go.transform.rotateY( 1.34 );
-		go.transform.rotateZ( 2.25 );*/
+		go.transform.rotateZ( 2.25 );
 		
 		
 		var go2 = new GameObject( "INSIDE" )
@@ -51,7 +53,10 @@ class TestScreen2 extends GameScreen
 		dl.rotateX( 1.74 );
 		gameScene.add( dl  );
 		
-		cameraHandle.owner.transform.position.z = 5;
+		cameraHandle.owner.transform.position.z = 5;*/
+		
+
+		
 	}
 	
 }

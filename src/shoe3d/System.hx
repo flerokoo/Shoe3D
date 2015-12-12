@@ -28,10 +28,11 @@ class System
 		WindowManager.init();
 		RenderManager.init();
 		ScreenManager.init();
-		Time.init();
+		Time.init();			
+		
+		window.updateLayout();
 		
 		loop = new MainLoop();
-				
 	}
 	
 	public static function start() {

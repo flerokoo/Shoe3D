@@ -45,7 +45,10 @@ class Main
 		
 		System.screen.show( "game" );
 		
-		Timer.delay( function() System.screen.show("game2") , 1100 );
+		//Timer.delay( function() System.screen.show("game2") , 1100 );
+		
+		//System.window.mode = Default;
+		//System.window.setSize( 600, 600 );
 		
 		System.start();
 		
@@ -54,7 +57,7 @@ class Main
 	
 	static function createConsole() {
 		console = Browser.document.createDivElement();
-		Browser.document.body.appendChild( console );
+		//Browser.document.body.appendChild( console );
 		trace2("CONSOLE CREATED");
 	}
 	

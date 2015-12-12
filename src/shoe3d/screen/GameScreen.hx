@@ -1,8 +1,10 @@
 package shoe3d.screen;
-import shoe3d.component.CameraHandle;
+import js.html.Screen;
+import shoe3d.component.CameraHolder;
 import shoe3d.component.RandomRotator;
 import shoe3d.core.GameObject;
-import shoe3d.core.GameScene;
+import shoe3d.core.Layer;
+import shoe3d.util.Assert;
 import three.Object3D;
 import three.PerspectiveCamera;
 import three.Scene;
@@ -14,27 +16,29 @@ import three.Scene;
 @:allow("shoe3d")
 class GameScreen
 {	
-	public var gameScene(default, null):GameScene;
-	public var uiScene:GameScene;
-	public var cameraHandle:CameraHandle;
-	
+	public var layers(default,null):Array<Layer>;
+		
 	public function new() 
 	{
-		gameScene = new GameScene();
-		uiScene = new GameScene();
-		cameraHandle = new CameraHandle();
-		gameScene.addChild( new GameObject().addComponent( cameraHandle ) );
-		
+		layers = [];		
 	}	
 	
-	private function _onShow() 
+	public function onShow() 
 	{
 		
 	}
 	
-	private function _onHide() 
+	public function onHide() 
 	{
 		
 	}
+	
+	public function addLayer( lr:Layer ) 
+	{
+		Assert.that( layers.indexOf( lr ) < 0, "Layer(${scr.name}) is already on the scene" );
+		layers.push( lr );
+		return this;
+	}
+	
 	
 }

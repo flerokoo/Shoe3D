@@ -10,7 +10,7 @@ class Time
 {
 
 	public static var dt(default, null):Float;
-	public static var timeSingleGameStart(default, null):Float;
+	public static var timeSinceGameStart(default, null):Float;
 	private static var gameStartTime:Float;
 	private static var lastUpdateTime:Float;
 	
@@ -29,7 +29,7 @@ class Time
 		dt = cur - lastUpdateTime;
 		lastUpdateTime = cur;
 		
-		timeSingleGameStart = cur - gameStartTime;
+		timeSinceGameStart = cur - gameStartTime;
 		
 	}
 	

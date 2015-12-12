@@ -1,5 +1,7 @@
 package shoe3d.component;
 import shoe3d.core.Component;
+import shoe3d.core.Time;
+import three.Vector3;
 
 /**
  * ...
@@ -8,6 +10,8 @@ import shoe3d.core.Component;
 class RandomRotator extends Component
 {
 
+	var t = 0;
+	
 	public function new() 
 	{
 		super();
@@ -15,7 +19,15 @@ class RandomRotator extends Component
 	
 	override public function onUpdate() 
 	{
-		owner.transform.rotation.x += 0.02 ;
+		
+		/*var h = owner.get(CameraHolder );		
+		h.camera.position.set(  Math.cos(Time.timeSinceGameStart), Math.sin( Time.timeSinceGameStart ) , 0 ).multiplyScalar( 20 );		
+		h.camera.lookAt( owner.transform.worldToLocal(new Vector3(0, 0, 0))  );*/
+		
+		
+		owner.transform.position.set(  Math.cos(Time.timeSinceGameStart), Math.sin( Time.timeSinceGameStart ) , 0 ).multiplyScalar( 20 );		
+		owner.transform.lookAt( owner.transform.worldToLocal(new Vector3(0, 0, 0))  );
+		
 	}
 	
 	

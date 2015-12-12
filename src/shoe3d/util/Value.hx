@@ -36,15 +36,15 @@ class Value<T>
 	
 	function get__():T 
 	{
-		return _self;
+		return __;
 	}
 	
 	function set__(value:T):T 
 	{
-		var old = _self;
-		_self = value;
+		var old = _;
+		__ = value;
 		change.emit( this, old );
-		return _self;
+		return _;
 	}
 	
 }

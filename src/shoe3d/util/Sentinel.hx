@@ -1,17 +1,18 @@
-package fastui.util.signal;
+package shoe3d.util;
 
 /**
  * ...
  * @author as
  */
+
 class Sentinel
 {
 
 	public var isOnce(default, null):Bool = false;
 
-	@:allow(fastui) 
+	@:allow(shoe3d) 
 	private var _next:Sentinel;
-	@:allow(fastui) 
+	@:allow(shoe3d) 
 	private var _fn:Dynamic;
 	private var _signal:Signal;
 	

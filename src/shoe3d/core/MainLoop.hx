@@ -23,12 +23,11 @@ class MainLoop
 	{
 		System.time.update();
 		
+
 		
-		for ( i in ScreenManager._currentScreen.gameScene.gameObjects )
-			updateGameObject( i );
-		
-		for ( i in ScreenManager._currentScreen.uiScene.gameObjects )
-			updateGameObject( i );	
+		for ( layer in ScreenManager._currentScreen.layers )
+			for( i in layer.gameObjects )
+				updateGameObject( i );	
 			
 		render();
 		

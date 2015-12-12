@@ -10,24 +10,23 @@ import three.Scene;
 class Transition
 {
 
-	private var _holder:GameObject;
-	
 	public function new() 
 	{
 		
 	}
 	
-	public function start( currentScreen:GameScreen, targetScreen:GameScreen ) 
+	public function start( currentScreen:GameScreen, targetScreen:GameScreen, ?fn:Void->Void ) 
 	{
 		//_holder.remove( currentScreen.scene );
 		//_holder.add( targetScreen.scene );
 		
+		targetScreen.onHide();
+		if ( fn != null ) fn();
+		targetScreen.onShow();
+		
 		ScreenManager._currentScreen = targetScreen;
-	}
-	
-	public function setHolder( holder:GameObject ) 
-	{
-		_holder = holder;
+		
+		end();
 	}
 	
 	public function end() 

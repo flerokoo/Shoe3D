@@ -1,0 +1,35 @@
+package shoe3d.component;
+import shoe3d.core.Component;
+import shoe3d.core.Time;
+import three.Camera;
+import three.PerspectiveCamera;
+import three.Vector3;
+
+/**
+ * ...
+ * @author as
+ */
+class CameraHolder extends Component
+{
+
+	public var camera:PerspectiveCamera;
+	
+	public function new() 
+	{
+		super();
+	}
+	
+	override public function onAdded() 
+	{
+		
+	}
+	
+	override public function onUpdate()
+	{
+		if( owner.layer != null && owner.layer.camera != null ) {
+			owner.layer.camera.position.set( Math.cos(Time.timeSinceGameStart), Math.sin( Time.timeSinceGameStart ) , 0 ).multiplyScalar( 50 );
+			owner.layer.camera.lookAt( new Vector3( 0, 0, 0 ) );
+		}
+	}
+	
+}

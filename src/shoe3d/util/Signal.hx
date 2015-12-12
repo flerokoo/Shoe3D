@@ -1,4 +1,4 @@
-package fastui.util.signal;
+package shoe3d.util;
 
 /**
  * ...
@@ -40,7 +40,7 @@ class Signal
 		return sentinel;
 	}
 	
-	@:allow(fastui)
+	@:allow(shoe3d)
 	private function disconnectInner( sentinel:Sentinel )
 	{
 		if ( isDispatching() )		
