@@ -6,7 +6,7 @@ import haxe.unit.TestStatus;
 import js.Browser;
 import js.html.DivElement;
 import js.Lib;
-import shoe3d.component.MeshDisplay;
+import shoe3d.component.S3Mesh;
 import shoe3d.core.GameObject;
 import shoe3d.System;
 import three.AmbientLight;
@@ -51,6 +51,8 @@ class Main
 		//System.window.setSize( 600, 600 );
 		
 		System.start();
+		
+		System.renderer.showStats();
 		
 		
 	}

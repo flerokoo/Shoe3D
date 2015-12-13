@@ -40,6 +40,10 @@ class System
 		loop.start();
 	}
 	
+	public static function showFPSMeter() {
+		
+	}
+	
 	
 	
 	public static var root(get, null):GameObject;		

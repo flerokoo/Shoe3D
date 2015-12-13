@@ -1,6 +1,6 @@
 package tests;
 import shoe3d.component.CameraHolder;
-import shoe3d.component.MeshDisplay;
+import shoe3d.component.S3Mesh;
 import shoe3d.component.RandomRotator;
 import shoe3d.core.GameObject;
 import shoe3d.core.Layer;

@@ -12,9 +12,9 @@ class ZeroSignal extends Signal
 		super();
 	}
 	
-	public function connect( highPriority:Bool = false )
+	public function connect( callback:Void->Void, callbackhighPriority:Bool = false )
 	{
-		return connectInner( null, highPriority );
+		return connectInner( callback, callbackhighPriority );
 	}
 	
 	public function emit(  )

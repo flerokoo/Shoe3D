@@ -1,4 +1,5 @@
 package shoe3d.core;
+import ext.RenderStats;
 import js.Browser;
 import js.html.DivElement;
 import three.OrthographicCamera;
@@ -18,6 +19,7 @@ class RenderManager
 	public static var camera:PerspectiveCamera;
 	public static var uiCamera:OrthographicCamera;
 	
+	private static var stats:RenderStats;
 	
 	private static function init() {
 		
@@ -43,6 +45,18 @@ class RenderManager
 		for ( layer in System.screen._currentScreen.layers )
 				if( layer.camera != null /*&& layer.visible*/ )
 					renderer.render( layer, layer.camera );
+		if ( stats != null ) stats.update( renderer );
+	}
+	
+	public static function showStats()
+	{
+		if ( stats == null ) {
+			stats = new RenderStats();
+			stats.domElement.style.position = "absolute";
+			stats.domElement.style.left = "0px";
+			stats.domElement.style.bottom = "0px";						
+		}		
+		Browser.document.body.appendChild( stats.domElement );
 	}
 	
 }

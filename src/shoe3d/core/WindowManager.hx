@@ -12,6 +12,7 @@ import shoe3d.util.Value;
 @:allow(shoe3d)
 class WindowManager
 {
+	private static var _prePublicResize(default,null):ZeroSignal;
 	public static var resize(default,null):ZeroSignal;
 	public static var orientation(default, null):Value<Orientation>;
 	public static var mode(default, set):WindowMode = Fill;
@@ -20,6 +21,7 @@ class WindowManager
 
 	public static function init() 
 	{
+		_prePublicResize = new ZeroSignal();
 		resize = new ZeroSignal();
 		orientation = new Value( Portrait );
 		
@@ -32,7 +34,11 @@ class WindowManager
 	
 	private static function onResize()
 	{
+		
+		
 		updateLayout();
+		
+		_prePublicResize.emit();
 		
 		resize.emit();
 	}
@@ -41,6 +47,9 @@ class WindowManager
 	{
 		
 		updateLayout();		
+		
+		_prePublicResize.emit();
+		
 		updateOrientation() ;
 	}
 	
