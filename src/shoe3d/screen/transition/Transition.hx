@@ -1,5 +1,5 @@
 package shoe3d.screen.transition;
-import shoe3d.core.GameObject;
+import shoe3d.core.game.GameObject;
 import shoe3d.screen.GameScreen;
 import three.Scene;
 

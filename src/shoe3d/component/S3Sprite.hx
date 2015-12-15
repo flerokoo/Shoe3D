@@ -1,6 +1,8 @@
 package shoe3d.component;
+import js.html.Float32Array;
 import js.html.ImageElement;
-import shoe3d.core.Component;
+import shoe3d.core.game.Component;
+import three.BufferAttribute;
 import three.ImageLoader;
 import three.ImageUtils;
 import three.LoadingManager;
@@ -8,6 +10,7 @@ import three.Mapping;
 import three.Sprite;
 import three.SpriteMaterial;
 import three.Texture;
+import three.TextureLoader;
 
 /**
  * ...
@@ -26,15 +29,23 @@ class S3Sprite extends Component
 		//mat = new SpriteMaterial( {map:tex} );
 		
 		var mgr = new LoadingManager();
-		var l = new ImageLoader( mgr );
-		l.load( 'assets/button1.png', function( img:ImageElement) {
-			var tex = new Texture( img );
-			
+		var l = new TextureLoader( mgr );
+		l.load( 'assets/button1.png', function( tex ) {
+				
 			sprite = new Sprite( new SpriteMaterial({ map: tex }) );
 			if ( owner != null ) {
 				trace('addFrom');
 				owner.transform.add( sprite );
+				trace( cast(sprite.material.map.image, ImageElement).width );
 			}
+			sprite.scale.set( 256, 256 , 1);
+			var spr = sprite;
+			untyped __js__('spr.geometry.getAttribute("uv").dynamic = true;');
+			sprite.geometry.getAttribute("uv").array = [[0.5, 0.5, 1, 0.5, 1, 1, 0, 1]];
+			sprite.geometry.addAttribute("uv", new BufferAttribute( new Float32Array([0.5, 0.5, 1, 0.5, 1, 1, 0, 1]), 2) );
+			
+			trace(sprite.geometry.getAttribute("uv") );
+			
 		} );
 		
 		
@@ -48,7 +59,7 @@ class S3Sprite extends Component
 	{
 		if ( sprite != null ) {
 			owner.transform.add( sprite );
-			trace('add');
+			trace( sprite.material.map.image );
 		}
 	}
 	

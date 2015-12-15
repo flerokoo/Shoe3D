@@ -1,5 +1,5 @@
 package shoe3d.component;
-import shoe3d.core.Component;
+import shoe3d.core.game.Component;
 import shoe3d.core.Time;
 import three.Camera;
 import three.PerspectiveCamera;

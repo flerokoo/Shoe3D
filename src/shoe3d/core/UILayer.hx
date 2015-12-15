@@ -17,13 +17,19 @@ class UILayer extends Layer
 		{
 			var cam = cast( camera, OrthographicCamera );
 			
-			cam.left = 0;
-			cam.right = System.window.width;
-			cam.top = 0;
-			cam.left = System.window.height;
-			cam.position.set( 0, 0, 500 );
+			var scale = 0.005;
+			scale = 1;
+			cam.left = -System.window.width / 2  *  scale;
+			cam.right = System.window.width / 2  *  scale;
+			cam.top = System.window.height / 2  *  scale;
+			cam.bottom = -System.window.height / 2  *  scale;
+			cam.far = 1000;
+			cam.near = 0.1;
+			
+			cam.position.set( 0, 0, 600 );
 			cam.lookAt( new Vector3(0, 0, 0) );
 			cam.updateProjectionMatrix();
+			cam.updateMatrix();
 		}
 	}
 

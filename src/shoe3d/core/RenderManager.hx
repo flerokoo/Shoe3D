@@ -41,11 +41,13 @@ class RenderManager
 	{
 		
 		renderer.clear( );
-	
-		for ( layer in System.screen._currentScreen.layers )
-				if( layer.camera != null /*&& layer.visible*/ )
-					renderer.render( layer, layer.camera );
+		if( System.screen._currentScreen != null )
+			for ( layer in System.screen._currentScreen.layers )
+					if( layer.camera != null /*&& layer.visible*/ )
+						renderer.render( layer, layer.camera );
 		if ( stats != null ) stats.update( renderer );
+		
+		
 	}
 	
 	public static function showStats()

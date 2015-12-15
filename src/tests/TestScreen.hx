@@ -7,12 +7,13 @@ import shoe3d.component.RandomRotator;
 import shoe3d.component.S3Mesh;
 import shoe3d.component.S3Mesh;
 import shoe3d.component.S3Sprite;
-import shoe3d.core.GameObject;
+import shoe3d.core.game.GameObject;
 import shoe3d.core.Layer;
 import shoe3d.screen.GameScreen;
 import shoe3d.System;
 import three.AmbientLight;
 import three.BoxGeometry;
+import three.BufferGeometry;
 import three.Color;
 import three.DirectionalLight;
 import three.Geometry;
@@ -75,11 +76,14 @@ class TestScreen extends GameScreen
 		var layer = new Layer( "layer" );
 		addLayer( layer );
 		
-		
+		var geom = new BoxGeometry( Math.random() * 0.5 + 1, Math.random() * 0.5 + 1, Math.random() * 0.5 + 1 );
+		var geom2 = new BufferGeometry().fromGeometry( geom );
+		var mat = new MeshPhongMaterial( { color: cast (0xffffff * Math.random()) });
+		var mesh = new S3Mesh( geom, mat );
 		for ( i in 0...400 ) {
 			var go = new GameObject("GO" + i)
 				//.add( new MeshDisplay( new SphereGeometry( Math.random() * 0.5 + 1, 12, 12 ) , new MeshPhongMaterial({color: cast (0xffffff * Math.random()) }) ) );
-				.add( new S3Mesh( new BoxGeometry( Math.random() * 0.5 + 1, Math.random() * 0.5 + 1, Math.random() * 0.5 + 1 ) , new MeshPhongMaterial({color: cast (0xffffff * Math.random()) }) ) );
+				.add(  new S3Mesh( untyped geom2, mat) 	);
 			go.transform.position.x = Math.random() * 40 - 20;
 			go.transform.position.y = Math.random() * 40 - 20;
 			go.transform.position.z = Math.random() * 40 - 20;
@@ -87,7 +91,11 @@ class TestScreen extends GameScreen
 			layer.addChild( go );
 		}
 		
-		layer.add( new DirectionalLight( 0x8EEAFD, 0.7 ) );
+		var dl = new DirectionalLight( 0x8EEAFD, 0.7 );
+		dl.rotateX( 0.9 );
+		dl.rotateY( 0.5 );
+		dl.rotateZ( 0.2);
+		layer.add( dl );
 		layer.add( new AmbientLight( 0xffffff ) );
 		
 		layer.addChild(
@@ -100,41 +108,38 @@ class TestScreen extends GameScreen
 		
 		
 		
-		var ui = newUILayer("UILAYER");		
+		/*var ui = newUILayer("UILAYER");		
 		var g2d = new GameObject("SPRITETEST");		
 		var spr = new S3Sprite();
-		//g2d.add( spr );		
+		g2d.add( spr );		
 		ui.addChild( g2d );		
 		//g2d.transform.position.set( 0, 0, 0 );
 		
 		var mgr = new LoadingManager();
 		var l = new TextureLoader( mgr );
-		l.load( '/assets/button1.png', function( img ) {
-					
-			var sprite:Sprite = null;
-			var mat:SpriteMaterial = null;
-			//var mat = new SpriteMaterial( { map: img } );
-			untyped __js__("mat = new THREE.SpriteMaterial({map:img});");
-			sprite = new Sprite( mat );
-			
-			trace('addFromwww');
-			ui.add( sprite );
-			
-		} );
+
 		
 		ui.add( new AmbientLight( 0xffffff ) );
 		
-		var cc = cast(ui.camera, OrthographicCamera );
-		cc.left = -10;
+		var cc = cast(ui.camera, OrthographicCamera );*/
+		
+		
+		
+		
+		
+		/*cc.left = -10;
 		cc.right = -cc.left;
 		cc.top = 10;
 		cc.bottom = -cc.top;
+		cc.far = 1000;
+		cc.near = 0.1;
 		cc.updateProjectionMatrix();
 		
-		cc.position.set( 10, 10, 100 );
-		cc.lookAt( new Vector3(0, 0, 0) );
-		cc.updateMatrix();
-		cc.updateProjectionMatrix();
+		cc.position.set( 0, 0, 900 );
+		cc.lookAt( new Vector3(0, 0, 0) );*/
+		
+		//cc.updateMatrix();
+		//cc.updateProjectionMatrix();
 		
 		
 	}

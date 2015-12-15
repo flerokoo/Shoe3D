@@ -25,7 +25,6 @@ extern class BufferGeometry
 	var name : String;
 	var attributes : Array<BufferAttribute>;
 	var drawcalls : Array<{ start: Int, count:Float, index:Int }>;
-	var offsets : Array<{ start: Int, count:Float, index:Int }>;
 	var boundingBox : BoundingBox3D;
 	var boundingSphere : BoundingSphere;
 

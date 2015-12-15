@@ -1,6 +1,7 @@
 package shoe3d.core;
 import js.html.DivElement;
-import shoe3d.util.ZeroSignal;
+import shoe3d.util.Info;
+import shoe3d.util.signal.ZeroSignal;
 import js.Browser;
 import js.html.CanvasElement;
 import shoe3d.util.Value;
@@ -69,7 +70,7 @@ class WindowManager
 		var canvas:CanvasElement = RenderManager.renderer.domElement;
 		var div:DivElement = RenderManager.container;
 		
-		if ( mode == Fill ) 
+		if ( mode == Fill || Info.isMobileBrowser() ) 
 		{
 			Browser.document.body.style.padding = "0";
 			div.style.margin = "0";
@@ -92,8 +93,7 @@ class WindowManager
 			trace("OK", marginTop + "px auto 0");
 		}
 	}
-	
-	
+		
 	private static function resetStyle()
 	{
 		Browser.document.body.style.margin = "0";

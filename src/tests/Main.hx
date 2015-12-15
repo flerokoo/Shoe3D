@@ -7,7 +7,7 @@ import js.Browser;
 import js.html.DivElement;
 import js.Lib;
 import shoe3d.component.S3Mesh;
-import shoe3d.core.GameObject;
+import shoe3d.core.game.GameObject;
 import shoe3d.System;
 import three.AmbientLight;
 import three.BoxGeometry;
@@ -44,14 +44,14 @@ class Main
 		System.screen.addScreen( "game2", TestScreen2 );
 		
 		System.screen.show( "game" );
-		
+		System.showFPSMeter();
 		//Timer.delay( function() System.screen.show("game2") , 1100 );
 		
 		//System.window.mode = Default;
 		//System.window.setSize( 600, 600 );
 		
 		System.start();
-		
+		System.loadAssetPack( 'biba' );
 		System.renderer.showStats();
 		
 		

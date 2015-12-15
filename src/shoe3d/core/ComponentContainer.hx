@@ -1,4 +1,5 @@
 package shoe3d.core;
+import shoe3d.core.game.Component;
 import three.Object3D;
 
 /**

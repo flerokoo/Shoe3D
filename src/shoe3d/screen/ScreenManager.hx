@@ -1,5 +1,6 @@
 package shoe3d.screen;
-import shoe3d.core.GameObject;
+import shoe3d.core.game.GameObject;
+import shoe3d.core.Time;
 import shoe3d.screen.transition.Transition;
 import shoe3d.util.Assert;
 import three.Scene;
@@ -18,6 +19,9 @@ class ScreenManager
 	private static var _transitions:Map<String,Transition>;
 	private static var _screens:Map<String,Class<GameScreen>>;
 	private static var _base:GameObject;
+	
+	public static var width(default, null):Int = 0;
+	public static var height(default, null):Int = 0;
 	
 	private static function init() 
 	{
@@ -49,7 +53,11 @@ class ScreenManager
 		{
 			//_base.add( _targetScreen.scene );
 			_currentScreen = _targetScreen;
+			if ( changeFn != null ) changeFn();
+			_currentScreen.onShow();
 		}
+		
+		Time.onScreenLoad();
 		
 	}
 	
@@ -59,5 +67,15 @@ class ScreenManager
 		_screens.set( name, scr );
 	}
 	
+	/**
+	 * Sets original game size (usually game is designed for 
+	 * @param	w Width of the game
+	 * @param	h Height of the game
+	 */
+	public static function setSize( w:Int, h:Int )
+	{
+		width = w;
+		height = h;
+	}
 	
 }

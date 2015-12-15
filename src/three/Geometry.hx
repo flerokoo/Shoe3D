@@ -112,7 +112,9 @@ extern class Geometry
 	 * True if geometry has tangents. Set in Geometry.computeTangents.
 	 */
 	var hasTangents : Bool;
+	
 
+	
 	/**
 	 * Set to true if attribute buffers will need to change in runtime (using "dirty" flags).
 	 * Unless set to true internal typed arrays corresponding to buffers will be deleted once sent to GPU.

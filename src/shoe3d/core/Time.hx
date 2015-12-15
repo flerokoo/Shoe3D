@@ -11,8 +11,11 @@ class Time
 
 	public static var dt(default, null):Float;
 	public static var timeSinceGameStart(default, null):Float;
-	private static var gameStartTime:Float;
-	private static var lastUpdateTime:Float;
+	public static var timeSinceScreenShow(default, null):Float;
+	
+	private static var _gameStartTime:Float;
+	private static var _lastUpdateTime:Float;
+	private static var _screenShowTime:Float;
 	
 	public function new() 
 	{
@@ -20,17 +23,31 @@ class Time
 	}
 	
 	private static function init() {
-		lastUpdateTime = gameStartTime = Timer.stamp();
+		_lastUpdateTime = _gameStartTime = Timer.stamp();
 	}
 	
 	public static function update() {
 		var cur = Timer.stamp();
 		
-		dt = cur - lastUpdateTime;
-		lastUpdateTime = cur;
+		dt = cur - _lastUpdateTime;		
+		timeSinceGameStart = cur - _gameStartTime;		
+		timeSinceScreenShow = cur - _screenShowTime;
 		
-		timeSinceGameStart = cur - gameStartTime;
+		if ( dt > 1 ) dt = 1;
+		if ( dt < 0 ) dt = 0;
 		
+		_lastUpdateTime = cur;
+		
+	}
+	
+	private static function onScreenLoad() 
+	{
+		_screenShowTime = Timer.stamp();
+	}
+	
+	private static function now():Float
+	{
+		return (untyped Date).now() / 1000;
 	}
 	
 }

@@ -1,5 +1,5 @@
 package shoe3d.util;
-import shoe3d.util.DoubleSignal;
+import shoe3d.util.signal.DoubleSignal;
 
 /**
  * ...
@@ -15,7 +15,7 @@ class Value<T>
 
 	private var __:T;
 	public var _(get, set):T;
-	public var change(default, null):DoubleSignal<Value<T>,T>;
+	public var change(default, null):DoubleSignal<T,T>;
 	
 	
 	
@@ -43,7 +43,7 @@ class Value<T>
 	{
 		var old = _;
 		__ = value;
-		change.emit( this, old );
+		change.emit( this.__, old );
 		return _;
 	}
 	
