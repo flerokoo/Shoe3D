@@ -114,6 +114,7 @@ class System
 		ldr.add( 'button1', 'assets/button1.png', 0 );
 		ldr.add( 'button2', 'assets/button1.png', 0 );
 		ldr.add( 'index', 'index.html', 0 );
+		ldr.add( 'tnt', 'assets/tnt.ogg', 0 );
 		
 		// TODO replace with real values
 		var promise = ldr.start( function( pack:AssetPack ) trace( pack ) );

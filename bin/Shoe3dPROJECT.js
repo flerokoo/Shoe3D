@@ -881,8 +881,9 @@ shoe3d.System.loadFolderFromAssets = function(folder,onSuccess,onProgress,regist
 	ldr.add("button1","assets/button1.png",0);
 	ldr.add("button2","assets/button1.png",0);
 	ldr.add("index","index.html",0);
+	ldr.add("tnt","assets/tnt.ogg",0);
 	var promise = ldr.start(function(pack) {
-		haxe.Log.trace(pack,{ fileName : "System.hx", lineNumber : 119, className : "shoe3d.System", methodName : "loadFolderFromAssets"});
+		haxe.Log.trace(pack,{ fileName : "System.hx", lineNumber : 120, className : "shoe3d.System", methodName : "loadFolderFromAssets"});
 	});
 	promise.success.connect(function(pack1) {
 		shoe3d.asset.Res.registerPack(pack1,registerThisPackWithName);
@@ -1137,7 +1138,9 @@ shoe3d.asset.AssetPackLoader.prototype = {
 				})(e));
 				break;
 			case 5:case 6:case 7:case 8:case 9:
-				new THREE.XHRLoader(this._manager).load(e[0].url,(function(e) {
+				var ldr = new THREE.XHRLoader(this._manager);
+				ldr.setResponseType("arraybuffer");
+				ldr.load(e[0].url,(function(e) {
 					return function(snd) {
 						_g3.onLoadSound(snd,e[0]);
 					};
@@ -1164,7 +1167,8 @@ shoe3d.asset.AssetPackLoader.prototype = {
 		this._pack._texMap.set(e.name,tex);
 	}
 	,onLoadSound: function(data,e) {
-		haxe.Log.trace("SND LOAD",{ fileName : "AssetPackLoader.hx", lineNumber : 242, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
+		haxe.Log.trace(data,{ fileName : "AssetPackLoader.hx", lineNumber : 245, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
+		haxe.Log.trace("SND LOAD",{ fileName : "AssetPackLoader.hx", lineNumber : 247, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
 	}
 	,onLoadData: function(data,e) {
 		var value = new shoe3d.asset.File(data);

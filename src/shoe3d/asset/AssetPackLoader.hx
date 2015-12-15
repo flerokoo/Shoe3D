@@ -1,5 +1,6 @@
 package shoe3d.asset;
 import js.Browser;
+import js.html.ArrayBuffer;
 import shoe3d.asset.AssetEntry.AssetFormat;
 import shoe3d.util.Assert;
 import shoe3d.util.Log;
@@ -209,10 +210,15 @@ class AssetPackLoader
 		_manager = new LoadingManager( onCompletePack, onProgress );
 		for ( e in _entriesToLoad ) {
 			switch( e.format ) {
+				
 				case JPG, PNG, GIF:
 					new TextureLoader( _manager ).load( e.url, function( tex ) onLoadTexture( tex, e ) );
+					
 				case MP3, M4A, OPUS, OGG, WAV:
-					new XHRLoader( _manager ).load( e.url, function (snd) onLoadSound( snd, e ) );
+					var ldr = new XHRLoader( _manager );
+					ldr.setResponseType("arraybuffer");
+					ldr.load( e.url, function (snd) onLoadSound( untyped snd, e ) );
+					
 				default:
 					new XHRLoader( _manager ).load( e.url, function (data) onLoadData( data, e ) );
 					
@@ -237,8 +243,10 @@ class AssetPackLoader
 		_pack._texMap.set( e.name, tex );
 	}
 	
-	function onLoadSound( data:String, e:AssetEntry ) 
+	function onLoadSound( data:ArrayBuffer, e:AssetEntry ) 
 	{
+		trace(data);
+		
 		trace( "SND LOAD");
 	}
 	
