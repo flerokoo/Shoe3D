@@ -3,6 +3,7 @@ import js.Browser;
 import shoe3d.asset.AssetEntry.AssetFormat;
 import shoe3d.util.Assert;
 import shoe3d.util.Log;
+import shoe3d.util.promise.Promise;
 import shoe3d.util.StringHelp;
 import shoe3d.util.Value;
 import three.Loader;
@@ -27,7 +28,10 @@ class AssetPackLoader
 	private var _entriesToLoad:Array<AssetEntry>;
 	private var _entriesToPick:Value<Int>;
 	private var _manager:LoadingManager;
-
+	private var _onCompleteCallback:AssetPack->Void;
+	private var _onProgressChangeCallback:Float->Void;
+	private var _promise:Promise<AssetPack>;
+	
 	public function new() 
 	{
 		_pack = new AssetPack();
@@ -61,11 +65,14 @@ class AssetPackLoader
         return RAW;
 	}
 
-	public function start()
+	public function start( ?onComplete:AssetPack->Void, ?onProgress:Float->Void ):Promise<AssetPack>
 	{
 		if ( _loading ) throw 'This asset pack is already loading';
-		
 		_loading = true;
+		_onCompleteCallback = onComplete;
+		_onProgressChangeCallback = onProgress;
+		
+		
 		var groups:Map<String,Array<AssetEntry>> = new Map();
 		
 		for ( i in _entries ) {
@@ -87,6 +94,8 @@ class AssetPackLoader
 				_entriesToPick._ --;
 			});
 		}
+		
+		return _promise = new Promise<AssetPack>();
 	}
 	
 	private static function detectImageFormats ( ret:Array<AssetFormat>->Void)
@@ -201,40 +210,40 @@ class AssetPackLoader
 		for ( e in _entriesToLoad ) {
 			switch( e.format ) {
 				case JPG, PNG, GIF:
-					new TextureLoader( _manager ).load( e.url, onLoadTexture );
+					new TextureLoader( _manager ).load( e.url, function( tex ) onLoadTexture( tex, e ) );
 				case MP3, M4A, OPUS, OGG, WAV:
-					new XHRLoader( _manager ).load( e.url, onLoadSound );
+					new XHRLoader( _manager ).load( e.url, function (snd) onLoadSound( snd, e ) );
 				default:
-					new XHRLoader( _manager ).load( e.url, onLoadData );
+					new XHRLoader( _manager ).load( e.url, function (data) onLoadData( data, e ) );
 					
 			}
 		}
 	}
-	
-	
-	
+		
 	function onProgress( nm:String, a:Float, b:Float ) 
 	{
-		trace("PROGRESS");
+		_promise.progress._ = a/b;
+		if ( _onProgressChangeCallback != null) _onProgressChangeCallback( _promise.progress._ );		
 	}
 	
 	function onCompletePack() 
 	{
-		trace("CMPL");
+		_promise.result = _pack;
+		if ( _onCompleteCallback != null ) _onCompleteCallback( _pack );
 	}
 	
-	function onLoadTexture( tex:Texture ) 
+	function onLoadTexture( tex:Texture, e:AssetEntry ) 
 	{
-		trace("TEX LOAD");
+		_pack._texMap.set( e.name, tex );
 	}
 	
-	function onLoadSound( data:String ) 
+	function onLoadSound( data:String, e:AssetEntry ) 
 	{
 		trace( "SND LOAD");
 	}
 	
-	function onLoadData( data:String ) 
+	function onLoadData( data:String, e:AssetEntry ) 
 	{
-		trace( "DATA LOAD");
+		_pack._fileMap.set( e.name, new File( data ) );
 	}
 }

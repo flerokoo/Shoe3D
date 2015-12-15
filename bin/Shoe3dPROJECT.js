@@ -876,12 +876,18 @@ shoe3d.System.showInfoBox = function() {
 shoe3d.System.hideInfoBox = function() {
 	if(shoe3d.System._info != null) window.document.body.removeChild(shoe3d.System._info);
 };
-shoe3d.System.loadAssetPack = function(name) {
+shoe3d.System.loadFolderFromAssets = function(folder,onSuccess,onProgress,registerThisPackWithName) {
 	var ldr = new shoe3d.asset.AssetPackLoader();
 	ldr.add("button1","assets/button1.png",0);
 	ldr.add("button2","assets/button1.png",0);
 	ldr.add("index","index.html",0);
-	ldr.start();
+	var promise = ldr.start(function(pack) {
+		haxe.Log.trace(pack,{ fileName : "System.hx", lineNumber : 119, className : "shoe3d.System", methodName : "loadFolderFromAssets"});
+	});
+	promise.success.connect(function(pack1) {
+		shoe3d.asset.Res.registerPack(pack1,registerThisPackWithName);
+	}).once();
+	return promise;
 };
 shoe3d.System.addInfo = function(text,breakLine) {
 	if(breakLine == null) breakLine = true;
@@ -929,14 +935,32 @@ shoe3d.asset.AssetEntry.prototype = {
 	,__class__: shoe3d.asset.AssetEntry
 };
 shoe3d.asset.AssetPack = function() {
+	this._texMap = new haxe.ds.StringMap();
+	this._fileMap = new haxe.ds.StringMap();
+	this._soundMap = new haxe.ds.StringMap();
 };
 shoe3d.asset.AssetPack.__name__ = ["shoe3d","asset","AssetPack"];
 shoe3d.asset.AssetPack.prototype = {
-	getTexture: function(name) {
+	_texMap: null
+	,_fileMap: null
+	,_soundMap: null
+	,getTexture: function(name,required) {
+		if(required == null) required = true;
+		var ret = this._texMap.get(name);
+		if(ret == null && required) throw "No texture with name=" + name;
+		return ret;
 	}
-	,getSound: function(name) {
+	,getSound: function(name,required) {
+		if(required == null) required = true;
+		var ret = this._soundMap.get(name);
+		if(ret == null && required) throw "No sound with name=" + name;
+		return ret;
 	}
-	,getFile: function(name) {
+	,getFile: function(name,required) {
+		if(required == null) required = true;
+		var ret = this._fileMap.get(name);
+		if(ret == null && required) throw "No file with name=" + name;
+		return ret;
 	}
 	,__class__: shoe3d.asset.AssetPack
 };
@@ -1031,6 +1055,9 @@ shoe3d.asset.AssetPackLoader.prototype = {
 	,_entriesToLoad: null
 	,_entriesToPick: null
 	,_manager: null
+	,_onCompleteCallback: null
+	,_onProgressChangeCallback: null
+	,_promise: null
 	,add: function(name,url,bytes,format) {
 		if(format == null) format = this.getFormat(url);
 		this._entries.push(new shoe3d.asset.AssetEntry(name,url,format,bytes));
@@ -1058,10 +1085,12 @@ shoe3d.asset.AssetPackLoader.prototype = {
 		} else throw "No asset format: " + url;
 		return shoe3d.asset.AssetFormat.RAW;
 	}
-	,start: function() {
+	,start: function(onComplete,onProgress) {
 		var _g = this;
 		if(this._loading) throw "This asset pack is already loading";
 		this._loading = true;
+		this._onCompleteCallback = onComplete;
+		this._onProgressChangeCallback = onProgress;
 		var groups = new haxe.ds.StringMap();
 		var _g1 = 0;
 		var _g11 = this._entries;
@@ -1088,43 +1117,76 @@ shoe3d.asset.AssetPackLoader.prototype = {
 				_g2;
 			});
 		}
+		return this._promise = new shoe3d.util.promise.Promise();
 	}
 	,load: function() {
+		var _g3 = this;
 		this._manager = new THREE.LoadingManager($bind(this,this.onCompletePack),$bind(this,this.onProgress));
 		var _g = 0;
 		var _g1 = this._entriesToLoad;
 		while(_g < _g1.length) {
-			var e = _g1[_g];
+			var e = [_g1[_g]];
 			++_g;
-			var _g2 = e.format;
+			var _g2 = e[0].format;
 			switch(_g2[1]) {
 			case 1:case 0:case 2:
-				new THREE.TextureLoader(this._manager).load(e.url,$bind(this,this.onLoadTexture));
+				new THREE.TextureLoader(this._manager).load(e[0].url,(function(e) {
+					return function(tex) {
+						_g3.onLoadTexture(tex,e[0]);
+					};
+				})(e));
 				break;
 			case 5:case 6:case 7:case 8:case 9:
-				new THREE.XHRLoader(this._manager).load(e.url,$bind(this,this.onLoadSound));
+				new THREE.XHRLoader(this._manager).load(e[0].url,(function(e) {
+					return function(snd) {
+						_g3.onLoadSound(snd,e[0]);
+					};
+				})(e));
 				break;
 			default:
-				new THREE.XHRLoader(this._manager).load(e.url,$bind(this,this.onLoadData));
+				new THREE.XHRLoader(this._manager).load(e[0].url,(function(e) {
+					return function(data) {
+						_g3.onLoadData(data,e[0]);
+					};
+				})(e));
 			}
 		}
 	}
 	,onProgress: function(nm,a,b) {
-		haxe.Log.trace("PROGRESS",{ fileName : "AssetPackLoader.hx", lineNumber : 218, className : "shoe3d.asset.AssetPackLoader", methodName : "onProgress"});
+		this._promise.progress.set__(a / b);
+		if(this._onProgressChangeCallback != null) this._onProgressChangeCallback(this._promise.progress.get__());
 	}
 	,onCompletePack: function() {
-		haxe.Log.trace("CMPL",{ fileName : "AssetPackLoader.hx", lineNumber : 223, className : "shoe3d.asset.AssetPackLoader", methodName : "onCompletePack"});
+		this._promise.set_result(this._pack);
+		if(this._onCompleteCallback != null) this._onCompleteCallback(this._pack);
 	}
-	,onLoadTexture: function(tex) {
-		haxe.Log.trace("TEX LOAD",{ fileName : "AssetPackLoader.hx", lineNumber : 228, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadTexture"});
+	,onLoadTexture: function(tex,e) {
+		this._pack._texMap.set(e.name,tex);
 	}
-	,onLoadSound: function(data) {
-		haxe.Log.trace("SND LOAD",{ fileName : "AssetPackLoader.hx", lineNumber : 233, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
+	,onLoadSound: function(data,e) {
+		haxe.Log.trace("SND LOAD",{ fileName : "AssetPackLoader.hx", lineNumber : 242, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
 	}
-	,onLoadData: function(data) {
-		haxe.Log.trace("DATA LOAD",{ fileName : "AssetPackLoader.hx", lineNumber : 238, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadData"});
+	,onLoadData: function(data,e) {
+		var value = new shoe3d.asset.File(data);
+		this._pack._fileMap.set(e.name,value);
 	}
 	,__class__: shoe3d.asset.AssetPackLoader
+};
+shoe3d.asset.File = function(content) {
+	this.content = content;
+};
+shoe3d.asset.File.__name__ = ["shoe3d","asset","File"];
+shoe3d.asset.File.prototype = {
+	content: null
+	,__class__: shoe3d.asset.File
+};
+shoe3d.asset.Res = function() {
+};
+shoe3d.asset.Res.__name__ = ["shoe3d","asset","Res"];
+shoe3d.asset.Res.registerPack = function(pack,name) {
+};
+shoe3d.asset.Res.prototype = {
+	__class__: shoe3d.asset.Res
 };
 shoe3d.core.game = {};
 shoe3d.core.game.Component = function() {
@@ -1625,6 +1687,34 @@ shoe3d.util.Value.prototype = {
 	}
 	,__class__: shoe3d.util.Value
 };
+shoe3d.util.promise = {};
+shoe3d.util.promise.Promise = function() {
+	this.success = new shoe3d.util.signal.SingleSignal();
+	this.error = new shoe3d.util.signal.SingleSignal();
+	this.progress = new shoe3d.util.Value(0);
+	this._progress = 0;
+};
+shoe3d.util.promise.Promise.__name__ = ["shoe3d","util","promise","Promise"];
+shoe3d.util.promise.Promise.prototype = {
+	_result: null
+	,ready: null
+	,success: null
+	,error: null
+	,progress: null
+	,_progress: null
+	,get_result: function() {
+		if(!this.ready) throw "Promise is not ready";
+		return this._result;
+	}
+	,set_result: function(value) {
+		if(this.ready) throw "Promise is ready";
+		this._result = value;
+		this.ready = true;
+		this.success.emit(value);
+		return this._result;
+	}
+	,__class__: shoe3d.util.promise.Promise
+};
 shoe3d.util.signal = {};
 shoe3d.util.signal.Sentinel = function(signal,fn) {
 	this.isOnce = false;
@@ -1775,7 +1865,7 @@ tests.Main.main = function() {
 	shoe3d.System.screen.show("game");
 	shoe3d.System.showFPSMeter();
 	shoe3d.System.start();
-	shoe3d.System.loadAssetPack("biba");
+	shoe3d.System.loadFolderFromAssets("biba");
 	shoe3d.System.renderer.showStats();
 };
 tests.Main.createConsole = function() {

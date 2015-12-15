@@ -9,8 +9,9 @@ import shoe3d.util.Value;
 class Promise<T>
 {
 
+	private var _result:T;
 	public var result(get, set):T;
-	public var ready(default, null):Bool
+	public var ready(default, null):Bool;
 	public var success(default, null):SingleSignal<T>;
 	public var error(default, null):SingleSignal<String>;
 	public var progress(default, null):Value<Float>;
@@ -20,17 +21,17 @@ class Promise<T>
 	
 	function get_result():T 
 	{
-		if ( ready ) throw "Promise is not ready";
-		return result;
+		if ( ! ready ) throw "Promise is not ready";
+		return _result;
 	}
 	
 	function set_result(value:T):T 
 	{
-		if ( ! ready ) throw "Promise is ready";
-		result = value;
+		if ( ready ) throw "Promise is ready";
+		_result = value;
 		ready = true;
 		success.emit( value );
-		return result;
+		return _result;
 	}
 	
 	public function new() 

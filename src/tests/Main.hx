@@ -51,7 +51,7 @@ class Main
 		//System.window.setSize( 600, 600 );
 		
 		System.start();
-		System.loadAssetPack( 'biba' );
+		System.loadFolderFromAssets( 'biba' );
 		System.renderer.showStats();
 		
 		

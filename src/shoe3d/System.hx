@@ -1,13 +1,16 @@
 package shoe3d;
 import js.Browser;
 import js.html.DivElement;
+import shoe3d.asset.AssetPack;
 import shoe3d.asset.AssetPackLoader;
+import shoe3d.asset.Res;
 import shoe3d.core.game.GameObject;
 import shoe3d.core.MainLoop;
 import shoe3d.core.RenderManager;
 import shoe3d.core.Time;
 import shoe3d.core.WindowManager;
 import shoe3d.screen.ScreenManager;
+import shoe3d.util.promise.Promise;
 import shoe3d.util.StringHelp;
 import three.Scene;
 
@@ -105,13 +108,21 @@ class System
 			#end
 	}
 	
-	public static function loadAssetPack( name:String )
+	public static function loadFolderFromAssets( folder:String, ?onSuccess:AssetPack->Void, ?onProgress:Float->Void, ?registerThisPackWithName:String ):Promise<AssetPack>
 	{
 		var ldr = new AssetPackLoader();
 		ldr.add( 'button1', 'assets/button1.png', 0 );
 		ldr.add( 'button2', 'assets/button1.png', 0 );
 		ldr.add( 'index', 'index.html', 0 );
-		ldr.start();
+		
+		// TODO replace with real values
+		var promise = ldr.start( function( pack:AssetPack ) trace( pack ) );
+		
+		promise.success.connect(
+				function(pack:AssetPack)
+					Res.registerPack( pack, registerThisPackWithName )
+					).once();
+		return promise;		
 	}
 	
 	#if debug
