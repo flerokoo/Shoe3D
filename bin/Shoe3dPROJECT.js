@@ -786,7 +786,6 @@ shoe3d.core.WindowManager.updateLayout = function() {
 		window.document.body.style.padding = "0.06px";
 		var marginTop = Math.floor(Math.max(0,(window.innerHeight - shoe3d.core.WindowManager.get_height()) / 2));
 		div.style.margin = marginTop + "px auto 0";
-		haxe.Log.trace("OK",{ fileName : "WindowManager.hx", lineNumber : 93, className : "shoe3d.core.WindowManager", methodName : "updateLayout", customParams : [marginTop + "px auto 0"]});
 	}
 };
 shoe3d.core.WindowManager.resetStyle = function() {
@@ -794,6 +793,7 @@ shoe3d.core.WindowManager.resetStyle = function() {
 	window.document.body.style.padding = "0";
 	window.document.body.style.width = "100%";
 	window.document.body.style.height = "100%";
+	shoe3d.core.RenderManager.container.style.padding = "0px";
 };
 shoe3d.core.WindowManager.hideMobileBrowser = function() {
 };
@@ -897,7 +897,7 @@ shoe3d.System.get_root = function() {
 	return shoe3d.screen.ScreenManager._base;
 };
 shoe3d.asset = {};
-shoe3d.asset.AssetFormat = { __ename__ : true, __constructs__ : ["PNG","JPG","GIF","JXR","WEBP","MP3","M4A","OPUS","OGG","WAV","GEOM","RAW"] };
+shoe3d.asset.AssetFormat = { __ename__ : true, __constructs__ : ["PNG","JPG","GIF","JXR","WEBP","MP3","M4A","OPUS","OGG","WAV","AAC","GEOM","RAW"] };
 shoe3d.asset.AssetFormat.PNG = ["PNG",0];
 shoe3d.asset.AssetFormat.PNG.__enum__ = shoe3d.asset.AssetFormat;
 shoe3d.asset.AssetFormat.JPG = ["JPG",1];
@@ -918,9 +918,11 @@ shoe3d.asset.AssetFormat.OGG = ["OGG",8];
 shoe3d.asset.AssetFormat.OGG.__enum__ = shoe3d.asset.AssetFormat;
 shoe3d.asset.AssetFormat.WAV = ["WAV",9];
 shoe3d.asset.AssetFormat.WAV.__enum__ = shoe3d.asset.AssetFormat;
-shoe3d.asset.AssetFormat.GEOM = ["GEOM",10];
+shoe3d.asset.AssetFormat.AAC = ["AAC",10];
+shoe3d.asset.AssetFormat.AAC.__enum__ = shoe3d.asset.AssetFormat;
+shoe3d.asset.AssetFormat.GEOM = ["GEOM",11];
 shoe3d.asset.AssetFormat.GEOM.__enum__ = shoe3d.asset.AssetFormat;
-shoe3d.asset.AssetFormat.RAW = ["RAW",11];
+shoe3d.asset.AssetFormat.RAW = ["RAW",12];
 shoe3d.asset.AssetFormat.RAW.__enum__ = shoe3d.asset.AssetFormat;
 shoe3d.asset.AssetEntry = function(name,url,format,bytes) {
 	this.name = name;
@@ -956,9 +958,10 @@ shoe3d.asset.AssetPack.prototype = {
 	}
 	,getSound: function(name,required) {
 		if(required == null) required = true;
-		var ret = this._soundMap.get(name);
-		if(ret == null && required) throw "No sound with name=" + name;
-		return ret;
+		if(!this._soundMap.exists(name)) {
+			if(required) throw "No sound with name=" + name; else return null;
+		}
+		return createjs.Sound.createInstance(name);
 	}
 	,getFile: function(name,required) {
 		if(required == null) required = true;
@@ -1016,7 +1019,7 @@ shoe3d.asset.AssetPackLoader.detectAudioFormats = function() {
 	}
 	var blacklist = new EReg("\\b(iPhone|iPod|iPad|Windows Phone)\\b","");
 	var userAgent = window.navigator.userAgent;
-	if(blacklist.match(userAgent)) {
+	if(blacklist.match(userAgent) && false) {
 		shoe3d.util.Log.warn("HTML5 audio is blacklisted for this browser " + userAgent);
 		return [];
 	}
@@ -1093,6 +1096,8 @@ shoe3d.asset.AssetPackLoader.prototype = {
 				return shoe3d.asset.AssetFormat.OPUS;
 			case "wav":
 				return shoe3d.asset.AssetFormat.WAV;
+			case "aac":
+				return shoe3d.asset.AssetFormat.AAC;
 			case "geom":
 				return shoe3d.asset.AssetFormat.GEOM;
 			}
@@ -1139,6 +1144,7 @@ shoe3d.asset.AssetPackLoader.prototype = {
 	}
 	,load: function() {
 		var _g3 = this;
+		createjs.Sound.alternateExtensions = ["aac"];
 		this._manager = new THREE.LoadingManager($bind(this,this.onCompletePack),$bind(this,this.onProgress));
 		var _g = 0;
 		var _g1 = this._entriesToLoad;
@@ -1155,15 +1161,9 @@ shoe3d.asset.AssetPackLoader.prototype = {
 				})(e));
 				break;
 			case 5:case 6:case 7:case 8:case 9:
-				var ldr = new THREE.XHRLoader(this._manager);
-				ldr.setResponseType("arraybuffer");
-				ldr.load(e[0].url,(function(e) {
-					return function(snd) {
-						_g3.onLoadSound(snd,e[0]);
-					};
-				})(e));
+				new shoe3d.asset.SoundLoader(this._manager).load(e[0].url,e[0].name,this._pack);
 				break;
-			case 10:
+			case 11:
 				new THREE.XHRLoader(this._manager).load(e[0].url,(function(e) {
 					return function(data) {
 						_g3.onLoadGeometry(data,e[0]);
@@ -1191,8 +1191,8 @@ shoe3d.asset.AssetPackLoader.prototype = {
 		this._pack._texMap.set(e.name,tex);
 	}
 	,onLoadSound: function(data,e) {
-		haxe.Log.trace(data,{ fileName : "AssetPackLoader.hx", lineNumber : 256, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
-		haxe.Log.trace("SND LOAD",{ fileName : "AssetPackLoader.hx", lineNumber : 258, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
+		haxe.Log.trace(data,{ fileName : "AssetPackLoader.hx", lineNumber : 259, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
+		haxe.Log.trace("SND LOAD",{ fileName : "AssetPackLoader.hx", lineNumber : 261, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
 	}
 	,onLoadGeometry: function(data,e) {
 		var parser = new THREE.JSONLoader();
@@ -1220,6 +1220,32 @@ shoe3d.asset.Res.registerPack = function(pack,name) {
 shoe3d.asset.Res.prototype = {
 	__class__: shoe3d.asset.Res
 };
+shoe3d.asset.SoundLoader = function(manager) {
+	THREE.Loader.call(this);
+	this._manager = manager;
+};
+shoe3d.asset.SoundLoader.__name__ = ["shoe3d","asset","SoundLoader"];
+shoe3d.asset.SoundLoader.__super__ = THREE.Loader;
+shoe3d.asset.SoundLoader.prototype = $extend(THREE.Loader.prototype,{
+	_loader: null
+	,_manager: null
+	,_url: null
+	,_pack: null
+	,_id: null
+	,load: function(url,id,pack) {
+		this._pack = pack;
+		this._url = url;
+		this._manager.itemStart(this._url);
+		this._id = id;
+		createjs.Sound.on("fileload",$bind(this,this.onLoad));
+		createjs.Sound.registerSound(url,id);
+	}
+	,onLoad: function(evt) {
+		this._pack._soundMap.set(this._id,this._url);
+		this._manager.itemEnd(this._url);
+	}
+	,__class__: shoe3d.asset.SoundLoader
+});
 shoe3d.core.game = {};
 shoe3d.core.game.Component = function() {
 	this._started = false;
@@ -1643,6 +1669,13 @@ shoe3d.screen.transition.Transition.prototype = {
 	}
 	,__class__: shoe3d.screen.transition.Transition
 };
+shoe3d.sound = {};
+shoe3d.sound.Sound = function() {
+};
+shoe3d.sound.Sound.__name__ = ["shoe3d","sound","Sound"];
+shoe3d.sound.Sound.prototype = {
+	__class__: shoe3d.sound.Sound
+};
 shoe3d.util = {};
 shoe3d.util.Assert = function() { };
 shoe3d.util.Assert.__name__ = ["shoe3d","util","Assert"];
@@ -1660,7 +1693,7 @@ shoe3d.util.Info.isMobileBrowser = function() {
 shoe3d.util.Log = function() { };
 shoe3d.util.Log.__name__ = ["shoe3d","util","Log"];
 shoe3d.util.Log.warn = function(msg) {
-	console.log(msg);
+	console.warn(msg);
 };
 shoe3d.util.StringHelp = function() { };
 shoe3d.util.StringHelp.__name__ = ["shoe3d","util","StringHelp"];
@@ -1939,6 +1972,7 @@ tests.TestScreen = function() {
 	layer.add(new THREE.AmbientLight(16777215));
 	layer.addChild(new shoe3d.core.game.GameObject().add(new shoe3d.component.CameraHolder()));
 	layer.setCamera(new THREE.PerspectiveCamera(60,1.3333333333333333,0.1,1000));
+	tests.Main.pack.getSound("tnt").play({ loop : 5});
 };
 tests.TestScreen.__name__ = ["tests","TestScreen"];
 tests.TestScreen.__super__ = shoe3d.screen.GameScreen;

@@ -8,7 +8,7 @@ class Log
 {
 	#if debug
 	public static function warn( msg:String ) {
-		untyped __js__("console").log( msg );
+		untyped __js__("console").warn( msg );
 	}
 	
 	

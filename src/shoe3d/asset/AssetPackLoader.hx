@@ -63,6 +63,7 @@ class AssetPackLoader
                 case "ogg": return OGG;
                 case "opus": return OPUS;
                 case "wav": return WAV;
+                case "aac": return AAC;
 				
 				case 'geom': return GEOM;
             }
@@ -157,7 +158,7 @@ class AssetPackLoader
 
         var userAgent = Browser.navigator.userAgent;
 		// TODO Add webaudio support check
-        if (/*!WebAudioSound.supported &&*/ blacklist.match(userAgent)) {
+        if (/*!WebAudioSound.supported &&*/ blacklist.match(userAgent) && false) {
             Log.warn("HTML5 audio is blacklisted for this browser " + userAgent);
             return [];
         }
@@ -214,6 +215,7 @@ class AssetPackLoader
 	
 	private function load() 
 	{
+		untyped __js__('createjs.Sound.alternateExtensions = ["aac"]');
 		_manager = new LoadingManager( onCompletePack, onProgress );
 		for ( e in _entriesToLoad ) {
 			switch( e.format ) {
@@ -222,9 +224,10 @@ class AssetPackLoader
 					new TextureLoader( _manager ).load( e.url, function( tex ) onLoadTexture( tex, e ) );
 					
 				case MP3, M4A, OPUS, OGG, WAV:
-					var ldr = new XHRLoader( _manager );
+					/*var ldr = new XHRLoader( _manager );
 					ldr.setResponseType("arraybuffer");
-					ldr.load( e.url, function (snd) onLoadSound( untyped snd, e ) );
+					ldr.load( e.url, function (snd) onLoadSound( untyped snd, e ) );*/
+					new SoundLoader(_manager).load( e.url, e.name, _pack );
 				case GEOM:
 					new XHRLoader(_manager).load( e.url, function( data ) onLoadGeometry( data, e ) );
 				default:

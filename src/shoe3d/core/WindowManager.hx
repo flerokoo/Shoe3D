@@ -90,7 +90,6 @@ class WindowManager
 			var marginTop = Math.floor( Math.max( 0, (Browser.window.innerHeight - height ) / 2 ) );
 			div.style.margin = marginTop + "px auto 0";
 			
-			trace("OK", marginTop + "px auto 0");
 		}
 	}
 		
@@ -101,6 +100,7 @@ class WindowManager
 		Browser.document.body.style.width = "100%";
 		Browser.document.body.style.height = "100%";
 		
+		RenderManager.container.style.padding = "0px";
 		
 			/*Browser.document.body.style.marginBottom =
 			Browser.document.body.style.marginLeft =

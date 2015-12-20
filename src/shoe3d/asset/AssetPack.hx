@@ -1,4 +1,5 @@
 package shoe3d.asset;
+import soundjs.SoundManager;
 import three.Geometry;
 import three.GeometryLoader;
 import three.GeometryUtils;
@@ -15,7 +16,7 @@ class AssetPack
 	private var _texMap:Map<String,Texture>;
 	private var _fileMap:Map<String,File>;
 	private var _geomMap:Map<String,Geometry>;
-	private var _soundMap:Map<String,File>;
+	private var _soundMap:Map<String,String>; // map just to check if sound belongs to this asset pack
 	
 	public function new(  ) 
 	{
@@ -34,9 +35,12 @@ class AssetPack
 	
 	public function getSound( name:String, required:Bool = true )
 	{
-		var ret = _soundMap.get( name );
-		if ( ret == null && required ) throw 'No sound with name=$name';
-		return ret;
+		if ( ! _soundMap.exists( name ) )
+			if ( required ) 
+				throw 'No sound with name=$name'
+			else
+				return null;
+		return SoundManager.createInstance( name );
 	}
 	
 	public function getFile( name:String, required:Bool = true ) 

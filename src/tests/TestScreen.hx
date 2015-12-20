@@ -11,6 +11,7 @@ import shoe3d.core.game.GameObject;
 import shoe3d.core.Layer;
 import shoe3d.screen.GameScreen;
 import shoe3d.System;
+import soundjs.SoundManager;
 import three.AmbientLight;
 import three.BoxGeometry;
 import three.BufferGeometry;
@@ -143,7 +144,7 @@ class TestScreen extends GameScreen
 		
 		//cc.updateMatrix();
 		//cc.updateProjectionMatrix();
-		
+		Main.pack.getSound("tnt").play({loop:5});
 		
 	}
 	

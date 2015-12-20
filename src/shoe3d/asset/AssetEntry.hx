@@ -11,7 +11,7 @@ enum AssetFormat
 	PNG; JPG; GIF; JXR; WEBP;
 	
 	//sounds	
-	MP3; M4A; OPUS; OGG; WAV;
+	MP3; M4A; OPUS; OGG; WAV; AAC;
 	
 	//geometry
 	GEOM;
