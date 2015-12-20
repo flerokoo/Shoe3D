@@ -6,6 +6,7 @@ import haxe.unit.TestStatus;
 import js.Browser;
 import js.html.DivElement;
 import js.Lib;
+import shoe3d.asset.AssetPack;
 import shoe3d.component.S3Mesh;
 import shoe3d.core.game.GameObject;
 import shoe3d.System;
@@ -23,7 +24,7 @@ import three.WebGLRenderer;
  */
 class Main 
 {
-	
+	static public var pack:AssetPack;
 	static var console:DivElement;
 	
 	static function main() 
@@ -40,21 +41,28 @@ class Main
 		
 		System.init();
 		
-		System.screen.addScreen( "game", TestScreen );
-		System.screen.addScreen( "game2", TestScreen2 );
 		
-		System.screen.show( "game" );
 		System.showFPSMeter();
 		//Timer.delay( function() System.screen.show("game2") , 1100 );
 		
 		//System.window.mode = Default;
 		//System.window.setSize( 600, 600 );
 		
+		
+		System.loadFolderFromAssets( 'biba', function(pc) 
+		{
+			Main.pack = pc;
+			System.screen.show( "game" );
+			System.start();
+		});
+		
+		System.renderer.showStats();		
+		System.screen.addScreen( "game", TestScreen );
+		System.screen.addScreen( "game2", TestScreen2 );
+		
+		
+		
 		System.start();
-		System.loadFolderFromAssets( 'biba' );
-		System.renderer.showStats();
-		
-		
 	}
 	
 	static function createConsole() {

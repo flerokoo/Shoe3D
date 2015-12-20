@@ -77,7 +77,7 @@ class TestScreen extends GameScreen
 		addLayer( layer );
 		
 		var geom = new BoxGeometry( Math.random() * 0.5 + 1, Math.random() * 0.5 + 1, Math.random() * 0.5 + 1 );
-		var geom2 = new BufferGeometry().fromGeometry( geom );
+		var geom2 = Main.pack.getGeometry("model1");
 		var mat = new MeshPhongMaterial( { color: cast (0xffffff * Math.random()) });
 		var mesh = new S3Mesh( geom, mat );
 		for ( i in 0...400 ) {
@@ -87,6 +87,9 @@ class TestScreen extends GameScreen
 			go.transform.position.x = Math.random() * 40 - 20;
 			go.transform.position.y = Math.random() * 40 - 20;
 			go.transform.position.z = Math.random() * 40 - 20;
+			go.transform.rotateX( Math.random() * 3.14 );
+			go.transform.rotateY( Math.random() * 3.14 );
+			go.transform.rotateZ( Math.random() * 3.14 );
 			
 			layer.addChild( go );
 		}

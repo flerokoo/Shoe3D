@@ -882,11 +882,10 @@ shoe3d.System.loadFolderFromAssets = function(folder,onSuccess,onProgress,regist
 	ldr.add("button2","assets/button1.png",0);
 	ldr.add("index","index.html",0);
 	ldr.add("tnt","assets/tnt.ogg",0);
-	var promise = ldr.start(function(pack) {
-		haxe.Log.trace(pack,{ fileName : "System.hx", lineNumber : 120, className : "shoe3d.System", methodName : "loadFolderFromAssets"});
-	});
-	promise.success.connect(function(pack1) {
-		shoe3d.asset.Res.registerPack(pack1,registerThisPackWithName);
+	ldr.add("model1","assets/model1.geom",0);
+	var promise = ldr.start(onSuccess,onProgress);
+	promise.success.connect(function(pack) {
+		shoe3d.asset.Res.registerPack(pack,registerThisPackWithName);
 	}).once();
 	return promise;
 };
@@ -898,7 +897,7 @@ shoe3d.System.get_root = function() {
 	return shoe3d.screen.ScreenManager._base;
 };
 shoe3d.asset = {};
-shoe3d.asset.AssetFormat = { __ename__ : true, __constructs__ : ["PNG","JPG","GIF","JXR","WEBP","MP3","M4A","OPUS","OGG","WAV","RAW"] };
+shoe3d.asset.AssetFormat = { __ename__ : true, __constructs__ : ["PNG","JPG","GIF","JXR","WEBP","MP3","M4A","OPUS","OGG","WAV","GEOM","RAW"] };
 shoe3d.asset.AssetFormat.PNG = ["PNG",0];
 shoe3d.asset.AssetFormat.PNG.__enum__ = shoe3d.asset.AssetFormat;
 shoe3d.asset.AssetFormat.JPG = ["JPG",1];
@@ -919,7 +918,9 @@ shoe3d.asset.AssetFormat.OGG = ["OGG",8];
 shoe3d.asset.AssetFormat.OGG.__enum__ = shoe3d.asset.AssetFormat;
 shoe3d.asset.AssetFormat.WAV = ["WAV",9];
 shoe3d.asset.AssetFormat.WAV.__enum__ = shoe3d.asset.AssetFormat;
-shoe3d.asset.AssetFormat.RAW = ["RAW",10];
+shoe3d.asset.AssetFormat.GEOM = ["GEOM",10];
+shoe3d.asset.AssetFormat.GEOM.__enum__ = shoe3d.asset.AssetFormat;
+shoe3d.asset.AssetFormat.RAW = ["RAW",11];
 shoe3d.asset.AssetFormat.RAW.__enum__ = shoe3d.asset.AssetFormat;
 shoe3d.asset.AssetEntry = function(name,url,format,bytes) {
 	this.name = name;
@@ -939,11 +940,13 @@ shoe3d.asset.AssetPack = function() {
 	this._texMap = new haxe.ds.StringMap();
 	this._fileMap = new haxe.ds.StringMap();
 	this._soundMap = new haxe.ds.StringMap();
+	this._geomMap = new haxe.ds.StringMap();
 };
 shoe3d.asset.AssetPack.__name__ = ["shoe3d","asset","AssetPack"];
 shoe3d.asset.AssetPack.prototype = {
 	_texMap: null
 	,_fileMap: null
+	,_geomMap: null
 	,_soundMap: null
 	,getTexture: function(name,required) {
 		if(required == null) required = true;
@@ -962,6 +965,14 @@ shoe3d.asset.AssetPack.prototype = {
 		var ret = this._fileMap.get(name);
 		if(ret == null && required) throw "No file with name=" + name;
 		return ret;
+	}
+	,getGeometry: function(name,required) {
+		if(required == null) required = true;
+		var ret = this._geomMap.get(name);
+		if(ret == null && required) throw "No file with name=" + name;
+		return ret;
+	}
+	,createGeometryFromFile: function(filename,geometryname) {
 	}
 	,__class__: shoe3d.asset.AssetPack
 };
@@ -1026,7 +1037,7 @@ shoe3d.asset.AssetPackLoader.detectAudioFormats = function() {
 };
 shoe3d.asset.AssetPackLoader.getSupportedFormatsAsync = function(fn) {
 	if(shoe3d.asset.AssetPackLoader._supportedFormats == null) shoe3d.asset.AssetPackLoader.detectImageFormats(function(imgFormats) {
-		shoe3d.asset.AssetPackLoader._supportedFormats = imgFormats.concat(shoe3d.asset.AssetPackLoader.detectAudioFormats()).concat([shoe3d.asset.AssetFormat.RAW]);
+		shoe3d.asset.AssetPackLoader._supportedFormats = imgFormats.concat(shoe3d.asset.AssetPackLoader.detectAudioFormats()).concat([shoe3d.asset.AssetFormat.RAW,shoe3d.asset.AssetFormat.GEOM]);
 		fn(shoe3d.asset.AssetPackLoader._supportedFormats);
 	}); else fn(shoe3d.asset.AssetPackLoader._supportedFormats);
 };
@@ -1082,6 +1093,8 @@ shoe3d.asset.AssetPackLoader.prototype = {
 				return shoe3d.asset.AssetFormat.OPUS;
 			case "wav":
 				return shoe3d.asset.AssetFormat.WAV;
+			case "geom":
+				return shoe3d.asset.AssetFormat.GEOM;
 			}
 		} else throw "No asset format: " + url;
 		return shoe3d.asset.AssetFormat.RAW;
@@ -1106,17 +1119,21 @@ shoe3d.asset.AssetPackLoader.prototype = {
 		this._entriesToPick.change.connect(function(cur,prev) {
 			if(cur <= 0) _g.load();
 		});
-		var $it0 = groups.iterator();
+		var $it0 = groups.keys();
 		while( $it0.hasNext() ) {
-			var group = $it0.next();
-			shoe3d.asset.AssetPackLoader.pickBestEntry(group,function(e) {
-				if(e == null) throw "Asset format is not supported: " + e.name + " @ " + e.url;
-				_g._entriesToLoad.push(e);
-				var _g12 = _g._entriesToPick;
-				var _g2 = _g12.get__();
-				_g12.set__(_g2 - 1);
-				_g2;
-			});
+			var groupName = $it0.next();
+			var groupName1 = [groupName];
+			var group = groups.get(groupName1[0]);
+			shoe3d.asset.AssetPackLoader.pickBestEntry(group,(function(groupName1) {
+				return function(e) {
+					if(e == null) throw "Asset format is not supported: " + groupName1[0] + " ";
+					_g._entriesToLoad.push(e);
+					var _g12 = _g._entriesToPick;
+					var _g2 = _g12.get__();
+					_g12.set__(_g2 - 1);
+					_g2;
+				};
+			})(groupName1));
 		}
 		return this._promise = new shoe3d.util.promise.Promise();
 	}
@@ -1146,10 +1163,17 @@ shoe3d.asset.AssetPackLoader.prototype = {
 					};
 				})(e));
 				break;
-			default:
+			case 10:
 				new THREE.XHRLoader(this._manager).load(e[0].url,(function(e) {
 					return function(data) {
-						_g3.onLoadData(data,e[0]);
+						_g3.onLoadGeometry(data,e[0]);
+					};
+				})(e));
+				break;
+			default:
+				new THREE.XHRLoader(this._manager).load(e[0].url,(function(e) {
+					return function(data1) {
+						_g3.onLoadData(data1,e[0]);
 					};
 				})(e));
 			}
@@ -1167,8 +1191,12 @@ shoe3d.asset.AssetPackLoader.prototype = {
 		this._pack._texMap.set(e.name,tex);
 	}
 	,onLoadSound: function(data,e) {
-		haxe.Log.trace(data,{ fileName : "AssetPackLoader.hx", lineNumber : 245, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
-		haxe.Log.trace("SND LOAD",{ fileName : "AssetPackLoader.hx", lineNumber : 247, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
+		haxe.Log.trace(data,{ fileName : "AssetPackLoader.hx", lineNumber : 256, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
+		haxe.Log.trace("SND LOAD",{ fileName : "AssetPackLoader.hx", lineNumber : 258, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
+	}
+	,onLoadGeometry: function(data,e) {
+		var parser = new THREE.JSONLoader();
+		this._pack._geomMap.set(e.name,parser.parse(JSON.parse(data)).geometry);
 	}
 	,onLoadData: function(data,e) {
 		var value = new shoe3d.asset.File(data);
@@ -1226,7 +1254,7 @@ shoe3d.component.CameraHolder.prototype = $extend(shoe3d.core.game.Component.pro
 	}
 	,onUpdate: function() {
 		if(this.owner.layer != null && this.owner.layer.camera != null) {
-			this.owner.layer.camera.position.set(Math.cos(shoe3d.core.Time.timeSinceGameStart),Math.sin(shoe3d.core.Time.timeSinceGameStart),0).multiplyScalar(50);
+			this.owner.layer.camera.position.set(Math.cos(shoe3d.core.Time.timeSinceGameStart),Math.sin(shoe3d.core.Time.timeSinceGameStart),0).multiplyScalar(20);
 			this.owner.layer.camera.lookAt(new THREE.Vector3(0,0,0));
 		}
 	}
@@ -1864,13 +1892,16 @@ tests.Main.main = function() {
 	runner.run();
 	tests.Main.trace2(runner.result);
 	shoe3d.System.init();
+	shoe3d.System.showFPSMeter();
+	shoe3d.System.loadFolderFromAssets("biba",function(pc) {
+		tests.Main.pack = pc;
+		shoe3d.System.screen.show("game");
+		shoe3d.System.start();
+	});
+	shoe3d.System.renderer.showStats();
 	shoe3d.System.screen.addScreen("game",tests.TestScreen);
 	shoe3d.System.screen.addScreen("game2",tests.TestScreen2);
-	shoe3d.System.screen.show("game");
-	shoe3d.System.showFPSMeter();
 	shoe3d.System.start();
-	shoe3d.System.loadFolderFromAssets("biba");
-	shoe3d.System.renderer.showStats();
 };
 tests.Main.createConsole = function() {
 	var _this = window.document;
@@ -1885,7 +1916,7 @@ tests.TestScreen = function() {
 	var layer = new shoe3d.core.Layer("layer");
 	this.addLayer(layer);
 	var geom = new THREE.BoxGeometry(Math.random() * 0.5 + 1,Math.random() * 0.5 + 1,Math.random() * 0.5 + 1);
-	var geom2 = new THREE.BufferGeometry().fromGeometry(geom);
+	var geom2 = tests.Main.pack.getGeometry("model1");
 	var mat = new THREE.MeshPhongMaterial({ color : 16777215 * Math.random()});
 	var mesh = new shoe3d.component.S3Mesh(geom,mat);
 	var _g = 0;
@@ -1895,6 +1926,9 @@ tests.TestScreen = function() {
 		go.transform.position.x = Math.random() * 40 - 20;
 		go.transform.position.y = Math.random() * 40 - 20;
 		go.transform.position.z = Math.random() * 40 - 20;
+		go.transform.rotateX(Math.random() * 3.14);
+		go.transform.rotateY(Math.random() * 3.14);
+		go.transform.rotateZ(Math.random() * 3.14);
 		layer.addChild(go);
 	}
 	var dl = new THREE.DirectionalLight(9366269,0.7);

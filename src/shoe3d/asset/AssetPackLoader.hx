@@ -1,4 +1,5 @@
 package shoe3d.asset;
+import haxe.Json;
 import js.Browser;
 import js.html.ArrayBuffer;
 import shoe3d.asset.AssetEntry.AssetFormat;
@@ -7,8 +8,11 @@ import shoe3d.util.Log;
 import shoe3d.util.promise.Promise;
 import shoe3d.util.StringHelp;
 import shoe3d.util.Value;
+import three.GeometryLoader;
+import three.JSONLoader;
 import three.Loader;
 import three.LoadingManager;
+import three.ObjectLoader;
 import three.Texture;
 import three.TextureLoader;
 import three.XHRLoader;
@@ -59,6 +63,8 @@ class AssetPackLoader
                 case "ogg": return OGG;
                 case "opus": return OPUS;
                 case "wav": return WAV;
+				
+				case 'geom': return GEOM;
             }
         } else {
             throw 'No asset format: $url';
@@ -88,9 +94,10 @@ class AssetPackLoader
 			if ( cur <= 0 ) load();
 		});
 		
-		for ( group in groups ) {
+		for ( groupName in groups.keys() ) {
+			var group = groups.get(groupName);
 			pickBestEntry( group, function( e:AssetEntry ) {
-				if ( e == null ) throw 'Asset format is not supported: ${e.name} @ ${e.url}';
+				if ( e == null ) throw 'Asset format is not supported: ${groupName} ';
 				_entriesToLoad.push( e );				
 				_entriesToPick._ --;
 			});
@@ -183,7 +190,7 @@ class AssetPackLoader
 	{
 		if ( _supportedFormats == null )
 			detectImageFormats( function ( imgFormats:Array<AssetFormat> ) {
-				_supportedFormats = imgFormats.concat( detectAudioFormats() ).concat( [ RAW ] );
+				_supportedFormats = imgFormats.concat( detectAudioFormats() ).concat( [ RAW, GEOM ] );
 				fn( _supportedFormats );
 			} )
 		else
@@ -218,10 +225,11 @@ class AssetPackLoader
 					var ldr = new XHRLoader( _manager );
 					ldr.setResponseType("arraybuffer");
 					ldr.load( e.url, function (snd) onLoadSound( untyped snd, e ) );
-					
+				case GEOM:
+					new XHRLoader(_manager).load( e.url, function( data ) onLoadGeometry( data, e ) );
 				default:
 					new XHRLoader( _manager ).load( e.url, function (data) onLoadData( data, e ) );
-					
+				
 			}
 		}
 	}
@@ -248,6 +256,12 @@ class AssetPackLoader
 		trace(data);
 		
 		trace( "SND LOAD");
+	}
+	
+	function onLoadGeometry( data:String, e:AssetEntry )
+	{
+		var parser = new JSONLoader();
+		_pack._geomMap.set( e.name, parser.parse( Json.parse(data) ).geometry );
 	}
 	
 	function onLoadData( data:String, e:AssetEntry ) 

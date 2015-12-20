@@ -1,4 +1,7 @@
 package shoe3d.asset;
+import three.Geometry;
+import three.GeometryLoader;
+import three.GeometryUtils;
 import three.Texture;
 
 /**
@@ -11,6 +14,7 @@ class AssetPack
 
 	private var _texMap:Map<String,Texture>;
 	private var _fileMap:Map<String,File>;
+	private var _geomMap:Map<String,Geometry>;
 	private var _soundMap:Map<String,File>;
 	
 	public function new(  ) 
@@ -18,6 +22,7 @@ class AssetPack
 		_texMap = new Map();
 		_fileMap = new Map();
 		_soundMap = new Map();
+		_geomMap = new Map();
 	}
 	
 	public function getTexture( name:String, required:Bool = true ) 
@@ -41,4 +46,15 @@ class AssetPack
 		return ret;
 	}
 	
+	public function getGeometry( name:String, required:Bool = true )
+	{
+		var ret = _geomMap.get( name );
+		if ( ret == null && required ) throw 'No file with name=$name';
+		return ret;
+	}
+	
+	public function createGeometryFromFile( filename:String, geometryname:String )
+	{
+		
+	}
 }

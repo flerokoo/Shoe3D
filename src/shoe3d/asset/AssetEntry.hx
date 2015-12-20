@@ -7,10 +7,16 @@ package shoe3d.asset;
 
 enum AssetFormat 
 {
+	//textures
 	PNG; JPG; GIF; JXR; WEBP;
 	
+	//sounds	
 	MP3; M4A; OPUS; OGG; WAV;
 	
+	//geometry
+	GEOM;
+	
+	//raw data
 	RAW;
 }
  
