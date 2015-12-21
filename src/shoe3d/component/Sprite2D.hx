@@ -41,22 +41,24 @@ class Sprite2D extends Element2D
 		super();
 		
 		texDef = Res.getTexDef( textureName );
-		material = new MeshBasicMaterial( {  map: texDef.texture, transparent: true } );
-		redefineGeom();
-		
-		
-		
+		geom = new PlaneGeometry(0, 0, 1, 1);
+		material = new MeshBasicMaterial( { transparent: true } );	
 		mesh = new Mesh( geom, material );
-		mesh.scale.set( 1.3, 1.3, 1 );	
+		
+		redefineSprite();
+		
+		
+		
 	}
 	
-	function redefineGeom()
-	{		
+	function redefineSprite()
+	{	
+		if ( texDef == null ) return;
+		
 		var w = texDef.width;
 		var h = texDef.height;
 		var uv = texDef.uv;
 		
-		if( geom == null ) geom = new PlaneGeometry( w, h, 1, 1 );
 		
 		
 		geom.uvsNeedUpdate = true;	
@@ -80,10 +82,16 @@ class Sprite2D extends Element2D
 				new Vector2( uv.umax, uv.vmin ),
 				new Vector2( uv.umax, uv.vmax )
 			]
-		]];		
+		]];			
+		material.map = texDef.texture;
 	}
 	
 	
+	public function setTexture( tex:TexDef ) 
+	{
+		texDef = tex;
+		redefineSprite();
+	}
 	
 	override public function onAdded()
 	{

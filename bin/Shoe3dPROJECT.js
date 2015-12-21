@@ -786,12 +786,15 @@ shoe3d.core.WindowManager.updateLayout = function() {
 	shoe3d.core.WindowManager.resetStyle();
 	var canvas = shoe3d.core.RenderManager.renderer.domElement;
 	var div = shoe3d.core.RenderManager.container;
-	if(shoe3d.core.WindowManager.mode == shoe3d.core.WindowMode.Fill || shoe3d.util.Info.isMobileBrowser()) {
+	var isMobile = shoe3d.util.Info.isMobileBrowser();
+	if(shoe3d.core.WindowManager.mode == shoe3d.core.WindowMode.Fill || isMobile) {
 		window.document.body.style.padding = "0";
 		div.style.margin = "0";
-		div.style.width = window.innerWidth + "px";
-		div.style.height = window.innerHeight + "px";
-		shoe3d.core.RenderManager.renderer.setSize(window.innerWidth,window.innerHeight);
+		var ratio = window.devicePixelRatio;
+		if(Math.max(window.innerWidth,window.innerHeight) * ratio > 2300 && isMobile) ratio = 1;
+		shoe3d.core.RenderManager.renderer.setSize(window.innerWidth * ratio,window.innerHeight * ratio);
+		div.style.width = canvas.style.width = window.innerWidth + "px";
+		div.style.height = canvas.style.height = window.innerHeight + "px";
 	} else {
 		div.style.width = shoe3d.core.WindowManager.get_width() + "px";
 		div.style.height = shoe3d.core.WindowManager.get_height() + "px";
@@ -1480,10 +1483,10 @@ shoe3d.component.S3Mesh.prototype = $extend(shoe3d.core.game.Component.prototype
 shoe3d.component.Sprite2D = function(textureName) {
 	shoe3d.component.Element2D.call(this);
 	this.texDef = shoe3d.asset.Res.getTexDef(textureName);
-	this.material = new THREE.MeshBasicMaterial({ map : this.texDef.texture, transparent : true});
-	this.redefineGeom();
+	this.geom = new THREE.PlaneGeometry(0,0,1,1);
+	this.material = new THREE.MeshBasicMaterial({ transparent : true});
 	this.mesh = new THREE.Mesh(this.geom,this.material);
-	this.mesh.scale.set(1.3,1.3,1);
+	this.redefineSprite();
 };
 shoe3d.component.Sprite2D.__name__ = ["shoe3d","component","Sprite2D"];
 shoe3d.component.Sprite2D.__super__ = shoe3d.component.Element2D;
@@ -1492,15 +1495,20 @@ shoe3d.component.Sprite2D.prototype = $extend(shoe3d.component.Element2D.prototy
 	,texDef: null
 	,mesh: null
 	,material: null
-	,redefineGeom: function() {
+	,redefineSprite: function() {
+		if(this.texDef == null) return;
 		var w = this.texDef.width;
 		var h = this.texDef.height;
 		var uv = this.texDef.uv;
-		if(this.geom == null) this.geom = new THREE.PlaneGeometry(w,h,1,1);
 		this.geom.uvsNeedUpdate = true;
 		this.geom.verticesNeedUpdate = true;
 		this.geom.vertices = [new THREE.Vector3(-w / 2,h / 2),new THREE.Vector3(w / 2,h / 2),new THREE.Vector3(-w / 2,-h / 2),new THREE.Vector3(w / 2,-h / 2)];
 		this.geom.faceVertexUvs = [[[new THREE.Vector2(uv.umin,uv.vmax),new THREE.Vector2(uv.umin,uv.vmin),new THREE.Vector2(uv.umax,uv.vmax)],[new THREE.Vector2(uv.umin,uv.vmin),new THREE.Vector2(uv.umax,uv.vmin),new THREE.Vector2(uv.umax,uv.vmax)]]];
+		this.material.map = this.texDef.texture;
+	}
+	,setTexture: function(tex) {
+		this.texDef = tex;
+		this.redefineSprite();
 	}
 	,onAdded: function() {
 		this.owner.transform.add(this.mesh);

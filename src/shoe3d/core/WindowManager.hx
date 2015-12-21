@@ -69,15 +69,20 @@ class WindowManager
 		
 		var canvas:CanvasElement = RenderManager.renderer.domElement;
 		var div:DivElement = RenderManager.container;
+		var isMobile = Info.isMobileBrowser();
 		
-		if ( mode == Fill || Info.isMobileBrowser() ) 
+		if ( mode == Fill || isMobile ) 
 		{
 			Browser.document.body.style.padding = "0";
 			div.style.margin = "0";
-			div.style.width = Browser.window.innerWidth + "px";
-			div.style.height = Browser.window.innerHeight + "px";
-			RenderManager.renderer.setSize( Browser.window.innerWidth, Browser.window.innerHeight );
 			
+			
+			var ratio = Browser.window.devicePixelRatio ;
+			if ( Math.max( Browser.window.innerWidth, Browser.window.innerHeight) * ratio > 2300 && isMobile ) ratio = 1;
+			RenderManager.renderer.setSize( Browser.window.innerWidth * ratio, Browser.window.innerHeight * ratio );	
+			
+			div.style.width = canvas.style.width = Browser.window.innerWidth + "px";
+			div.style.height = canvas.style.height = Browser.window.innerHeight + "px";		
 		}
 		else 
 		{
@@ -88,8 +93,7 @@ class WindowManager
 			Browser.document.body.style.padding = "0.06px";
 			
 			var marginTop = Math.floor( Math.max( 0, (Browser.window.innerHeight - height ) / 2 ) );
-			div.style.margin = marginTop + "px auto 0";
-			
+			div.style.margin = marginTop + "px auto 0";			
 		}
 	}
 		

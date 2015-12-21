@@ -1,6 +1,7 @@
 package tests;
 import js.Browser;
 import js.html.ImageElement;
+import shoe3d.asset.Res;
 import shoe3d.component.CameraHolder;
 import shoe3d.component.S3Mesh;
 import shoe3d.component.RandomRotator;
@@ -115,6 +116,7 @@ class TestScreen extends GameScreen
 		var ui = newLayer2D("UILAYER");		
 		var g2d = new GameObject("SPRITETEST");		
 		var spr = new Sprite2D( 'logo' );
+		//spr.setTexture( Res.getTexDef( 'button_gameplay_level_menu' ) );
 		g2d.add( spr );		
 		ui.addChild( g2d );		
 		//g2d.transform.position.set( 0, 0, 0 );
