@@ -1267,7 +1267,8 @@ shoe3d.asset.Atlas.prototype = {
 	}
 	,UVfromRectangle: function(rect) {
 		if(this.image == null) throw "Image is null";
-		return { umin : rect.x / this.image.naturalWidth, vmin : rect.y / this.image.naturalHeight, umax : (rect.x + rect.width) / this.image.naturalWidth, vmax : (rect.y + rect.height) / this.image.naturalHeight};
+		haxe.Log.trace(this.image.naturalWidth,{ fileName : "Atlas.hx", lineNumber : 63, className : "shoe3d.asset.Atlas", methodName : "UVfromRectangle", customParams : [this.image.naturalHeight]});
+		return { umin : rect.x / this.image.naturalWidth, vmin : (this.image.naturalHeight - rect.y - rect.height) / this.image.naturalHeight, umax : (rect.x + rect.width) / this.image.naturalWidth, vmax : (this.image.naturalHeight - rect.y - rect.height * 0) / this.image.naturalHeight};
 	}
 	,parseJSON: function(json,type) {
 		if(type == shoe3d.asset.AtlasType.TexturePacker) this.parseTexturePacker(json); else if(type == shoe3d.asset.AtlasType.ShoeBox) this.parseShoeBox(json); else if(type == shoe3d.asset.AtlasType.Auto || type == null) {
@@ -1479,8 +1480,10 @@ shoe3d.component.S3Mesh.prototype = $extend(shoe3d.core.game.Component.prototype
 shoe3d.component.Sprite2D = function(textureName) {
 	shoe3d.component.Element2D.call(this);
 	this.texDef = shoe3d.asset.Res.getTexDef(textureName);
+	this.material = new THREE.MeshBasicMaterial({ map : this.texDef.texture, transparent : true});
 	this.redefineGeom();
-	this.mesh = new THREE.Mesh(this.geom,new THREE.MeshPhongMaterial({ transparent : true, map : this.texDef.texture}));
+	this.mesh = new THREE.Mesh(this.geom,this.material);
+	this.mesh.scale.set(1.3,1.3,1);
 };
 shoe3d.component.Sprite2D.__name__ = ["shoe3d","component","Sprite2D"];
 shoe3d.component.Sprite2D.__super__ = shoe3d.component.Element2D;
@@ -1488,20 +1491,19 @@ shoe3d.component.Sprite2D.prototype = $extend(shoe3d.component.Element2D.prototy
 	geom: null
 	,texDef: null
 	,mesh: null
+	,material: null
 	,redefineGeom: function() {
 		var w = this.texDef.width;
 		var h = this.texDef.height;
+		var uv = this.texDef.uv;
 		if(this.geom == null) this.geom = new THREE.PlaneGeometry(w,h,1,1);
 		this.geom.uvsNeedUpdate = true;
 		this.geom.verticesNeedUpdate = true;
 		this.geom.vertices = [new THREE.Vector3(-w / 2,h / 2),new THREE.Vector3(w / 2,h / 2),new THREE.Vector3(-w / 2,-h / 2),new THREE.Vector3(w / 2,-h / 2)];
-		var uv = this.texDef.uv;
-		haxe.Log.trace(this.geom.faceVertexUvs,{ fileName : "Sprite2D.hx", lineNumber : 163, className : "shoe3d.component.Sprite2D", methodName : "redefineGeom"});
 		this.geom.faceVertexUvs = [[[new THREE.Vector2(uv.umin,uv.vmax),new THREE.Vector2(uv.umin,uv.vmin),new THREE.Vector2(uv.umax,uv.vmax)],[new THREE.Vector2(uv.umin,uv.vmin),new THREE.Vector2(uv.umax,uv.vmin),new THREE.Vector2(uv.umax,uv.vmax)]]];
 	}
 	,onAdded: function() {
 		this.owner.transform.add(this.mesh);
-		this.owner.transform.add(new THREE.AmbientLight(16777215));
 	}
 	,__class__: shoe3d.component.Sprite2D
 });

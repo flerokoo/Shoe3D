@@ -60,11 +60,12 @@ class Atlas
 	function UVfromRectangle( rect:Rectangle ):UV
 	{
 		if ( image == null ) throw "Image is null";
+		trace(image.naturalWidth, image.naturalHeight);
 		return {
 			umin: rect.x / image.naturalWidth,
-			vmin: rect.y / image.naturalHeight,
+			vmin: (image.naturalHeight - rect.y - rect.height) / image.naturalHeight,
 			umax: (rect.x + rect.width) / image.naturalWidth,
-			vmax: (rect.y + rect.height) / image.naturalHeight			
+			vmax: (image.naturalHeight - rect.y - rect.height*0) / image.naturalHeight			
 		}
 	}
 	
