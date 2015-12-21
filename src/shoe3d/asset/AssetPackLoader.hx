@@ -251,7 +251,20 @@ class AssetPackLoader
 	
 	function onLoadTexture( tex:Texture, e:AssetEntry ) 
 	{
-		_pack._texMap.set( e.name, tex );
+		_pack._texMap.set( e.name, 
+		{
+			texture: tex, 
+			uv: {
+				umin: 0,
+				vmin: 0,
+				umax: 1,
+				vmax: 1
+			},
+			width: (tex.image.width != null ? tex.image.width : tex.image.naturalWidth ),
+			height: (tex.image.height != null ? tex.image.height : tex.image.naturalHeight )
+		});
+		tex.naturalWidth = (tex.image.width != null ? tex.image.width : tex.image.naturalWidth );
+		tex.naturalHeight = (tex.image.height != null ? tex.image.height : tex.image.naturalHeight );
 	}
 	
 	function onLoadSound( data:ArrayBuffer, e:AssetEntry ) 

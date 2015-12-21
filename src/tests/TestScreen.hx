@@ -6,7 +6,7 @@ import shoe3d.component.S3Mesh;
 import shoe3d.component.RandomRotator;
 import shoe3d.component.S3Mesh;
 import shoe3d.component.S3Mesh;
-import shoe3d.component.S3Sprite;
+import shoe3d.component.Sprite2D;
 import shoe3d.core.game.GameObject;
 import shoe3d.core.Layer;
 import shoe3d.screen.GameScreen;
@@ -79,7 +79,7 @@ class TestScreen extends GameScreen
 		
 		var geom = new BoxGeometry( Math.random() * 0.5 + 1, Math.random() * 0.5 + 1, Math.random() * 0.5 + 1 );
 		var geom2 = Main.pack.getGeometry("model1");
-		var mat = new MeshPhongMaterial( { color: cast (0xffffff * Math.random()) });
+		var mat = new MeshPhongMaterial( { color: cast (0xffffff ), map: Main.pack.getTexDef("main_pattern").texture });
 		var mesh = new S3Mesh( geom, mat );
 		for ( i in 0...400 ) {
 			var go = new GameObject("GO" + i)
@@ -112,9 +112,9 @@ class TestScreen extends GameScreen
 		
 		
 		
-		/*var ui = newUILayer("UILAYER");		
+		var ui = newLayer2D("UILAYER");		
 		var g2d = new GameObject("SPRITETEST");		
-		var spr = new S3Sprite();
+		var spr = new Sprite2D( 'logo' );
 		g2d.add( spr );		
 		ui.addChild( g2d );		
 		//g2d.transform.position.set( 0, 0, 0 );
@@ -123,9 +123,8 @@ class TestScreen extends GameScreen
 		var l = new TextureLoader( mgr );
 
 		
-		ui.add( new AmbientLight( 0xffffff ) );
 		
-		var cc = cast(ui.camera, OrthographicCamera );*/
+		var cc = cast(ui.camera, OrthographicCamera );
 		
 		
 		
@@ -144,7 +143,7 @@ class TestScreen extends GameScreen
 		
 		//cc.updateMatrix();
 		//cc.updateProjectionMatrix();
-		Main.pack.getSound("tnt").play({loop:5});
+		Main.pack.getSound("tnt").play();
 		
 	}
 	

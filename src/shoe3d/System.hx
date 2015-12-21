@@ -116,6 +116,8 @@ class System
 		ldr.add( 'index', 'index.html', 0 );
 		ldr.add( 'tnt', 'assets/tnt.ogg', 0 );
 		ldr.add( 'model1', 'assets/model1.geom', 0 );
+		ldr.add( 'sprites', 'assets/sprites.png', 0 );
+		ldr.add( 'sprites.txt', 'assets/sprites.txt', 0 );
 		
 		var promise = ldr.start( onSuccess, onProgress );
 		

@@ -52,6 +52,7 @@ class Main
 		System.loadFolderFromAssets( 'biba', function(pc) 
 		{
 			Main.pack = pc;
+			Main.pack.defineAtlas( 'main', 'sprites', 'sprites.txt' );
 			System.screen.show( "game" );
 			System.start();
 		});

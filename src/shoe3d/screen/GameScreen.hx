@@ -4,7 +4,7 @@ import shoe3d.component.CameraHolder;
 import shoe3d.component.RandomRotator;
 import shoe3d.core.game.GameObject;
 import shoe3d.core.Layer;
-import shoe3d.core.UILayer;
+import shoe3d.core.Layer2D;
 import shoe3d.util.Assert;
 import three.Object3D;
 import three.PerspectiveCamera;
@@ -51,9 +51,9 @@ class GameScreen
 		return layer;
 	}
 	
-	public function newUILayer( ?name:String ):UILayer
+	public function newLayer2D( ?name:String ):Layer2D
 	{
-		var layer = new UILayer( name );
+		var layer = new Layer2D( name );
 		layer.addOrthoCamera();
 		addLayer( layer );
 		return layer;

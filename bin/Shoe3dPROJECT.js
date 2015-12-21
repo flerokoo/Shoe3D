@@ -121,11 +121,24 @@ Reflect.field = function(o,field) {
 Reflect.callMethod = function(o,func,args) {
 	return func.apply(o,args);
 };
+Reflect.fields = function(o) {
+	var a = [];
+	if(o != null) {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		for( var f in o ) {
+		if(f != "__id__" && f != "hx__closures__" && hasOwnProperty.call(o,f)) a.push(f);
+		}
+	}
+	return a;
+};
 Reflect.isFunction = function(f) {
 	return typeof(f) == "function" && !(f.__name__ || f.__ename__);
 };
 var Std = function() { };
 Std.__name__ = ["Std"];
+Std["is"] = function(v,t) {
+	return js.Boot.__instanceof(v,t);
+};
 Std.string = function(s) {
 	return js.Boot.__string_rec(s,"");
 };
@@ -883,6 +896,8 @@ shoe3d.System.loadFolderFromAssets = function(folder,onSuccess,onProgress,regist
 	ldr.add("index","index.html",0);
 	ldr.add("tnt","assets/tnt.ogg",0);
 	ldr.add("model1","assets/model1.geom",0);
+	ldr.add("sprites","assets/sprites.png",0);
+	ldr.add("sprites.txt","assets/sprites.txt",0);
 	var promise = ldr.start(onSuccess,onProgress);
 	promise.success.connect(function(pack) {
 		shoe3d.asset.Res.registerPack(pack,registerThisPackWithName);
@@ -943,6 +958,7 @@ shoe3d.asset.AssetPack = function() {
 	this._fileMap = new haxe.ds.StringMap();
 	this._soundMap = new haxe.ds.StringMap();
 	this._geomMap = new haxe.ds.StringMap();
+	this._atlasMap = new haxe.ds.StringMap();
 };
 shoe3d.asset.AssetPack.__name__ = ["shoe3d","asset","AssetPack"];
 shoe3d.asset.AssetPack.prototype = {
@@ -950,9 +966,26 @@ shoe3d.asset.AssetPack.prototype = {
 	,_fileMap: null
 	,_geomMap: null
 	,_soundMap: null
-	,getTexture: function(name,required) {
+	,_atlasMap: null
+	,getAtlas: function(name) {
+		if(!this._atlasMap.exists(name)) throw "No atlas with name=" + name;
+		return this._atlasMap.get(name);
+	}
+	,defineAtlas: function(name,texName,jsonName) {
+		if(!this._texMap.exists(texName) || !this._fileMap.exists(jsonName)) throw "No image or json from atlas " + name;
+		var atlas = new shoe3d.asset.Atlas(this.getTexDef(texName).texture,this.getFile(jsonName).content);
+		this._atlasMap.set(name,atlas);
+		return atlas;
+	}
+	,getTexDef: function(name,required) {
 		if(required == null) required = true;
-		var ret = this._texMap.get(name);
+		var ret = null;
+		var $it0 = this._atlasMap.iterator();
+		while( $it0.hasNext() ) {
+			var i = $it0.next();
+			if(i.exists(name)) return i.get(name);
+		}
+		ret = this._texMap.get(name);
 		if(ret == null && required) throw "No texture with name=" + name;
 		return ret;
 	}
@@ -1188,11 +1221,13 @@ shoe3d.asset.AssetPackLoader.prototype = {
 		if(this._onCompleteCallback != null) this._onCompleteCallback(this._pack);
 	}
 	,onLoadTexture: function(tex,e) {
-		this._pack._texMap.set(e.name,tex);
+		this._pack._texMap.set(e.name,{ texture : tex, uv : { umin : 0, vmin : 0, umax : 1, vmax : 1}, width : tex.image.width != null?tex.image.width:tex.image.naturalWidth, height : tex.image.height != null?tex.image.height:tex.image.naturalHeight});
+		if(tex.image.width != null) tex.naturalWidth = tex.image.width; else tex.naturalWidth = tex.image.naturalWidth;
+		if(tex.image.height != null) tex.naturalHeight = tex.image.height; else tex.naturalHeight = tex.image.naturalHeight;
 	}
 	,onLoadSound: function(data,e) {
-		haxe.Log.trace(data,{ fileName : "AssetPackLoader.hx", lineNumber : 259, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
-		haxe.Log.trace("SND LOAD",{ fileName : "AssetPackLoader.hx", lineNumber : 261, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
+		haxe.Log.trace(data,{ fileName : "AssetPackLoader.hx", lineNumber : 272, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
+		haxe.Log.trace("SND LOAD",{ fileName : "AssetPackLoader.hx", lineNumber : 274, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
 	}
 	,onLoadGeometry: function(data,e) {
 		var parser = new THREE.JSONLoader();
@@ -1204,6 +1239,101 @@ shoe3d.asset.AssetPackLoader.prototype = {
 	}
 	,__class__: shoe3d.asset.AssetPackLoader
 };
+shoe3d.asset.AtlasType = { __ename__ : true, __constructs__ : ["ShoeBox","TexturePacker","Auto"] };
+shoe3d.asset.AtlasType.ShoeBox = ["ShoeBox",0];
+shoe3d.asset.AtlasType.ShoeBox.__enum__ = shoe3d.asset.AtlasType;
+shoe3d.asset.AtlasType.TexturePacker = ["TexturePacker",1];
+shoe3d.asset.AtlasType.TexturePacker.__enum__ = shoe3d.asset.AtlasType;
+shoe3d.asset.AtlasType.Auto = ["Auto",2];
+shoe3d.asset.AtlasType.Auto.__enum__ = shoe3d.asset.AtlasType;
+shoe3d.asset.Atlas = function(image,json) {
+	this._texMap = new haxe.ds.StringMap();
+	this.image = image;
+	if(json != null) this.parseJSON(json);
+	var $it0 = this._texMap.keys();
+	while( $it0.hasNext() ) {
+		var i = $it0.next();
+		haxe.Log.trace("" + i + " => " + Std.string(this._texMap.get(i).uv),{ fileName : "Atlas.hx", lineNumber : 50, className : "shoe3d.asset.Atlas", methodName : "new"});
+	}
+};
+shoe3d.asset.Atlas.__name__ = ["shoe3d","asset","Atlas"];
+shoe3d.asset.Atlas.prototype = {
+	image: null
+	,_texMap: null
+	,addSubTexture: function(name,rect) {
+		var value = { uv : this.UVfromRectangle(rect), texture : this.image, width : rect.width, height : rect.height};
+		this._texMap.set(name,value);
+		return this;
+	}
+	,UVfromRectangle: function(rect) {
+		if(this.image == null) throw "Image is null";
+		return { umin : rect.x / this.image.naturalWidth, vmin : rect.y / this.image.naturalHeight, umax : (rect.x + rect.width) / this.image.naturalWidth, vmax : (rect.y + rect.height) / this.image.naturalHeight};
+	}
+	,parseJSON: function(json,type) {
+		if(type == shoe3d.asset.AtlasType.TexturePacker) this.parseTexturePacker(json); else if(type == shoe3d.asset.AtlasType.ShoeBox) this.parseShoeBox(json); else if(type == shoe3d.asset.AtlasType.Auto || type == null) {
+			var a = JSON.parse(json);
+			if(Object.prototype.hasOwnProperty.call(a,"frames") && Object.prototype.hasOwnProperty.call(a,"meta")) {
+				if((Reflect.field(a,"frames") instanceof Array) && Reflect.field(a,"frames").__enum__ == null) this.parseTexturePacker(json); else if(Std["is"](Reflect.field(a,"frames"),Dynamic)) this.parseShoeBox(json);
+			}
+		}
+		return this;
+	}
+	,parseTexturePacker: function(json) {
+		var a = null;
+		try {
+			a = JSON.parse(json);
+		} catch( e ) {
+			throw "Can' parse json";
+		}
+		if(!Object.prototype.hasOwnProperty.call(a,"frames") && !Object.prototype.hasOwnProperty.call(a,"meta")) throw "Wrong JSON Format";
+		var frames = Reflect.field(a,"frames");
+		var _g = 0;
+		while(_g < frames.length) {
+			var o = frames[_g];
+			++_g;
+			if(Object.prototype.hasOwnProperty.call(o,"filename") && Object.prototype.hasOwnProperty.call(o,"frame")) {
+				var name = Reflect.field(o,"filename");
+				var frame = Reflect.field(o,"frame");
+				var len = name.lastIndexOf(".");
+				name = HxOverrides.substr(name,0,len);
+				var value = { uv : this.UVfromRectangle(new shoe3d.util.math.Rectangle(Reflect.field(frame,"x"),Reflect.field(frame,"y"),Reflect.field(frame,"w"),Reflect.field(frame,"h"))), texture : this.image, width : Reflect.field(frame,"w"), height : Reflect.field(frame,"h")};
+				this._texMap.set(name,value);
+			}
+		}
+	}
+	,parseShoeBox: function(json) {
+		var a = null;
+		try {
+			a = JSON.parse(json);
+		} catch( e ) {
+			throw "Can' parse json";
+		}
+		if(!Object.prototype.hasOwnProperty.call(a,"frames") && !Object.prototype.hasOwnProperty.call(a,"meta")) throw "Wrong JSON Format";
+		var frames = Reflect.field(a,"frames");
+		var fields = Reflect.fields(frames);
+		var _g = 0;
+		while(_g < fields.length) {
+			var name = fields[_g];
+			++_g;
+			var o = Reflect.field(frames,name);
+			if(Object.prototype.hasOwnProperty.call(o,"frame")) {
+				var frame = Reflect.field(o,"frame");
+				var clearName;
+				var len = name.lastIndexOf(".");
+				clearName = HxOverrides.substr(name,0,len);
+				var value = { uv : this.UVfromRectangle(new shoe3d.util.math.Rectangle(Reflect.field(frame,"x"),Reflect.field(frame,"y"),Reflect.field(frame,"w"),Reflect.field(frame,"h"))), texture : this.image, width : Reflect.field(frame,"w"), height : Reflect.field(frame,"h")};
+				this._texMap.set(clearName,value);
+			}
+		}
+	}
+	,exists: function(name) {
+		return this._texMap.exists(name);
+	}
+	,get: function(name) {
+		return this._texMap.get(name);
+	}
+	,__class__: shoe3d.asset.Atlas
+};
 shoe3d.asset.File = function(content) {
 	this.content = content;
 };
@@ -1212,13 +1342,30 @@ shoe3d.asset.File.prototype = {
 	content: null
 	,__class__: shoe3d.asset.File
 };
-shoe3d.asset.Res = function() {
-};
+shoe3d.asset.Res = function() { };
 shoe3d.asset.Res.__name__ = ["shoe3d","asset","Res"];
 shoe3d.asset.Res.registerPack = function(pack,name) {
+	if(shoe3d.asset.Res._packMap == null) shoe3d.asset.Res._packMap = new haxe.ds.StringMap();
+	var key;
+	if(name == null || name == "") key = shoe3d.asset.Res.getRandomName(); else key = name;
+	shoe3d.asset.Res._packMap.set(key,pack);
 };
-shoe3d.asset.Res.prototype = {
-	__class__: shoe3d.asset.Res
+shoe3d.asset.Res.getRandomName = function() {
+	var e = "abcdefgh0123456789";
+	var r = "";
+	while(r.length < 30) r += e.charAt(Math.floor(Math.random() * e.length));
+	return r;
+};
+shoe3d.asset.Res.getTexDef = function(name) {
+	if(shoe3d.asset.Res._packMap == null) throw "No asset packs";
+	var $it0 = shoe3d.asset.Res._packMap.iterator();
+	while( $it0.hasNext() ) {
+		var i = $it0.next();
+		var ret = i.getTexDef(name,false);
+		if(ret != null) return ret;
+	}
+	throw "No texture " + name + " found";
+	return null;
 };
 shoe3d.asset.SoundLoader = function(manager) {
 	THREE.Loader.call(this);
@@ -1286,6 +1433,17 @@ shoe3d.component.CameraHolder.prototype = $extend(shoe3d.core.game.Component.pro
 	}
 	,__class__: shoe3d.component.CameraHolder
 });
+shoe3d.component.Element2D = function() {
+	shoe3d.core.game.Component.call(this);
+};
+shoe3d.component.Element2D.__name__ = ["shoe3d","component","Element2D"];
+shoe3d.component.Element2D.__super__ = shoe3d.core.game.Component;
+shoe3d.component.Element2D.prototype = $extend(shoe3d.core.game.Component.prototype,{
+	getBounds: function() {
+		return new shoe3d.util.math.Rectangle();
+	}
+	,__class__: shoe3d.component.Element2D
+});
 shoe3d.component.RandomRotator = function() {
 	this.t = 0;
 	shoe3d.core.game.Component.call(this);
@@ -1318,37 +1476,34 @@ shoe3d.component.S3Mesh.prototype = $extend(shoe3d.core.game.Component.prototype
 	}
 	,__class__: shoe3d.component.S3Mesh
 });
-shoe3d.component.S3Sprite = function(mat) {
-	var _g = this;
-	shoe3d.core.game.Component.call(this);
-	var mgr = new THREE.LoadingManager();
-	var l = new THREE.TextureLoader(mgr);
-	l.load("assets/button1.png",function(tex) {
-		_g.sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map : tex}));
-		if(_g.owner != null) {
-			haxe.Log.trace("addFrom",{ fileName : "S3Sprite.hx", lineNumber : 37, className : "shoe3d.component.S3Sprite", methodName : "new"});
-			_g.owner.transform.add(_g.sprite);
-			haxe.Log.trace((js.Boot.__cast(_g.sprite.material.map.image , HTMLImageElement)).width,{ fileName : "S3Sprite.hx", lineNumber : 39, className : "shoe3d.component.S3Sprite", methodName : "new"});
-		}
-		_g.sprite.scale.set(256,256,1);
-		var spr = _g.sprite;
-		spr.geometry.getAttribute("uv").dynamic = true;;
-		_g.sprite.geometry.getAttribute("uv").array = [[0.5,0.5,1,0.5,1,1,0,1]];
-		_g.sprite.geometry.addAttribute("uv",new THREE.BufferAttribute(new Float32Array([0.5,0.5,1,0.5,1,1,0,1]),2));
-		haxe.Log.trace(_g.sprite.geometry.getAttribute("uv"),{ fileName : "S3Sprite.hx", lineNumber : 47, className : "shoe3d.component.S3Sprite", methodName : "new"});
-	});
+shoe3d.component.Sprite2D = function(textureName) {
+	shoe3d.component.Element2D.call(this);
+	this.texDef = shoe3d.asset.Res.getTexDef(textureName);
+	this.redefineGeom();
+	this.mesh = new THREE.Mesh(this.geom,new THREE.MeshPhongMaterial({ transparent : true, map : this.texDef.texture}));
 };
-shoe3d.component.S3Sprite.__name__ = ["shoe3d","component","S3Sprite"];
-shoe3d.component.S3Sprite.__super__ = shoe3d.core.game.Component;
-shoe3d.component.S3Sprite.prototype = $extend(shoe3d.core.game.Component.prototype,{
-	sprite: null
-	,onAdded: function() {
-		if(this.sprite != null) {
-			this.owner.transform.add(this.sprite);
-			haxe.Log.trace(this.sprite.material.map.image,{ fileName : "S3Sprite.hx", lineNumber : 62, className : "shoe3d.component.S3Sprite", methodName : "onAdded"});
-		}
+shoe3d.component.Sprite2D.__name__ = ["shoe3d","component","Sprite2D"];
+shoe3d.component.Sprite2D.__super__ = shoe3d.component.Element2D;
+shoe3d.component.Sprite2D.prototype = $extend(shoe3d.component.Element2D.prototype,{
+	geom: null
+	,texDef: null
+	,mesh: null
+	,redefineGeom: function() {
+		var w = this.texDef.width;
+		var h = this.texDef.height;
+		if(this.geom == null) this.geom = new THREE.PlaneGeometry(w,h,1,1);
+		this.geom.uvsNeedUpdate = true;
+		this.geom.verticesNeedUpdate = true;
+		this.geom.vertices = [new THREE.Vector3(-w / 2,h / 2),new THREE.Vector3(w / 2,h / 2),new THREE.Vector3(-w / 2,-h / 2),new THREE.Vector3(w / 2,-h / 2)];
+		var uv = this.texDef.uv;
+		haxe.Log.trace(this.geom.faceVertexUvs,{ fileName : "Sprite2D.hx", lineNumber : 163, className : "shoe3d.component.Sprite2D", methodName : "redefineGeom"});
+		this.geom.faceVertexUvs = [[[new THREE.Vector2(uv.umin,uv.vmax),new THREE.Vector2(uv.umin,uv.vmin),new THREE.Vector2(uv.umax,uv.vmax)],[new THREE.Vector2(uv.umin,uv.vmin),new THREE.Vector2(uv.umax,uv.vmin),new THREE.Vector2(uv.umax,uv.vmax)]]];
 	}
-	,__class__: shoe3d.component.S3Sprite
+	,onAdded: function() {
+		this.owner.transform.add(this.mesh);
+		this.owner.transform.add(new THREE.AmbientLight(16777215));
+	}
+	,__class__: shoe3d.component.Sprite2D
 });
 shoe3d.core.ComponentContainer = function() { };
 shoe3d.core.ComponentContainer.__name__ = ["shoe3d","core","ComponentContainer"];
@@ -1414,6 +1569,39 @@ shoe3d.core.Layer.prototype = $extend(THREE.Scene.prototype,{
 		return pc;
 	}
 	,__class__: shoe3d.core.Layer
+});
+shoe3d.core.Layer2D = function(name) {
+	shoe3d.core.Layer.call(this,name);
+};
+shoe3d.core.Layer2D.__name__ = ["shoe3d","core","Layer2D"];
+shoe3d.core.Layer2D.__super__ = shoe3d.core.Layer;
+shoe3d.core.Layer2D.prototype = $extend(shoe3d.core.Layer.prototype,{
+	reconfigureCamera: function() {
+		if(this.camera != null) {
+			var cam;
+			cam = js.Boot.__cast(this.camera , THREE.OrthographicCamera);
+			var scale = 0.005;
+			scale = 1;
+			cam.left = -shoe3d.System.window.get_width() / 2 * scale;
+			cam.right = shoe3d.System.window.get_width() / 2 * scale;
+			cam.top = shoe3d.System.window.get_height() / 2 * scale;
+			cam.bottom = -shoe3d.System.window.get_height() / 2 * scale;
+			cam.far = 1000;
+			cam.near = 0.1;
+			cam.position.set(0,0,600);
+			cam.lookAt(new THREE.Vector3(0,0,0));
+			cam.updateProjectionMatrix();
+			cam.updateMatrix();
+		}
+	}
+	,setCamera: function(cam) {
+		shoe3d.util.Assert.that(js.Boot.__instanceof(cam,THREE.OrthographicCamera),"UILayer allows only ortho camera");
+		this.camera = cam;
+		this.camera.up = new THREE.Vector3(0,1,0);
+		this.reconfigureCamera();
+		return this;
+	}
+	,__class__: shoe3d.core.Layer2D
 });
 shoe3d.core.MainLoop = function() {
 	this.averageFPS = -1000;
@@ -1500,39 +1688,6 @@ shoe3d.core.MainLoop.prototype = {
 	}
 	,__class__: shoe3d.core.MainLoop
 };
-shoe3d.core.UILayer = function(name) {
-	shoe3d.core.Layer.call(this,name);
-};
-shoe3d.core.UILayer.__name__ = ["shoe3d","core","UILayer"];
-shoe3d.core.UILayer.__super__ = shoe3d.core.Layer;
-shoe3d.core.UILayer.prototype = $extend(shoe3d.core.Layer.prototype,{
-	reconfigureCamera: function() {
-		if(this.camera != null) {
-			var cam;
-			cam = js.Boot.__cast(this.camera , THREE.OrthographicCamera);
-			var scale = 0.005;
-			scale = 1;
-			cam.left = -shoe3d.System.window.get_width() / 2 * scale;
-			cam.right = shoe3d.System.window.get_width() / 2 * scale;
-			cam.top = shoe3d.System.window.get_height() / 2 * scale;
-			cam.bottom = -shoe3d.System.window.get_height() / 2 * scale;
-			cam.far = 1000;
-			cam.near = 0.1;
-			cam.position.set(0,0,600);
-			cam.lookAt(new THREE.Vector3(0,0,0));
-			cam.updateProjectionMatrix();
-			cam.updateMatrix();
-		}
-	}
-	,setCamera: function(cam) {
-		shoe3d.util.Assert.that(js.Boot.__instanceof(cam,THREE.OrthographicCamera),"UILayer allows only ortho camera");
-		this.camera = cam;
-		this.camera.up = new THREE.Vector3(0,0,1);
-		this.reconfigureCamera();
-		return this;
-	}
-	,__class__: shoe3d.core.UILayer
-});
 shoe3d.core.Orientation = { __ename__ : true, __constructs__ : ["Portrait","Landscape"] };
 shoe3d.core.Orientation.Portrait = ["Portrait",0];
 shoe3d.core.Orientation.Portrait.__enum__ = shoe3d.core.Orientation;
@@ -1645,8 +1800,8 @@ shoe3d.screen.GameScreen.prototype = {
 		this.addLayer(layer);
 		return layer;
 	}
-	,newUILayer: function(name) {
-		var layer = new shoe3d.core.UILayer(name);
+	,newLayer2D: function(name) {
+		var layer = new shoe3d.core.Layer2D(name);
 		layer.addOrthoCamera();
 		this.addLayer(layer);
 		return layer;
@@ -1751,6 +1906,42 @@ shoe3d.util.Value.prototype = {
 		return this.get__();
 	}
 	,__class__: shoe3d.util.Value
+};
+shoe3d.util.math = {};
+shoe3d.util.math.Rectangle = function(x,y,width,height) {
+	if(height == null) height = 0;
+	if(width == null) width = 0;
+	if(y == null) y = 0;
+	if(x == null) x = 0;
+	this.height = 0;
+	this.width = 0;
+	this.y = 0;
+	this.x = 0;
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
+};
+shoe3d.util.math.Rectangle.__name__ = ["shoe3d","util","math","Rectangle"];
+shoe3d.util.math.Rectangle.prototype = {
+	x: null
+	,y: null
+	,width: null
+	,height: null
+	,set: function(x,y,width,height) {
+		if(x != null) this.x = x;
+		if(y != null) this.y = y;
+		if(width != null) this.width = width;
+		if(height != null) this.height = height;
+	}
+	,isVector2Inside: function(v) {
+		var c = this.getCenter();
+		return Math.abs(c.x - v.x) <= this.width / 2 && Math.abs(c.y - v.y) <= this.height / 2;
+	}
+	,getCenter: function() {
+		return new THREE.Vector2(this.x + this.width / 2,this.y + this.width / 2);
+	}
+	,__class__: shoe3d.util.math.Rectangle
 };
 shoe3d.util.promise = {};
 shoe3d.util.promise.Promise = function() {
@@ -1928,6 +2119,7 @@ tests.Main.main = function() {
 	shoe3d.System.showFPSMeter();
 	shoe3d.System.loadFolderFromAssets("biba",function(pc) {
 		tests.Main.pack = pc;
+		tests.Main.pack.defineAtlas("main","sprites","sprites.txt");
 		shoe3d.System.screen.show("game");
 		shoe3d.System.start();
 	});
@@ -1950,7 +2142,7 @@ tests.TestScreen = function() {
 	this.addLayer(layer);
 	var geom = new THREE.BoxGeometry(Math.random() * 0.5 + 1,Math.random() * 0.5 + 1,Math.random() * 0.5 + 1);
 	var geom2 = tests.Main.pack.getGeometry("model1");
-	var mat = new THREE.MeshPhongMaterial({ color : 16777215 * Math.random()});
+	var mat = new THREE.MeshPhongMaterial({ color : 16777215, map : tests.Main.pack.getTexDef("main_pattern").texture});
 	var mesh = new shoe3d.component.S3Mesh(geom,mat);
 	var _g = 0;
 	while(_g < 400) {
@@ -1972,7 +2164,16 @@ tests.TestScreen = function() {
 	layer.add(new THREE.AmbientLight(16777215));
 	layer.addChild(new shoe3d.core.game.GameObject().add(new shoe3d.component.CameraHolder()));
 	layer.setCamera(new THREE.PerspectiveCamera(60,1.3333333333333333,0.1,1000));
-	tests.Main.pack.getSound("tnt").play({ loop : 5});
+	var ui = this.newLayer2D("UILAYER");
+	var g2d = new shoe3d.core.game.GameObject("SPRITETEST");
+	var spr = new shoe3d.component.Sprite2D("logo");
+	g2d.add(spr);
+	ui.addChild(g2d);
+	var mgr = new THREE.LoadingManager();
+	var l = new THREE.TextureLoader(mgr);
+	var cc;
+	cc = js.Boot.__cast(ui.camera , THREE.OrthographicCamera);
+	tests.Main.pack.getSound("tnt").play();
 };
 tests.TestScreen.__name__ = ["tests","TestScreen"];
 tests.TestScreen.__super__ = shoe3d.screen.GameScreen;

@@ -82,5 +82,11 @@ extern class Texture
 	function addEventListener(type:String, listener:Dynamic->Void) : Void;
 	function hasEventListener(type:String, listener:Dynamic->Void) : Void;
 	function removeEventListener(type:String, listener:Dynamic->Void) : Void;
-	function dispatchEvent(event: { type: String, target:Dynamic }) : Void;
+	function dispatchEvent(event: { type: String, target:Dynamic } ) : Void;
+	
+	
+	// SHOE3D ADDITIONS
+	@:allow(shoe3d) public var naturalWidth(default,null):Float;
+	@:allow(shoe3d) public var naturalHeight(default,null):Float;
+	
 }
