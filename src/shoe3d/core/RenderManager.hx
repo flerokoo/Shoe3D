@@ -27,6 +27,7 @@ class RenderManager
 		Browser.document.body.appendChild( container );	
 		
 		
+		
 		renderer = new WebGLRenderer();
 		renderer.setSize( 800, 600);			
 		container.appendChild( renderer.domElement );

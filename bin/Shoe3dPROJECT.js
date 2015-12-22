@@ -271,11 +271,6 @@ haxe.Log.__name__ = ["haxe","Log"];
 haxe.Log.trace = function(v,infos) {
 	js.Boot.__trace(v,infos);
 };
-haxe.Timer = function() { };
-haxe.Timer.__name__ = ["haxe","Timer"];
-haxe.Timer.stamp = function() {
-	return new Date().getTime() / 1000;
-};
 haxe.ds = {};
 haxe.ds.StringMap = function() {
 	this.h = { };
@@ -715,10 +710,21 @@ shoe3d.core.Time = function() {
 };
 shoe3d.core.Time.__name__ = ["shoe3d","core","Time"];
 shoe3d.core.Time.init = function() {
-	shoe3d.core.Time._lastUpdateTime = shoe3d.core.Time._gameStartTime = haxe.Timer.stamp();
+	var performance = window.performance;
+	var hasPerformance = performance != null && shoe3d.util.HtmlUtils.polyfill("now",performance);
+	if(hasPerformance) {
+		shoe3d.core.Time.now = function() {
+			return performance.now() / 1000;
+		};
+		shoe3d.util.Log.sys("Using window.performance timer");
+	} else {
+		shoe3d.core.Time.now = shoe3d.core.Time._now;
+		shoe3d.util.Log.sys("No window.performance, using system date");
+	}
+	shoe3d.core.Time._lastUpdateTime = shoe3d.core.Time._gameStartTime = shoe3d.core.Time.now();
 };
 shoe3d.core.Time.update = function() {
-	var cur = haxe.Timer.stamp();
+	var cur = shoe3d.core.Time.now();
 	shoe3d.core.Time.dt = cur - shoe3d.core.Time._lastUpdateTime;
 	shoe3d.core.Time.timeSinceGameStart = cur - shoe3d.core.Time._gameStartTime;
 	shoe3d.core.Time.timeSinceScreenShow = cur - shoe3d.core.Time._screenShowTime;
@@ -727,9 +733,9 @@ shoe3d.core.Time.update = function() {
 	shoe3d.core.Time._lastUpdateTime = cur;
 };
 shoe3d.core.Time.onScreenLoad = function() {
-	shoe3d.core.Time._screenShowTime = haxe.Timer.stamp();
+	shoe3d.core.Time._screenShowTime = shoe3d.core.Time.now();
 };
-shoe3d.core.Time.now = function() {
+shoe3d.core.Time._now = function() {
 	return Date.now() / 1000;
 };
 shoe3d.core.Time.prototype = {
@@ -743,6 +749,7 @@ shoe3d.core.WindowMode.Default.__enum__ = shoe3d.core.WindowMode;
 shoe3d.core.WindowManager = function() { };
 shoe3d.core.WindowManager.__name__ = ["shoe3d","core","WindowManager"];
 shoe3d.core.WindowManager.init = function() {
+	shoe3d.core.WindowManager.hidden = new shoe3d.util.Value(false);
 	shoe3d.core.WindowManager._prePublicResize = new shoe3d.util.signal.ZeroSignal();
 	shoe3d.core.WindowManager.resize = new shoe3d.util.signal.ZeroSignal();
 	shoe3d.core.WindowManager.orientation = new shoe3d.util.Value(shoe3d.core.Orientation.Portrait);
@@ -752,6 +759,22 @@ shoe3d.core.WindowManager.init = function() {
 	window.addEventListener("resize",function(_1) {
 		shoe3d.core.WindowManager.callLater(shoe3d.core.WindowManager.onResize);
 	});
+	var api = shoe3d.util.HtmlUtils.loadExtension("hidden",window);
+	if(api.value != null) {
+		var onVisibilityChange = function(e) {
+			shoe3d.core.WindowManager.hidden.set__(Reflect.field(window.document,api.field));
+		};
+		onVisibilityChange(null);
+		window.document.addEventListener(api.prefix + "visibilitychange",onVisibilityChange,false);
+		shoe3d.util.Log.sys("Visibility API supported");
+	} else {
+		var onPageTransition = function(e1) {
+			shoe3d.core.WindowManager.hidden.set__(e1.type == "pagehide");
+		};
+		window.addEventListener("pageshow",onPageTransition,false);
+		window.addEventListener("pagehide",onPageTransition,false);
+		shoe3d.util.Log.sys("No Visibility API. Using pageshow/pagehide fallback");
+	}
 	shoe3d.core.WindowManager.updateOrientation();
 };
 shoe3d.core.WindowManager.onResize = function() {
@@ -810,8 +833,6 @@ shoe3d.core.WindowManager.resetStyle = function() {
 	window.document.body.style.width = "100%";
 	window.document.body.style.height = "100%";
 	shoe3d.core.RenderManager.container.style.padding = "0px";
-};
-shoe3d.core.WindowManager.hideMobileBrowser = function() {
 };
 shoe3d.core.WindowManager.callLater = function(fn,delay) {
 	if(delay == null) delay = 300;
@@ -1271,7 +1292,7 @@ shoe3d.asset.Atlas.prototype = {
 	,UVfromRectangle: function(rect) {
 		if(this.image == null) throw "Image is null";
 		haxe.Log.trace(this.image.naturalWidth,{ fileName : "Atlas.hx", lineNumber : 63, className : "shoe3d.asset.Atlas", methodName : "UVfromRectangle", customParams : [this.image.naturalHeight]});
-		return { umin : rect.x / this.image.naturalWidth, vmin : (this.image.naturalHeight - rect.y - rect.height) / this.image.naturalHeight, umax : (rect.x + rect.width) / this.image.naturalWidth, vmax : (this.image.naturalHeight - rect.y - rect.height * 0) / this.image.naturalHeight};
+		return { umin : rect.x / this.image.naturalWidth, vmin : (this.image.naturalHeight - rect.y - rect.height) / this.image.naturalHeight, umax : (rect.x + rect.width) / this.image.naturalWidth, vmax : (this.image.naturalHeight - rect.y) / this.image.naturalHeight};
 	}
 	,parseJSON: function(json,type) {
 		if(type == shoe3d.asset.AtlasType.TexturePacker) this.parseTexturePacker(json); else if(type == shoe3d.asset.AtlasType.ShoeBox) this.parseShoeBox(json); else if(type == shoe3d.asset.AtlasType.Auto || type == null) {
@@ -1481,6 +1502,8 @@ shoe3d.component.S3Mesh.prototype = $extend(shoe3d.core.game.Component.prototype
 	,__class__: shoe3d.component.S3Mesh
 });
 shoe3d.component.Sprite2D = function(textureName) {
+	this.anchorY = 0;
+	this.anchorX = 0;
 	shoe3d.component.Element2D.call(this);
 	this.texDef = shoe3d.asset.Res.getTexDef(textureName);
 	this.geom = new THREE.PlaneGeometry(0,0,1,1);
@@ -1495,6 +1518,8 @@ shoe3d.component.Sprite2D.prototype = $extend(shoe3d.component.Element2D.prototy
 	,texDef: null
 	,mesh: null
 	,material: null
+	,anchorX: null
+	,anchorY: null
 	,redefineSprite: function() {
 		if(this.texDef == null) return;
 		var w = this.texDef.width;
@@ -1506,12 +1531,33 @@ shoe3d.component.Sprite2D.prototype = $extend(shoe3d.component.Element2D.prototy
 		this.geom.faceVertexUvs = [[[new THREE.Vector2(uv.umin,uv.vmax),new THREE.Vector2(uv.umin,uv.vmin),new THREE.Vector2(uv.umax,uv.vmax)],[new THREE.Vector2(uv.umin,uv.vmin),new THREE.Vector2(uv.umax,uv.vmin),new THREE.Vector2(uv.umax,uv.vmax)]]];
 		this.material.map = this.texDef.texture;
 	}
+	,setAnchor: function(x,y) {
+		if(y == null) y = 0;
+		if(x == null) x = 0;
+		this.set_anchorX(x);
+		this.set_anchorY(y);
+	}
 	,setTexture: function(tex) {
+		shoe3d.util.Assert.that(tex != null,"Texture is null");
 		this.texDef = tex;
 		this.redefineSprite();
 	}
+	,updateAnchor: function() {
+		this.mesh.position.x = -this.anchorX;
+		this.mesh.position.y = -this.anchorY;
+	}
 	,onAdded: function() {
 		this.owner.transform.add(this.mesh);
+	}
+	,set_anchorY: function(value) {
+		this.anchorY = value;
+		this.updateAnchor();
+		return this.anchorY;
+	}
+	,set_anchorX: function(value) {
+		this.anchorX = value;
+		this.updateAnchor();
+		return this.anchorX;
 	}
 	,__class__: shoe3d.component.Sprite2D
 });
@@ -1615,28 +1661,50 @@ shoe3d.core.Layer2D.prototype = $extend(shoe3d.core.Layer.prototype,{
 });
 shoe3d.core.MainLoop = function() {
 	this.averageFPS = -1000;
+	this._totalUpdateTime = 0;
+	this._skipFrame = false;
+	this._paused = true;
 	this._frames = 0;
+	var _g = this;
 	this._frame = new shoe3d.util.signal.SingleSignal();
 	if(!window.requestAnimationFrame) {
 		__js__("window.requestAnimationFrame = (function(){window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || oRequestAnimationFrame || msRequestAnimationFrame" + "function(callback, el){window.setTimeout(callback, 1000/60);}; })() ");
 	}
+	shoe3d.System.window.hidden.change.connect(function(hidden,_) {
+		if(!hidden) _g.skipFrame();
+	});
 };
 shoe3d.core.MainLoop.__name__ = ["shoe3d","core","MainLoop"];
 shoe3d.core.MainLoop.prototype = {
 	_frame: null
 	,_frames: null
+	,_paused: null
+	,_skipFrame: null
+	,_totalUpdateTime: null
 	,frameTime: null
 	,updateTime: null
 	,renderTime: null
 	,FPS: null
 	,averageFPS: null
 	,start: function() {
-		this.update();
+		var _g = this;
+		var updateFrame = null;
+		updateFrame = function(t) {
+			_g.update();
+			window.requestAnimationFrame(updateFrame);
+			return true;
+		};
+		window.requestAnimationFrame(updateFrame);
 	}
-	,update: function(flt) {
+	,update: function() {
+		if(shoe3d.System.window.hidden.get__()) return;
+		if(this._skipFrame) {
+			this._skipFrame = false;
+			return;
+		}
+		shoe3d.System.time.update();
 		var startTime = shoe3d.core.Time.now();
 		this._frames++;
-		shoe3d.System.time.update();
 		if(shoe3d.screen.ScreenManager._currentScreen != null) {
 			var _g = 0;
 			var _g1 = shoe3d.screen.ScreenManager._currentScreen.layers;
@@ -1657,21 +1725,32 @@ shoe3d.core.MainLoop.prototype = {
 		this.render();
 		this.renderTime = shoe3d.core.Time.now() - middleTime;
 		this.frameTime = shoe3d.core.Time.now() - startTime;
+		this._totalUpdateTime += this.frameTime;
 		this.FPS = 1 / this.frameTime;
-		if(this.averageFPS == -1000) this.averageFPS = this.FPS; else this.averageFPS = this.FPS;
+		this.averageFPS = 1 / (this._totalUpdateTime / (this._frames - 1));
 		this._frame.emit(shoe3d.core.Time.dt);
-		window.requestAnimationFrame($bind(this,this.update));
-		return true;
+	}
+	,skipFrame: function() {
+		this._skipFrame = true;
+		shoe3d.core.Time._lastUpdateTime = shoe3d.core.Time.now();
 	}
 	,getTimingString: function() {
-		return "T: U" + this.round(this.updateTime * 1000) + "+R" + this.round(this.renderTime * 1000) + "=" + this.round(this.frameTime * 1000);
+		return "U" + this.round(this.updateTime * 1000) + "&Tab;R" + this.round(this.renderTime * 1000) + " =&Tab;" + this.round(this.frameTime * 1000);
 	}
 	,getFPSString: function() {
-		return "FPS: A" + this.round(this.averageFPS) + " C" + this.round(this.FPS);
+		return "FPS: A" + this.round(this.averageFPS,10,5) + " C" + this.round(this.FPS,10,5);
 	}
-	,round: function(f,m) {
-		if(m == null) m = 10;
-		return Math.round(f * m) / m;
+	,round: function(f,m,l) {
+		if(l == null) l = 4;
+		if(m == null) m = 100;
+		var ret = Math.round(f * m) / m;
+		var str;
+		if(ret == null) str = "null"; else str = "" + ret;
+		if(str.indexOf(".") >= 0) while(str.length < l) str += "0"; else {
+			str += ".";
+			while(str.length < l) str += "0";
+		}
+		return str;
 	}
 	,render: function() {
 		shoe3d.System.renderer.render();
@@ -1850,6 +1929,34 @@ shoe3d.util.Assert.that = function(cond,msg) {
 shoe3d.util.Assert.fail = function(msg) {
 	throw msg;
 };
+shoe3d.util.HtmlUtils = function() { };
+shoe3d.util.HtmlUtils.__name__ = ["shoe3d","util","HtmlUtils"];
+shoe3d.util.HtmlUtils.loadExtension = function(name,obj) {
+	if(obj == null) obj = window;
+	var extension = Reflect.field(obj,name);
+	if(extension != null) return { prefix : "", field : name, value : extension};
+	var capitalized = name.charAt(0).toUpperCase() + HxOverrides.substr(name,1,null);
+	var _g = 0;
+	var _g1 = shoe3d.util.HtmlUtils.VENDOR_PREFIXES;
+	while(_g < _g1.length) {
+		var prefix = _g1[_g];
+		++_g;
+		var field = prefix + capitalized;
+		var extension1 = Reflect.field(obj,field);
+		if(extension1 != null) return { prefix : prefix, field : field, value : extension1};
+	}
+	return { prefix : null, field : null, value : null};
+};
+shoe3d.util.HtmlUtils.hideMobileBrowser = function() {
+	window.scrollTo(1,0);
+};
+shoe3d.util.HtmlUtils.polyfill = function(name,obj) {
+	if(obj == null) obj = window;
+	var value = shoe3d.util.HtmlUtils.loadExtension(name,obj).value;
+	if(value == null) return false;
+	obj[name] = value;
+	return true;
+};
 shoe3d.util.Info = function() { };
 shoe3d.util.Info.__name__ = ["shoe3d","util","Info"];
 shoe3d.util.Info.isMobileBrowser = function() {
@@ -1859,6 +1966,21 @@ shoe3d.util.Log = function() { };
 shoe3d.util.Log.__name__ = ["shoe3d","util","Log"];
 shoe3d.util.Log.warn = function(msg) {
 	console.warn(msg);
+};
+shoe3d.util.Log.log = function(msg) {
+	console.log(msg);
+};
+shoe3d.util.Log.sys = function(msg) {
+	shoe3d.util.Log._sys.push(msg);
+};
+shoe3d.util.Log.printSys = function() {
+	var _g = 0;
+	var _g1 = shoe3d.util.Log._sys;
+	while(_g < _g1.length) {
+		var i = _g1[_g];
+		++_g;
+		shoe3d.util.Log.log(i);
+	}
 };
 shoe3d.util.StringHelp = function() { };
 shoe3d.util.StringHelp.__name__ = ["shoe3d","util","StringHelp"];
@@ -2177,7 +2299,9 @@ tests.TestScreen = function() {
 	var ui = this.newLayer2D("UILAYER");
 	var g2d = new shoe3d.core.game.GameObject("SPRITETEST");
 	var spr = new shoe3d.component.Sprite2D("logo");
+	spr.setAnchor(0,0);
 	g2d.add(spr);
+	g2d.transform.rotateZ(0.5);
 	ui.addChild(g2d);
 	var mgr = new THREE.LoadingManager();
 	var l = new THREE.TextureLoader(mgr);
@@ -2239,6 +2363,9 @@ shoe3d.System.renderer = shoe3d.core.RenderManager;
 shoe3d.System.updateInfoEveryNthFrame = 6;
 shoe3d.System._infoFrameCounter = 0;
 shoe3d.System._showFPS = false;
+shoe3d.util.HtmlUtils.HIDE_MOBILE_BROWSER = window.top == window && new EReg("Mobile(/.*)? Safari","").match(window.navigator.userAgent);
+shoe3d.util.HtmlUtils.VENDOR_PREFIXES = ["webkit","moz","ms","o","khtml"];
+shoe3d.util.Log._sys = [];
 shoe3d.util.signal.Signal.DUMMY = new shoe3d.util.signal.Sentinel(null,null);
 tests.Main.main();
 })();

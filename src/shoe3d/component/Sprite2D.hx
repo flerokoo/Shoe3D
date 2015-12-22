@@ -1,9 +1,11 @@
 package shoe3d.component;
+import js.Browser;
 import js.html.Float32Array;
 import js.html.ImageElement;
 import shoe3d.asset.Atlas.TexDef;
 import shoe3d.asset.Res;
 import shoe3d.core.game.Component;
+import shoe3d.util.Assert;
 import tests.Main;
 import three.AmbientLight;
 import three.BufferAttribute;
@@ -35,7 +37,9 @@ class Sprite2D extends Element2D
 	var texDef:TexDef;
 	var mesh:Mesh;
 	var material:MeshBasicMaterial;
-	
+	public var anchorX(default, set):Float = 0;
+	public var anchorY(default, set):Float = 0;
+
 	public function new( textureName:String ) 
 	{
 		super();
@@ -45,9 +49,7 @@ class Sprite2D extends Element2D
 		material = new MeshBasicMaterial( { transparent: true } );	
 		mesh = new Mesh( geom, material );
 		
-		redefineSprite();
-		
-		
+		redefineSprite();	
 		
 	}
 	
@@ -86,21 +88,44 @@ class Sprite2D extends Element2D
 		material.map = texDef.texture;
 	}
 	
+	public function setAnchor( x:Float = 0, y:Float = 0 )
+	{
+		anchorX = x;
+		anchorY = y;
+	}
 	
 	public function setTexture( tex:TexDef ) 
 	{
+		Assert.that(tex != null, "Texture is null" );
 		texDef = tex;
 		redefineSprite();
 	}
 	
+	function updateAnchor()
+	{
+		mesh.position.x = -anchorX;
+		mesh.position.y = -anchorY;
+	}
+	
 	override public function onAdded()
 	{
-		/*if ( sprite != null ) {
-			owner.transform.add( sprite );
-			trace( sprite.material.map.image );
-		}*/
 		owner.transform.add( mesh );
-		//owner.transform.add( new AmbientLight( 0xffffff ) );
 	}
+	
+	function set_anchorY(value:Float):Float 
+	{
+		anchorY = value;
+		updateAnchor();
+		return anchorY;
+	}
+	
+	function set_anchorX(value:Float):Float 
+	{
+		anchorX = value;
+		updateAnchor();
+		return anchorX;
+	}
+	
+	
 	
 }

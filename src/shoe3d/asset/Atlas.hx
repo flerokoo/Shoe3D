@@ -65,7 +65,7 @@ class Atlas
 			umin: rect.x / image.naturalWidth,
 			vmin: (image.naturalHeight - rect.y - rect.height) / image.naturalHeight,
 			umax: (rect.x + rect.width) / image.naturalWidth,
-			vmax: (image.naturalHeight - rect.y - rect.height*0) / image.naturalHeight			
+			vmax: (image.naturalHeight - rect.y) / image.naturalHeight			
 		}
 	}
 	

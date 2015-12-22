@@ -12,6 +12,7 @@ import shoe3d.core.WindowManager;
 import shoe3d.screen.ScreenManager;
 import shoe3d.util.promise.Promise;
 import shoe3d.util.StringHelp;
+import shoe3d.util.Value;
 import three.Scene;
 
 /**

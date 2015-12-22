@@ -1,6 +1,8 @@
 package shoe3d.core;
 import js.html.DivElement;
+import shoe3d.util.HtmlUtils;
 import shoe3d.util.Info;
+import shoe3d.util.Log;
 import shoe3d.util.signal.ZeroSignal;
 import js.Browser;
 import js.html.CanvasElement;
@@ -19,9 +21,12 @@ class WindowManager
 	public static var mode(default, set):WindowMode = Fill;
 	public static var width(get, null):Int = 640;
 	public static var height(get, null):Int = 800;
-
+	public static var hidden(default, null):Value<Bool>;
+	
+	
 	public static function init() 
 	{
+		hidden = new Value( false );
 		_prePublicResize = new ZeroSignal();
 		resize = new ZeroSignal();
 		orientation = new Value( Portrait );
@@ -29,10 +34,36 @@ class WindowManager
 		Browser.window.addEventListener( "orientationchange", function(_) callLater( onOrientationChange ) );
 		Browser.window.addEventListener( "resize", function(_) callLater( onResize ) );
 		
+		
+		
+		// HIDDEN API
+		var api = HtmlUtils.loadExtension("hidden", Browser.window );
+		
+		if ( api.value != null ) {
+			var onVisibilityChange = function(e) {
+				hidden._ = Reflect.field( Browser.document, api.field );
+			};
+			
+			onVisibilityChange(null);
+			
+			Browser.document.addEventListener(api.prefix + "visibilitychange", onVisibilityChange, false );
+			Log.sys( "Visibility API supported" );
+		} else {
+			
+			var onPageTransition = function (e) {
+				hidden._ = e.type == 'pagehide';
+			}
+			Browser.window.addEventListener("pageshow", onPageTransition, false);
+			Browser.window.addEventListener("pagehide", onPageTransition, false);
+			Log.sys( "No Visibility API. Using pageshow/pagehide fallback" );
+		}
+		
+
+		
 		updateOrientation();	
 		
 	}
-	
+
 	private static function onResize()
 	{
 		
@@ -112,11 +143,6 @@ class WindowManager
 			Browser.document.body.style.marginTop =*/
 	}
 		
-	private static function hideMobileBrowser()
-	{
-		
-	}
-	
 	private static function callLater( fn:Void->Void, delay:Int = 300 ) 
 	{
 		Browser.window.setTimeout( fn, delay );
@@ -156,6 +182,7 @@ class WindowManager
 		if ( autoSetMode ) mode = Default;
 		updateLayout();
 	}
+	
 	
 }
 

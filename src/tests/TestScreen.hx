@@ -116,8 +116,10 @@ class TestScreen extends GameScreen
 		var ui = newLayer2D("UILAYER");		
 		var g2d = new GameObject("SPRITETEST");		
 		var spr = new Sprite2D( 'logo' );
+		spr.setAnchor( 0, 0 );
 		//spr.setTexture( Res.getTexDef( 'button_gameplay_level_menu' ) );
 		g2d.add( spr );		
+		g2d.transform.rotateZ( 0.5 );
 		ui.addChild( g2d );		
 		//g2d.transform.position.set( 0, 0, 0 );
 		
