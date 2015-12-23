@@ -1,6 +1,8 @@
 package shoe3d.asset;
 import haxe.Json;
+import shoe3d.asset.AssetPack.TexDef;
 import shoe3d.util.math.Rectangle;
+import shoe3d.util.UVTools.UV;
 import three.Texture;
 
 /**
@@ -8,21 +10,9 @@ import three.Texture;
  * @author as
  */
 
-private typedef UV = 
-{
-	umin:Float,
-	umax:Float,
-	vmin:Float,
-	vmax:Float,
-}
 
-typedef TexDef = 
-{
-	texture:Texture,
-	uv:UV,
-	width:Int,
-	height:Int
-}
+
+
  
 enum AtlasType {
 	ShoeBox;

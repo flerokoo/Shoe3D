@@ -1,5 +1,5 @@
 package shoe3d.asset;
-import shoe3d.asset.Atlas.TexDef;
+import shoe3d.asset.AssetPack.TexDef;
 
 /**
  * ...

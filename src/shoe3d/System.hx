@@ -5,6 +5,7 @@ import shoe3d.asset.AssetPack;
 import shoe3d.asset.AssetPackLoader;
 import shoe3d.asset.Res;
 import shoe3d.core.game.GameObject;
+import shoe3d.core.InputManager;
 import shoe3d.core.MainLoop;
 import shoe3d.core.RenderManager;
 import shoe3d.core.Time;
@@ -27,6 +28,7 @@ class System
 	public static var screen(default, null) = ScreenManager;
 	public static var window(default, null) = WindowManager;
 	public static var renderer(default, null) = RenderManager;
+	public static var input(default, null) = InputManager;
 	public static var updateInfoEveryNthFrame:Int = 6;
 	
 	private static var _infoFrameCounter:Int = 0;
@@ -43,7 +45,8 @@ class System
 		WindowManager.init();
 		RenderManager.init();
 		ScreenManager.init();
-		Time.init();			
+		Time.init();		
+		InputManager.init();
 		
 		window.updateLayout();
 		
@@ -117,6 +120,7 @@ class System
 		ldr.add( 'index', 'index.html', 0 );
 		ldr.add( 'tnt', 'assets/tnt.ogg', 0 );
 		ldr.add( 'model1', 'assets/model1.geom', 0 );
+		ldr.add( 'cube', 'assets/cube.geom', 0 );
 		ldr.add( 'sprites', 'assets/sprites.png', 0 );
 		ldr.add( 'sprites.txt', 'assets/sprites.txt', 0 );
 		

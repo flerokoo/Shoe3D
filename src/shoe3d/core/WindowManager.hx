@@ -137,6 +137,13 @@ class WindowManager
 		
 		RenderManager.container.style.padding = "0px";
 		
+		// for input systems
+		RenderManager.container.style.overflow = "hidden";
+		RenderManager.container.style.position = "relative";
+		
+        // http://msdn.microsoft.com/en-us/library/windows/apps/Hh767313.aspx
+		(untyped RenderManager.container.style).msTouchAction = "none";
+		
 			/*Browser.document.body.style.marginBottom =
 			Browser.document.body.style.marginLeft =
 			Browser.document.body.style.marginRight =

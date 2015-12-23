@@ -1,11 +1,13 @@
 package shoe3d.asset;
-import shoe3d.asset.Atlas.TexDef;
+import shoe3d.util.UVTools;
 import soundjs.SoundManager;
 import three.Geometry;
 import three.GeometryLoader;
 import three.GeometryUtils;
+import three.MeshPhongMaterial;
 import three.Texture;
-
+import shoe3d.util.UVTools.UV;
+import three.Vector2;
 /**
  * ...
  * @author as
@@ -19,6 +21,7 @@ class AssetPack
 	private var _geomMap:Map<String,Geometry>;
 	private var _soundMap:Map<String,String>; // map just to check if sound belongs to this asset pack
 	private var _atlasMap:Map<String,Atlas>;
+	private var _geomDefMap:Map<String,GeomDef>;
 	
 	public function new(  ) 
 	{
@@ -27,6 +30,7 @@ class AssetPack
 		_soundMap = new Map();
 		_geomMap = new Map();
 		_atlasMap = new Map();
+		_geomDefMap = new Map();
 	}
 	
 	public function getAtlas( name:String )
@@ -41,6 +45,33 @@ class AssetPack
 		var atlas = new Atlas( getTexDef(texName).texture, getFile(jsonName).content );
 		_atlasMap.set( name, atlas );
 		return atlas;
+	}
+	
+	public function defineGeomDef( name:String, geomName:String, texDefName:String, isTransparent:Bool = false )
+	{
+		if ( ! _geomMap.exists( geomName ) ) throw 'No geometry with name=$geomName';
+		if ( getTexDef( texDefName, false) == null) throw 'No texDef with name=$texDefName';
+		
+		var texd = getTexDef( texDefName );
+		var geom = getGeometry( geomName );
+		
+		var newGeom = geom.clone();
+		UVTools.setGeometryUV( newGeom, texd.uv );
+		var geomDef:GeomDef = {
+			geom: newGeom,
+			texDef:texd,
+			originalUV: geom.faceVertexUvs,
+			phongMaterial: new MeshPhongMaterial( {map: texd.texture, transparent: isTransparent} )
+		};
+		
+		_geomDefMap.set( name, geomDef );
+	}
+	
+	public function getGeomDef( name:String, required:Bool = true ) 
+	{
+		var ret = _geomDefMap.get( name );
+		if ( ret == null && required ) throw 'No GeomDef with name=$name';
+		return ret;
 	}
 	
 	public function getTexDef( name:String, required:Bool = true ) 
@@ -83,4 +114,20 @@ class AssetPack
 	{
 		
 	}
+}
+
+typedef TexDef = 
+{
+	texture:Texture,
+	uv:UV,
+	width:Int,
+	height:Int
+}
+
+typedef GeomDef = 
+{
+	phongMaterial:MeshPhongMaterial,
+	texDef:TexDef,
+	geom:Geometry,
+	originalUV:Array<Array<Array<Vector2>>>
 }

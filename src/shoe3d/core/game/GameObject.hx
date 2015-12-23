@@ -47,6 +47,7 @@ class GameObject implements ComponentContainer
 		if ( i >= 0 ) {
 			components.splice( i , 1 );
 			component.onRemoved();
+			component.owner = null;
 		}		
 		return this;	
 	}

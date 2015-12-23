@@ -16,6 +16,10 @@ class Signal
 		
 	}
 	
+	public function hasListeners():Bool {
+		return _head != null;
+	}
+	
 	public function connectInner( callback:Dynamic, highPriority:Bool = false )
 	{
 		var sentinel = new Sentinel( this, callback );

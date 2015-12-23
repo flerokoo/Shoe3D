@@ -2,7 +2,7 @@ package shoe3d.component;
 import js.Browser;
 import js.html.Float32Array;
 import js.html.ImageElement;
-import shoe3d.asset.Atlas.TexDef;
+import shoe3d.asset.AssetPack.TexDef;
 import shoe3d.asset.Res;
 import shoe3d.core.game.Component;
 import shoe3d.util.Assert;
@@ -110,6 +110,11 @@ class Sprite2D extends Element2D
 	override public function onAdded()
 	{
 		owner.transform.add( mesh );
+	}
+	
+	override public function onRemoved()
+	{
+		owner.transform.remove( mesh );
 	}
 	
 	function set_anchorY(value:Float):Float 

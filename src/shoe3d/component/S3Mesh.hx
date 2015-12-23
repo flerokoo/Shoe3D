@@ -3,6 +3,7 @@ import shoe3d.core.game.Component;
 import three.Geometry;
 import three.Material;
 import three.Mesh;
+import three.MeshPhongMaterial;
 
 /**
  * ...
@@ -20,6 +21,7 @@ class S3Mesh extends Component
 		super();
 		geometry = geom;
 		material = mat;
+		cast(material, MeshPhongMaterial);
 		mesh = new Mesh( geometry, material );
 		if ( owner != null ) owner.transform.add( mesh );
 	}
