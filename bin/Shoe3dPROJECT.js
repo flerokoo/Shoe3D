@@ -715,7 +715,6 @@ shoe3d.core.InputManager.init = function() {
 			if(isStandartTouch) changedTouches = e1.changedTouches; else changedTouches = [e1];
 			var bounds1 = e1.target.getBoundingClientRect();
 			shoe3d.core.InputManager._lastTouchTime = e1.timeStamp;
-			haxe.Log.trace(e1.type,{ fileName : "InputManager.hx", lineNumber : 84, className : "shoe3d.core.InputManager", methodName : "init", customParams : [changedTouches[0].clientX,changedTouches[0].clientY]});
 			var _g1 = e1.type;
 			switch(_g1) {
 			case "touchstart":case "MSPointerDown":case "pointerdown":
@@ -2258,10 +2257,31 @@ shoe3d.core.input.PointerManager.prototype = {
 		return this._isDown;
 	}
 	,submitDown: function(viewX,viewY,source) {
+		if(this._isDown) return;
+		var hit = null;
+		this.submitMove(viewX,viewY,source);
+		this._isDown = true;
+		this.prepare(viewX,viewY,hit,source);
+		this.down.emit(shoe3d.core.input.PointerManager._sharedEvent);
 	}
 	,submitMove: function(viewX,viewY,source) {
+		if(viewX == this._x && viewY == this._y) return;
+		var hit = null;
+		this.prepare(viewX,viewY,hit,source);
+		this.move.emit(shoe3d.core.input.PointerManager._sharedEvent);
 	}
 	,submitUp: function(viewX,viewY,source) {
+		if(this._isDown) return;
+		var hit = null;
+		this.submitMove(viewX,viewY,source);
+		this._isDown = false;
+		this.prepare(viewX,viewY,hit,source);
+		this.up.emit(shoe3d.core.input.PointerManager._sharedEvent);
+	}
+	,prepare: function(viewX,viewY,hit,source) {
+		this._x = viewX;
+		this._y = viewY;
+		shoe3d.core.input.PointerManager._sharedEvent.set(shoe3d.core.input.PointerManager._sharedEvent.id + 1,viewX,viewY,hit,source);
 	}
 	,__class__: shoe3d.core.input.PointerManager
 };

@@ -1,4 +1,5 @@
 package shoe3d.core.input;
+import shoe3d.component.Element2D;
 import shoe3d.util.signal.SingleSignal;
 import three.Vector2;
 
@@ -55,17 +56,49 @@ class PointerManager
 	
 	function submitDown(viewX :Float, viewY :Float, source :EventSource)
 	{
+		if ( _isDown ) return;
 		
+		var hit:Element2D = null;
+		
+		submitMove( viewX, viewY, source );
+		_isDown = true;
+		
+		
+		//
+		prepare(viewX, viewY, hit, source);
+		
+		down.emit( _sharedEvent );
 	}
 	
 	function submitMove(viewX :Float, viewY :Float, source :EventSource)
 	{
+		if (viewX == _x && viewY == _y) return;
 		
+		var hit:Element2D = null;
+		
+		prepare(viewX, viewY, hit, source);
+		
+		move.emit( _sharedEvent );
 	}
 	
 	function submitUp(viewX :Float, viewY :Float, source :EventSource)
 	{
+		if ( _isDown ) return;
 		
+		var hit:Element2D = null;
+		
+		submitMove( viewX, viewY, source );
+		_isDown = false;
+		
+		prepare(viewX, viewY, hit, source);
+		up.emit(_sharedEvent);
 	}
+	
+    private function prepare (viewX :Float, viewY :Float, hit :Element2D, source :EventSource)
+    {
+        _x = viewX;
+        _y = viewY;
+        _sharedEvent.set(_sharedEvent.id+1, viewX, viewY, hit, source);
+    }
 	
 }
