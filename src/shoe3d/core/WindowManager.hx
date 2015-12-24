@@ -89,7 +89,7 @@ class WindowManager
 	{
 		orientation.set( 
 			switch( (untyped Browser.window).orientation ) {
-				case -90, 90,270,-270: Landscape;
+				case -90, 90, 270, -270: Landscape;
 				default: Portrait;
 			} );	
 	}
@@ -134,6 +134,7 @@ class WindowManager
 		Browser.document.body.style.padding = "0";
 		Browser.document.body.style.width = "100%";
 		Browser.document.body.style.height = "100%";
+		
 		
 		RenderManager.container.style.padding = "0px";
 		
@@ -182,11 +183,12 @@ class WindowManager
 		}
 	}
 	
-	static public function setSize( w:Int, h:Int, autoSetMode:Bool = true ) 
+	static public function setSize( w:Int, h:Int, fit:Bool = false ) 
 	{
+		// TODO Implement fit fixed canvas size to window size
 		width = w;
 		height = h;
-		if ( autoSetMode ) mode = Default;
+		mode = Default;
 		updateLayout();
 	}
 	

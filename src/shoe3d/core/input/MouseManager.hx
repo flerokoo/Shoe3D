@@ -62,6 +62,7 @@ class MouseManager
 	
     public function submitDown (viewX :Float, viewY :Float, buttonCode :Int)
     {
+		trace("DOWN", viewX, viewY, buttonCode );
         if (!isCodeDown(buttonCode)) {
             _buttonStates.set(buttonCode, true);
 
@@ -73,6 +74,7 @@ class MouseManager
 
     public function submitMove (viewX :Float, viewY :Float)
     {
+		trace("MOVE", viewX, viewY);
         prepare(viewX, viewY, null);
         System.input.pointer.submitMove(viewX, viewY, _source);
         move.emit(_sharedEvent);
@@ -80,6 +82,7 @@ class MouseManager
 
     public function submitUp (viewX :Float, viewY :Float, buttonCode :Int)
     {
+		trace("UP", viewX, viewY, buttonCode );
         if (isCodeDown(buttonCode)) {
             _buttonStates.remove(buttonCode);
 

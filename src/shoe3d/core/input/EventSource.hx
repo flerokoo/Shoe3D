@@ -7,5 +7,5 @@ package shoe3d.core.input;
 enum EventSource
 {
 	Mouse(e:MouseEvent);
-	Touch(e:MouseEvent);
+	Touch(e:TouchPoint);
 }

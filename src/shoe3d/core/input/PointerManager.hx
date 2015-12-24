@@ -38,6 +38,21 @@ class PointerManager
         return true;
     }
 	
+	public function get_x () :Float
+    {
+        return _x;
+    }
+
+    public function get_y () :Float
+    {
+        return _y;
+    }
+
+    public function isDown () :Bool
+    {
+        return _isDown;
+    }
+	
 	function submitDown(viewX :Float, viewY :Float, source :EventSource)
 	{
 		

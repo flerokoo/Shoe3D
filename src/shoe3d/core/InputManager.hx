@@ -5,6 +5,8 @@ import js.html.DivElement;
 import js.html.MouseEvent;
 import shoe3d.core.input.MouseManager;
 import shoe3d.core.input.PointerManager;
+import shoe3d.core.input.TouchManager;
+import shoe3d.util.HtmlUtils;
 
 /**
  * ...
@@ -16,6 +18,7 @@ class InputManager
 
 	public static var pointer(default, null):PointerManager;
 	public static var mouse(default, null):MouseManager;
+	public static var touch(default, null):TouchManager;
 	
 	static var _canvas:CanvasElement;
 	static var _div:DivElement;
@@ -25,6 +28,7 @@ class InputManager
 	{
 		pointer = new PointerManager( );
 		mouse = new MouseManager( );
+		touch = new TouchManager( );
 		
 		_canvas = System.renderer.renderer.domElement;
 		_div = System.renderer.container;
@@ -68,7 +72,61 @@ class InputManager
 		_canvas.addEventListener("contextmenu", function(e) e.preventDefault() , false );
 		
 		// TOUCH SYSTEM
-		
+		var isStandartTouch = untyped __js__("typeof")(Browser.window.ontouchstart) != "undefined";
+		var isMsTouch = untyped __js__("'msMaxTouchPoints' in window.navigator && (window.navigator.msMaxTouchPoints > 1 )" );
+		if ( isStandartTouch || isMsTouch ) {
+			touch.maxPoints = isStandartTouch ? 4 : (untyped Browser.navigator).msMaxTouchPoints ;
+			
+			var onTouch = function ( e:Dynamic ) {
+				var changedTouches:Array<Dynamic> = isStandartTouch ? e.changedTouches : [e];
+				var bounds = e.target.getBoundingClientRect();
+				_lastTouchTime = e.timeStamp;
+				switch( e.type ) {
+					case "touchstart", "MSPointerDown", "pointerdown":
+						e.preventDefault();
+						if ( HtmlUtils.HIDE_MOBILE_BROWSER ) HtmlUtils.hideMobileBrowser();
+						for ( t in changedTouches ) {
+							var x = getX( t, bounds );
+							var y = getY( t, bounds );
+							var id = Std.int( isStandartTouch ? t.identifier : t.pointerId );
+							touch.submitDown( id, x, y );
+						}
+					case "touchmove", "MSPointerMove", "pointermove":
+						e.preventDefault();
+						for ( t in changedTouches ) {
+							var x = getX( t, bounds );
+							var y = getY( t, bounds );
+							var id = Std.int( isStandartTouch ? t.identifier : t.pointerId );
+							touch.submitMove( id, x, y );
+						}
+					case "touchend", "touchcancel", "MSPointerUp", "pointerup":
+						for (t in changedTouches) {
+							var x = getX(t, bounds);
+							var y = getY(t, bounds);
+							var id = Std.int(isStandartTouch ? t.identifier : t.pointerId);
+							touch.submitUp(id, x, y);
+                    }                
+				}
+			}
+			
+			// I DONT KNOW WHY SAMSUNG I HATE YOU
+			if ( js.Browser.navigator.userAgent.toLowerCase().indexOf("samsung") >= 0 )
+				js.Browser.window.addEventListener("touchstart", function(e:Dynamic) {} );
+			
+			if ( isStandartTouch ) {
+				_canvas.addEventListener("touchstart", onTouch, false);
+				_canvas.addEventListener("touchmove", onTouch, false);
+                _canvas.addEventListener("touchend", onTouch, false);
+                _canvas.addEventListener("touchcancel", onTouch, false);
+			} else {
+				_canvas.addEventListener("MSPointerDown", onTouch, false);
+                _canvas.addEventListener("MSPointerMove", onTouch, false);
+                _canvas.addEventListener("MSPointerUp", onTouch, false);
+			}
+			
+		} else {
+			touch._disabled = true;
+		}
 	}
 	
 	private static inline function getX (event :Dynamic, bounds :Dynamic) :Float

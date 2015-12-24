@@ -282,6 +282,9 @@ haxe.ds.IntMap.prototype = {
 	,set: function(key,value) {
 		this.h[key] = value;
 	}
+	,get: function(key) {
+		return this.h[key];
+	}
 	,exists: function(key) {
 		return this.h.hasOwnProperty(key);
 	}
@@ -665,6 +668,7 @@ shoe3d.core.InputManager.__name__ = ["shoe3d","core","InputManager"];
 shoe3d.core.InputManager.init = function() {
 	shoe3d.core.InputManager.pointer = new shoe3d.core.input.PointerManager();
 	shoe3d.core.InputManager.mouse = new shoe3d.core.input.MouseManager();
+	shoe3d.core.InputManager.touch = new shoe3d.core.input.TouchManager();
 	shoe3d.core.InputManager._canvas = shoe3d.System.renderer.renderer.domElement;
 	shoe3d.core.InputManager._div = shoe3d.System.renderer.container;
 	var onMouse = function(event) {
@@ -702,6 +706,72 @@ shoe3d.core.InputManager.init = function() {
 	shoe3d.core.InputManager._canvas.addEventListener("contextmenu",function(e) {
 		e.preventDefault();
 	},false);
+	var isStandartTouch = typeof(window.ontouchstart) != "undefined";
+	var isMsTouch = 'msMaxTouchPoints' in window.navigator && (window.navigator.msMaxTouchPoints > 1 );
+	if(isStandartTouch || isMsTouch) {
+		if(isStandartTouch) shoe3d.core.InputManager.touch.maxPoints = 4; else shoe3d.core.InputManager.touch.maxPoints = window.navigator.msMaxTouchPoints;
+		var onTouch = function(e1) {
+			var changedTouches;
+			if(isStandartTouch) changedTouches = e1.changedTouches; else changedTouches = [e1];
+			var bounds1 = e1.target.getBoundingClientRect();
+			shoe3d.core.InputManager._lastTouchTime = e1.timeStamp;
+			haxe.Log.trace(e1.type,{ fileName : "InputManager.hx", lineNumber : 84, className : "shoe3d.core.InputManager", methodName : "init", customParams : [changedTouches[0].clientX,changedTouches[0].clientY]});
+			var _g1 = e1.type;
+			switch(_g1) {
+			case "touchstart":case "MSPointerDown":case "pointerdown":
+				e1.preventDefault();
+				if(shoe3d.util.HtmlUtils.HIDE_MOBILE_BROWSER) shoe3d.util.HtmlUtils.hideMobileBrowser();
+				var _g11 = 0;
+				while(_g11 < changedTouches.length) {
+					var t = changedTouches[_g11];
+					++_g11;
+					var x1 = (t.clientX - bounds1.left) * shoe3d.System.window.get_width() / bounds1.width;
+					var y1 = (t.clientY - bounds1.top) * shoe3d.System.window.get_height() / bounds1.height;
+					var id;
+					id = (isStandartTouch?t.identifier:t.pointerId) | 0;
+					shoe3d.core.InputManager.touch.submitDown(id,x1,y1);
+				}
+				break;
+			case "touchmove":case "MSPointerMove":case "pointermove":
+				e1.preventDefault();
+				var _g12 = 0;
+				while(_g12 < changedTouches.length) {
+					var t1 = changedTouches[_g12];
+					++_g12;
+					var x2 = (t1.clientX - bounds1.left) * shoe3d.System.window.get_width() / bounds1.width;
+					var y2 = (t1.clientY - bounds1.top) * shoe3d.System.window.get_height() / bounds1.height;
+					var id1;
+					id1 = (isStandartTouch?t1.identifier:t1.pointerId) | 0;
+					shoe3d.core.InputManager.touch.submitMove(id1,x2,y2);
+				}
+				break;
+			case "touchend":case "touchcancel":case "MSPointerUp":case "pointerup":
+				var _g13 = 0;
+				while(_g13 < changedTouches.length) {
+					var t2 = changedTouches[_g13];
+					++_g13;
+					var x3 = (t2.clientX - bounds1.left) * shoe3d.System.window.get_width() / bounds1.width;
+					var y3 = (t2.clientY - bounds1.top) * shoe3d.System.window.get_height() / bounds1.height;
+					var id2;
+					id2 = (isStandartTouch?t2.identifier:t2.pointerId) | 0;
+					shoe3d.core.InputManager.touch.submitUp(id2,x3,y3);
+				}
+				break;
+			}
+		};
+		if(window.navigator.userAgent.toLowerCase().indexOf("samsung") >= 0) window.addEventListener("touchstart",function(e2) {
+		});
+		if(isStandartTouch) {
+			shoe3d.core.InputManager._canvas.addEventListener("touchstart",onTouch,false);
+			shoe3d.core.InputManager._canvas.addEventListener("touchmove",onTouch,false);
+			shoe3d.core.InputManager._canvas.addEventListener("touchend",onTouch,false);
+			shoe3d.core.InputManager._canvas.addEventListener("touchcancel",onTouch,false);
+		} else {
+			shoe3d.core.InputManager._canvas.addEventListener("MSPointerDown",onTouch,false);
+			shoe3d.core.InputManager._canvas.addEventListener("MSPointerMove",onTouch,false);
+			shoe3d.core.InputManager._canvas.addEventListener("MSPointerUp",onTouch,false);
+		}
+	} else shoe3d.core.InputManager.touch._disabled = true;
 };
 shoe3d.core.InputManager.getX = function(event,bounds) {
 	return (event.clientX - bounds.left) * shoe3d.System.window.get_width() / bounds.width;
@@ -933,11 +1003,11 @@ shoe3d.core.WindowManager.get_height = function() {
 		return shoe3d.core.WindowManager.height;
 	}
 };
-shoe3d.core.WindowManager.setSize = function(w,h,autoSetMode) {
-	if(autoSetMode == null) autoSetMode = true;
+shoe3d.core.WindowManager.setSize = function(w,h,fit) {
+	if(fit == null) fit = false;
 	shoe3d.core.WindowManager.width = w;
 	shoe3d.core.WindowManager.height = h;
-	if(autoSetMode) shoe3d.core.WindowManager.set_mode(shoe3d.core.WindowMode.Default);
+	shoe3d.core.WindowManager.set_mode(shoe3d.core.WindowMode.Default);
 	shoe3d.core.WindowManager.updateLayout();
 };
 shoe3d.System = function() { };
@@ -2091,6 +2161,7 @@ shoe3d.core.input.MouseManager.prototype = {
 		return this._buttonStates.exists(buttonCode);
 	}
 	,submitDown: function(viewX,viewY,buttonCode) {
+		haxe.Log.trace("DOWN",{ fileName : "MouseManager.hx", lineNumber : 65, className : "shoe3d.core.input.MouseManager", methodName : "submitDown", customParams : [viewX,viewY,buttonCode]});
 		if(!this._buttonStates.exists(buttonCode)) {
 			this._buttonStates.set(buttonCode,true);
 			this.prepare(viewX,viewY,shoe3d.core.input.MouseManager.toButton(buttonCode));
@@ -2099,11 +2170,13 @@ shoe3d.core.input.MouseManager.prototype = {
 		}
 	}
 	,submitMove: function(viewX,viewY) {
+		haxe.Log.trace("MOVE",{ fileName : "MouseManager.hx", lineNumber : 77, className : "shoe3d.core.input.MouseManager", methodName : "submitMove", customParams : [viewX,viewY]});
 		this.prepare(viewX,viewY,null);
 		shoe3d.System.input.pointer.submitMove(viewX,viewY,this._source);
 		this.move.emit(shoe3d.core.input.MouseManager._sharedEvent);
 	}
 	,submitUp: function(viewX,viewY,buttonCode) {
+		haxe.Log.trace("UP",{ fileName : "MouseManager.hx", lineNumber : 85, className : "shoe3d.core.input.MouseManager", methodName : "submitUp", customParams : [viewX,viewY,buttonCode]});
 		if(this._buttonStates.exists(buttonCode)) {
 			this._buttonStates.remove(buttonCode);
 			this.prepare(viewX,viewY,shoe3d.core.input.MouseManager.toButton(buttonCode));
@@ -2129,7 +2202,11 @@ shoe3d.core.input.MouseManager.prototype = {
 	,__class__: shoe3d.core.input.MouseManager
 };
 shoe3d.core.input.PointerEvent = function() {
-	this.set(0,0,0,null,null);
+	this.id = 0;
+	this.source = null;
+	this.hit = null;
+	this.viewY = 0;
+	this.viewX = 0;
 };
 shoe3d.core.input.PointerEvent.__name__ = ["shoe3d","core","input","PointerEvent"];
 shoe3d.core.input.PointerEvent.prototype = {
@@ -2153,12 +2230,33 @@ shoe3d.core.input.PointerEvent.prototype = {
 	,__class__: shoe3d.core.input.PointerEvent
 };
 shoe3d.core.input.PointerManager = function() {
+	this.down = new shoe3d.util.signal.SingleSignal();
+	this.move = new shoe3d.util.signal.SingleSignal();
+	this.up = new shoe3d.util.signal.SingleSignal();
 };
 shoe3d.core.input.PointerManager.__name__ = ["shoe3d","core","input","PointerManager"];
 shoe3d.core.input.PointerManager.prototype = {
-	_x: null
+	supported: null
+	,down: null
+	,move: null
+	,up: null
+	,x: null
+	,y: null
+	,_x: null
 	,_y: null
 	,_isDown: null
+	,get_supported: function() {
+		return true;
+	}
+	,get_x: function() {
+		return this._x;
+	}
+	,get_y: function() {
+		return this._y;
+	}
+	,isDown: function() {
+		return this._isDown;
+	}
 	,submitDown: function(viewX,viewY,source) {
 	}
 	,submitMove: function(viewX,viewY,source) {
@@ -2166,6 +2264,81 @@ shoe3d.core.input.PointerManager.prototype = {
 	,submitUp: function(viewX,viewY,source) {
 	}
 	,__class__: shoe3d.core.input.PointerManager
+};
+shoe3d.core.input.TouchManager = function() {
+	this._disabled = false;
+	this._pointMap = new haxe.ds.IntMap();
+	this.up = new shoe3d.util.signal.SingleSignal();
+	this.move = new shoe3d.util.signal.SingleSignal();
+	this.down = new shoe3d.util.signal.SingleSignal();
+	this.points = [];
+	this._pointer = shoe3d.System.input.pointer;
+};
+shoe3d.core.input.TouchManager.__name__ = ["shoe3d","core","input","TouchManager"];
+shoe3d.core.input.TouchManager.prototype = {
+	up: null
+	,down: null
+	,move: null
+	,points: null
+	,maxPoints: null
+	,_pointerTouch: null
+	,_pointMap: null
+	,_pointer: null
+	,_disabled: null
+	,get_supported: function() {
+		return !this._disabled;
+	}
+	,submitDown: function(id,viewX,viewY) {
+		if(!this._pointMap.exists(id)) {
+			var point = new shoe3d.core.input.TouchPoint(id);
+			point.set(viewX,viewY);
+			this._pointMap.set(id,point);
+			this.points.push(point);
+			if(this._pointerTouch == null) {
+				this._pointerTouch = point;
+				this._pointer.submitDown(viewX,viewY,point._source);
+			}
+			this.down.emit(point);
+		}
+	}
+	,submitMove: function(id,viewX,viewY) {
+		var point = this._pointMap.get(id);
+		if(point != null) {
+			point.set(viewX,viewY);
+			if(this._pointerTouch == point) this._pointer.submitMove(viewX,viewY,point._source);
+			this.move.emit(point);
+		}
+	}
+	,submitUp: function(id,viewX,viewY) {
+		var point = this._pointMap.get(id);
+		if(point != null) {
+			point.set(viewX,viewY);
+			this._pointMap.remove(id);
+			HxOverrides.remove(this.points,point);
+			if(this._pointerTouch == point) {
+				this._pointerTouch = null;
+				this._pointer.submitUp(viewX,viewY,point._source);
+			}
+			this.up.emit(point);
+		}
+	}
+	,__class__: shoe3d.core.input.TouchManager
+};
+shoe3d.core.input.TouchPoint = function(id) {
+	this.id = id;
+	this._source = shoe3d.core.input.EventSource.Touch(this);
+};
+shoe3d.core.input.TouchPoint.__name__ = ["shoe3d","core","input","TouchPoint"];
+shoe3d.core.input.TouchPoint.prototype = {
+	viewX: null
+	,viewY: null
+	,id: null
+	,set: function(viewX,viewY) {
+		this.viewX = viewX;
+		this.viewY = viewY;
+	}
+	,_source: null
+	,__class__: shoe3d.core.input.TouchPoint
 };
 shoe3d.screen.GameScreen = function() {
 	this.layers = [];

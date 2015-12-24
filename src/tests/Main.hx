@@ -41,6 +41,7 @@ class Main
 		
 		System.init();
 		
+		//System.window.setSize( 640, 800 );
 		
 		System.showFPSMeter();
 		//Timer.delay( function() System.screen.show("game2") , 1100 );
