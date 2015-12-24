@@ -23,6 +23,11 @@ class Layer2D extends Layer
 			cam.right = System.window.width / 2  *  scale;
 			cam.top = System.window.height / 2  *  scale;
 			cam.bottom = -System.window.height / 2  *  scale;
+			
+			/*cam.left = cam.top = 0;
+			cam.right = System.window.width;
+			cam.bottom = -System.window.height;*/
+			
 			cam.far = 1000;
 			cam.near = 0.1;
 			

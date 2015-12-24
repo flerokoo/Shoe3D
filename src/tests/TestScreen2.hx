@@ -1,16 +1,21 @@
 package tests;
+import shoe3d.asset.AssetPack.GeomDef;
+import shoe3d.asset.Res;
 import shoe3d.component.CameraHolder;
+import shoe3d.component.GeometryDisplay;
 import shoe3d.component.S3Mesh;
 import shoe3d.component.RandomRotator;
 import shoe3d.core.game.GameObject;
 import shoe3d.core.Layer;
 import shoe3d.screen.GameScreen;
 import shoe3d.System;
+import shoe3d.util.UVTools;
 import three.AmbientLight;
 import three.BoxGeometry;
 import three.DirectionalLight;
 import three.Geometry;
 import three.MeshPhongMaterial;
+import three.Vector3;
 
 /**
  * ...
@@ -24,38 +29,36 @@ class TestScreen2 extends GameScreen
 	{
 		super();
 		
-		/*var msh = new MeshDisplay( new BoxGeometry(1, 1, 1), new MeshPhongMaterial( { color : 0xF7CF33 } ) );		
-		var go = new GameObject("out")
-			.addComponent(msh)
-			//.addComponent( new RandomRotator() )
-			;
+		var texDef = Res.getTexDef("main_pattern");
+		var geom = new BoxGeometry( 2, 1, 0.5 );
+		UVTools.setGeometryUVFromTexDef( geom, texDef);
+		var platformGeomDef:GeomDef = {
+			geom: geom,
+			texDef: texDef,
+			material: new MeshPhongMaterial( { map:texDef.texture } )
+		}
 		
-		go.transform.rotateX( 0.34 );
-		go.transform.rotateY( 1.34 );
-		go.transform.rotateZ( 2.25 );
+		var layer1 = newLayer("platforms");		
+		//var layer2 = newLayer("hero");
 		
 		
-		var go2 = new GameObject( "INSIDE" )
-			.addComponent( new MeshDisplay( new BoxGeometry(0.9, 0.9, 0.9) ) )
-			//.addComponent( new RandomRotator() )
-			;
-		Main.trace2(go2.components.length);
-		go.addChild( go2 );
-		go2.transform.position.z = 1.5;
+		for ( i in 0...10 ) {
+			var pl = new GameObject();
+			pl.add( new GeometryDisplay( platformGeomDef ) );
+			pl.transform.position.set( Math.random() * 10 - 5, 0, Math.random() * 10 - 5 );
+			layer1.addChild( pl );
+		}
 		
-		gameScene.addChild( go );
+		var dl = new DirectionalLight( 0x8EEAFD, 0.7 );
+		dl.rotateY( 3.14 / 2);
+		layer1.add( dl );
+		layer1.add( new AmbientLight( 0xffffff ) );	
 		
-		var l = new AmbientLight(0xffffff);
-		gameScene.add( l );
-		var dl = new DirectionalLight( 0x2E8FFC, 0.8 );
-		dl.rotateX( 0.45 );
-		dl.rotateX( 0.74 );
-		dl.rotateX( 1.74 );
-		gameScene.add( dl  );
 		
-		cameraHandle.owner.transform.position.z = 5;*/
-		
-
+		layer1.camera.position.set( 0, 10, 0 );
+		layer1.camera.lookAt( new Vector3(0, 0, 0));
+		layer1.camera.up = new Vector3(0, 0, 1);
+		//layer2.setCamera( layer1.camera );
 		
 	}
 	

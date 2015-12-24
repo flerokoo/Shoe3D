@@ -1154,7 +1154,7 @@ shoe3d.asset.AssetPack.prototype = {
 		var geom = this.getGeometry(geomName);
 		var newGeom = geom.clone();
 		shoe3d.util.UVTools.setGeometryUV(newGeom,texd.uv);
-		var geomDef = { geom : newGeom, texDef : texd, originalUV : geom.faceVertexUvs, phongMaterial : new THREE.MeshPhongMaterial({ map : texd.texture, transparent : isTransparent})};
+		var geomDef = { geom : newGeom, texDef : texd, originalUV : geom.faceVertexUvs, material : new THREE.MeshPhongMaterial({ map : texd.texture, transparent : isTransparent})};
 		this._geomDefMap.set(name,geomDef);
 	}
 	,getGeomDef: function(name,required) {
@@ -1551,7 +1551,18 @@ shoe3d.asset.Res.getTexDef = function(name) {
 		var ret = i.getTexDef(name,false);
 		if(ret != null) return ret;
 	}
-	throw "No texture " + name + " found";
+	throw "No texDef " + name + " found";
+	return null;
+};
+shoe3d.asset.Res.getGeomDef = function(name) {
+	if(shoe3d.asset.Res._packMap == null) throw "No asset packs";
+	var $it0 = shoe3d.asset.Res._packMap.iterator();
+	while( $it0.hasNext() ) {
+		var i = $it0.next();
+		var ret = i.getGeomDef(name,false);
+		if(ret != null) return ret;
+	}
+	throw "No geomDef " + name + " found";
 	return null;
 };
 shoe3d.asset.SoundLoader = function(manager) {
@@ -1633,7 +1644,7 @@ shoe3d.component.Element2D.prototype = $extend(shoe3d.core.game.Component.protot
 });
 shoe3d.component.GeometryDisplay = function(geom) {
 	shoe3d.core.game.Component.call(this);
-	this.mesh = new THREE.Mesh(geom.geom,geom.phongMaterial);
+	this.mesh = new THREE.Mesh(geom.geom,geom.material == null?geom.material:new THREE.MeshPhongMaterial({ map : geom.texDef.texture, transparent : true}));
 };
 shoe3d.component.GeometryDisplay.__name__ = ["shoe3d","component","GeometryDisplay"];
 shoe3d.component.GeometryDisplay.__super__ = shoe3d.core.game.Component;
@@ -1797,7 +1808,7 @@ shoe3d.core.Layer.prototype = $extend(THREE.Scene.prototype,{
 		return this;
 	}
 	,addPerspectiveCamera: function() {
-		var pc = new THREE.PerspectiveCamera(60,1,0.1,1000);
+		var pc = new THREE.PerspectiveCamera(70,1,0.1,1000);
 		this.setCamera(pc);
 		return pc;
 	}
@@ -2160,7 +2171,6 @@ shoe3d.core.input.MouseManager.prototype = {
 		return this._buttonStates.exists(buttonCode);
 	}
 	,submitDown: function(viewX,viewY,buttonCode) {
-		haxe.Log.trace("DOWN",{ fileName : "MouseManager.hx", lineNumber : 65, className : "shoe3d.core.input.MouseManager", methodName : "submitDown", customParams : [viewX,viewY,buttonCode]});
 		if(!this._buttonStates.exists(buttonCode)) {
 			this._buttonStates.set(buttonCode,true);
 			this.prepare(viewX,viewY,shoe3d.core.input.MouseManager.toButton(buttonCode));
@@ -2169,13 +2179,11 @@ shoe3d.core.input.MouseManager.prototype = {
 		}
 	}
 	,submitMove: function(viewX,viewY) {
-		haxe.Log.trace("MOVE",{ fileName : "MouseManager.hx", lineNumber : 77, className : "shoe3d.core.input.MouseManager", methodName : "submitMove", customParams : [viewX,viewY]});
 		this.prepare(viewX,viewY,null);
 		shoe3d.System.input.pointer.submitMove(viewX,viewY,this._source);
 		this.move.emit(shoe3d.core.input.MouseManager._sharedEvent);
 	}
 	,submitUp: function(viewX,viewY,buttonCode) {
-		haxe.Log.trace("UP",{ fileName : "MouseManager.hx", lineNumber : 85, className : "shoe3d.core.input.MouseManager", methodName : "submitUp", customParams : [viewX,viewY,buttonCode]});
 		if(this._buttonStates.exists(buttonCode)) {
 			this._buttonStates.remove(buttonCode);
 			this.prepare(viewX,viewY,shoe3d.core.input.MouseManager.toButton(buttonCode));
@@ -2784,7 +2792,7 @@ tests.Main.main = function() {
 		tests.Main.pack.defineAtlas("main","sprites","sprites.txt");
 		tests.Main.pack.defineGeomDef("mesh","model1","logo");
 		tests.Main.pack.defineGeomDef("cube","cube","logo",true);
-		shoe3d.System.screen.show("game");
+		shoe3d.System.screen.show("game2");
 		shoe3d.System.start();
 	});
 	shoe3d.System.renderer.showStats();
@@ -2825,6 +2833,15 @@ tests.TestScreen = function() {
 	layer.add(new THREE.AmbientLight(16777215));
 	layer.addChild(new shoe3d.core.game.GameObject().add(new shoe3d.component.CameraHolder()));
 	layer.setCamera(new THREE.PerspectiveCamera(60,1.3333333333333333,0.1,1000));
+	var ui = this.newLayer2D("UILAYER");
+	var g2d = new shoe3d.core.game.GameObject("SPRITETEST");
+	var spr = new shoe3d.component.Sprite2D("logo");
+	g2d.add(spr);
+	ui.addChild(g2d);
+	var mgr = new THREE.LoadingManager();
+	var l = new THREE.TextureLoader(mgr);
+	var cc;
+	cc = js.Boot.__cast(ui.camera , THREE.OrthographicCamera);
 };
 tests.TestScreen.__name__ = ["tests","TestScreen"];
 tests.TestScreen.__super__ = shoe3d.screen.GameScreen;
@@ -2833,6 +2850,26 @@ tests.TestScreen.prototype = $extend(shoe3d.screen.GameScreen.prototype,{
 });
 tests.TestScreen2 = function() {
 	shoe3d.screen.GameScreen.call(this);
+	var texDef = shoe3d.asset.Res.getTexDef("main_pattern");
+	var geom = new THREE.BoxGeometry(2,1,0.5);
+	shoe3d.util.UVTools.setGeometryUVFromTexDef(geom,texDef);
+	var platformGeomDef = { geom : geom, texDef : texDef, material : new THREE.MeshPhongMaterial({ map : texDef.texture})};
+	var layer1 = this.newLayer("platforms");
+	var _g = 0;
+	while(_g < 10) {
+		var i = _g++;
+		var pl = new shoe3d.core.game.GameObject();
+		pl.add(new shoe3d.component.GeometryDisplay(platformGeomDef));
+		pl.transform.position.set(Math.random() * 10 - 5,0,Math.random() * 10 - 5);
+		layer1.addChild(pl);
+	}
+	var dl = new THREE.DirectionalLight(9366269,0.7);
+	dl.rotateY(1.57);
+	layer1.add(dl);
+	layer1.add(new THREE.AmbientLight(16777215));
+	layer1.camera.position.set(0,10,0);
+	layer1.camera.lookAt(new THREE.Vector3(0,0,0));
+	layer1.camera.up = new THREE.Vector3(0,0,1);
 };
 tests.TestScreen2.__name__ = ["tests","TestScreen2"];
 tests.TestScreen2.__super__ = shoe3d.screen.GameScreen;

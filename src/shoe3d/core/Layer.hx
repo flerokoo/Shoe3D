@@ -74,7 +74,7 @@ class Layer extends Scene
 	
 	public function addPerspectiveCamera():PerspectiveCamera
 	{
-		var pc = new PerspectiveCamera( 60, 1, 0.1, 1000 );
+		var pc = new PerspectiveCamera( 70, 1, 0.1, 1000 );
 		setCamera( pc );
 		return pc;
 	}

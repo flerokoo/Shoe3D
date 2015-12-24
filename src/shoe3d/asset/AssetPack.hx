@@ -4,6 +4,7 @@ import soundjs.SoundManager;
 import three.Geometry;
 import three.GeometryLoader;
 import three.GeometryUtils;
+import three.Material;
 import three.MeshPhongMaterial;
 import three.Texture;
 import shoe3d.util.UVTools.UV;
@@ -61,7 +62,7 @@ class AssetPack
 			geom: newGeom,
 			texDef:texd,
 			originalUV: geom.faceVertexUvs,
-			phongMaterial: new MeshPhongMaterial( {map: texd.texture, transparent: isTransparent} )
+			material: new MeshPhongMaterial( {map: texd.texture, transparent: isTransparent} )
 		};
 		
 		_geomDefMap.set( name, geomDef );
@@ -126,8 +127,8 @@ typedef TexDef =
 
 typedef GeomDef = 
 {
-	phongMaterial:MeshPhongMaterial,
+	?material:Material,
 	texDef:TexDef,
 	geom:Geometry,
-	originalUV:Array<Array<Array<Vector2>>>
+	?originalUV:Array<Array<Array<Vector2>>>
 }

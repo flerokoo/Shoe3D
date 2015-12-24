@@ -1,4 +1,5 @@
 package shoe3d.asset;
+import shoe3d.asset.AssetPack.GeomDef;
 import shoe3d.asset.AssetPack.TexDef;
 
 /**
@@ -34,7 +35,20 @@ class Res
 			if ( ret != null) return ret;
 		}
 		
-		throw 'No texture $name found';
+		throw 'No texDef $name found';
+		return null;	
+	}
+	
+	public static function getGeomDef( name:String ):GeomDef
+	{
+		if ( _packMap == null ) throw 'No asset packs';
+		for ( i in _packMap )
+		{
+			var ret = i.getGeomDef( name, false );
+			if ( ret != null) return ret;
+		}
+		
+		throw 'No geomDef $name found';
 		return null;	
 	}
 	
