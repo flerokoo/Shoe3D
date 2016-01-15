@@ -2916,11 +2916,11 @@ tests.TestScreen2 = function() {
 	layer1.addChild(anim);
 	this.skm = skm;
 	var t = this.getIdleAction();
-	haxe.Log.trace(t.clip.name,{ fileName : "TestScreen2.hx", lineNumber : 79, className : "tests.TestScreen2", methodName : "new"});
+	haxe.Log.trace(t.clip.tracks,{ fileName : "TestScreen2.hx", lineNumber : 82, className : "tests.TestScreen2", methodName : "new"});
 	var act =  new THREE.AnimationAction( skm.geometry.animations[0] );
 	act.timeScale = 10;
 	act.loop = THREE.LoopOnce;
-	this.mixer =  new THREE.AnimationMixer( skm ) ;
+	this.mixer = new THREE.AnimationMixer(skm);
 	this.action = act;
 	this.mixer.play(act);
 	var idle = this.createActionFromTracks("Idle",skm.geometry.animations,THREE.LoopPingPong,1);
@@ -2933,23 +2933,24 @@ tests.TestScreen2 = function() {
 	layer1.camera.lookAt(anim.transform.position);
 	layer1.camera.up = new THREE.Vector3(0,0,1);
 	var last = idle;
-	haxe.Log.trace(THREE.LoopPingPong,{ fileName : "TestScreen2.hx", lineNumber : 110, className : "tests.TestScreen2", methodName : "new"});
+	haxe.Log.trace(THREE.LoopPingPong,{ fileName : "TestScreen2.hx", lineNumber : 113, className : "tests.TestScreen2", methodName : "new"});
 	var crossed = false;
 	var click = function(e) {
 		crossed = true;
-		haxe.Log.trace("CROSSFADE",{ fileName : "TestScreen2.hx", lineNumber : 115, className : "tests.TestScreen2", methodName : "new"});
+		haxe.Log.trace("CROSSFADE",{ fileName : "TestScreen2.hx", lineNumber : 118, className : "tests.TestScreen2", methodName : "new"});
 		_g.mixer.removeAllActions();
 		var to = _g.getKickAction();
 		_g.mixer.play(to);
 		_g.mixer.crossFade(last,to,0.3,true);
 		last = kick;
 	};
+	var evt;
 	shoe3d.System.input.mouse.up.connect(click);
 	var loop = function(e1) {
-		haxe.Log.trace(e1.action == idle,{ fileName : "TestScreen2.hx", lineNumber : 127, className : "tests.TestScreen2", methodName : "new", customParams : [!crossed]});
+		haxe.Log.trace(e1.action.loopCount,{ fileName : "TestScreen2.hx", lineNumber : 132, className : "tests.TestScreen2", methodName : "new"});
 		if(e1.action == idle || !crossed) return;
 		crossed = false;
-		haxe.Log.trace("FINISHED",{ fileName : "TestScreen2.hx", lineNumber : 131, className : "tests.TestScreen2", methodName : "new"});
+		haxe.Log.trace("FINISHED",{ fileName : "TestScreen2.hx", lineNumber : 137, className : "tests.TestScreen2", methodName : "new"});
 		_g.mixer.removeAllActions();
 		var to1 = _g.getIdleAction();
 		var from = _g.getKickAction();
@@ -2986,6 +2987,10 @@ tests.TestScreen2.prototype = $extend(shoe3d.screen.GameScreen.prototype,{
 	}
 	,__class__: tests.TestScreen2
 });
+var three = {};
+three._AnimationMixer = {};
+three._AnimationMixer.AnimationEventType_Impl_ = function() { };
+three._AnimationMixer.AnimationEventType_Impl_.__name__ = ["three","_AnimationMixer","AnimationEventType_Impl_"];
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
@@ -3039,6 +3044,8 @@ shoe3d.util.HtmlUtils.HIDE_MOBILE_BROWSER = window.top == window && new EReg("Mo
 shoe3d.util.HtmlUtils.VENDOR_PREFIXES = ["webkit","moz","ms","o","khtml"];
 shoe3d.util.Log._sys = [];
 shoe3d.util.signal.Signal.DUMMY = new shoe3d.util.signal.Sentinel(null,null);
+three._AnimationMixer.AnimationEventType_Impl_.Finished = "finished";
+three._AnimationMixer.AnimationEventType_Impl_.Loop = "loop";
 tests.Main.main();
 })();
 

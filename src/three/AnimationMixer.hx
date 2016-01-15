@@ -1,5 +1,6 @@
 package three;
 
+import js.html.Event;
 /**
  * ...
  * @author as
@@ -25,7 +26,27 @@ extern class AnimationMixer
 	public function crossFade( from:AnimationAction, to:AnimationAction, duration:Float, warp:Bool = false ):AnimationMixer;
 	public function update( dt:Float ):AnimationMixer;
 	
-	public function addEventListener( type:String, handler:Dynamic ):Void;
-	public function removeEventListener( type:String, handler:Dynamic ):Void;
-	public function hasEventListener( type:String, handler:Dynamic ):Void;
+	public function addEventListener( type:AnimationEventType, handler:AnimationEvent->Void ):Void;
+	public function removeEventListener( type:AnimationEventType, handler:AnimationEvent->Void  ):Void;
+	public function hasEventListener( type:AnimationEventType, handler:AnimationEvent->Void  ):Void;
+}
+
+@:enum
+abstract AnimationEventType(String) {
+	/**
+	 * Fired on actions with LoopOnce
+	 */
+	var Finished = "finished";
+	/**
+	 * Fired on actions with LoopRepeat and LoopPingPong;
+	 */
+	var Loop = "loop";
+}
+
+extern class AnimationEvent
+{
+	public var action(default, null):AnimationAction;
+	public var direction(default, null):Float;
+	public var target(default, null):AnimationMixer;
+	public var type(default, null):AnimationEventType;
 }

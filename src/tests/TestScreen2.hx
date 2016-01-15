@@ -1,4 +1,6 @@
 package tests;
+import js.Browser;
+import js.html.Event;
 import shoe3d.asset.AssetPack.GeomDef;
 import shoe3d.asset.Res;
 import shoe3d.component.CameraHolder;
@@ -17,6 +19,7 @@ import three.Animation;
 import three.AnimationAction;
 import three.AnimationData;
 import three.AnimationLoopType;
+import three.AnimationMixer;
 import three.BoxGeometry;
 import three.DirectionalLight;
 import three.Geometry;
@@ -76,15 +79,15 @@ class TestScreen2 extends GameScreen
 		//trace(untyped skm.geometry.animations[0]);
 		
 		var t:AnimationAction = getIdleAction();
-		trace( t.clip.name );
+		trace( t.clip.tracks );
 		
 		//var clip = untyped __js__(" new THREE.AnimationClip( 'nam', -1, skm.geometry.animations[0].tracks )" );
 		var act = untyped __js__(" new THREE.AnimationAction( skm.geometry.animations[0] )");
 		act.timeScale = 10;
 		act.loop = untyped __js__("THREE.LoopOnce");
-		mixer = untyped __js__(" new THREE.AnimationMixer( skm ) " );
+		mixer = new AnimationMixer( skm );
 		action = act;
-		mixer.play( act );
+		mixer.play( untyped act );
 		//mixer.addEventListener('loop', function (a) { trace("LOOP"); trace(a); }  );
 		//mixer.addEventListener('finished', function (a) { trace("FINISHED"); trace(a); }  );
 		
@@ -120,11 +123,12 @@ class TestScreen2 extends GameScreen
 			mixer.crossFade( last, to, 0.3, true );
 			last = kick;
 		};
+		var evt:AnimationEvent;
+		
 		
 		System.input.mouse.up.connect( click );
 		
-		var loop = function(e:Dynamic) {
-				trace(e.action == idle, ! crossed );
+		var loop = function(e:AnimationEvent) {
 				if (e.action == idle || ! crossed) return;
 				crossed = false;
 				//mixer.removeEventListener( "loop", loop );
@@ -138,13 +142,13 @@ class TestScreen2 extends GameScreen
 				
 			};
 		
-		mixer.addEventListener( "finished", loop);
+		mixer.addEventListener( Finished , loop);
 		
 		
 	}
 	
 	var action:Dynamic;
-	var mixer:Dynamic;
+	var mixer:AnimationMixer;
 	
 	function createActionFromTracks( name:String, tracks:Array<Dynamic>, loop:Dynamic, weight:Float = 1, scale:Float = 1 ) {
 		for ( i in tracks ) {
