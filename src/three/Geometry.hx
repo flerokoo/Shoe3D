@@ -20,6 +20,9 @@ extern class Geometry
 {
 	function new() : Void;
 
+	
+	public var animations:Array<AnimationClip>;
+	
 	/**
 	 * Unique number of this geometry instance
 	 */

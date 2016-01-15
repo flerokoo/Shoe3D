@@ -24,6 +24,11 @@ class GameScreen
 		layers = [];		
 	}	
 	
+	public function onUpdate()
+	{
+		
+	}
+	
 	public function onShow() 
 	{
 		

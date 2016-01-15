@@ -22,6 +22,7 @@ import three.PlaneGeometry;
 import three.Sprite;
 import three.SpriteMaterial;
 import three.Texture;
+import three.TextureFilter;
 import three.TextureLoader;
 import three.Vector2;
 import three.Vector3;
@@ -48,6 +49,7 @@ class Sprite2D extends Element2D
 		geom = new PlaneGeometry(0, 0, 1, 1);
 		material = new MeshBasicMaterial( { transparent: true } );	
 		mesh = new Mesh( geom, material );
+		
 		
 		redefineSprite();	
 		
@@ -131,6 +133,14 @@ class Sprite2D extends Element2D
 		return anchorX;
 	}
 	
+	public function setScale( s:Float ) 
+	{
+		mesh.scale.set( s, s, 1);
+	}
+		
 	
-	
+	public function setScaleXY( sx:Float, sy:Float ) 
+	{
+		mesh.scale.set( sx, sy, 1);
+	}
 }

@@ -55,9 +55,9 @@ class Main
 			Main.pack = pc;
 			Main.pack.defineAtlas( 'main', 'sprites', 'sprites.txt' );
 			Main.pack.defineGeomDef( 'mesh', 'model1', 'logo');
-			Main.pack.defineGeomDef( 'cube', 'cube', 'logo', true);
+			Main.pack.defineGeomDef( 'cube', 'cube', 'main_pattern', true);
 			System.screen.show( "game2" );
-			System.start();
+			System.start();			
 		});
 		
 		System.renderer.showStats();		

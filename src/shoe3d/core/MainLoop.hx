@@ -71,12 +71,15 @@ class MainLoop
 		
 		var startTime = Time.now();		
 		_frames++;
-		if( ScreenManager._currentScreen != null )
+		if ( ScreenManager._currentScreen != null ) 
+		{
+			ScreenManager._currentScreen.onUpdate();
 			for ( layer in ScreenManager._currentScreen.layers )
 				for ( i in layer.gameObjects )
 				{
 					updateGameObject( i );
 				}
+		}
 					
 		var middleTime = Time.now();
 		updateTime = middleTime - startTime;	

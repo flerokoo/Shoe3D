@@ -123,6 +123,8 @@ class System
 		ldr.add( 'cube', 'assets/cube.geom', 0 );
 		ldr.add( 'sprites', 'assets/sprites.png', 0 );
 		ldr.add( 'sprites.txt', 'assets/sprites.txt', 0 );
+		ldr.add( 'anim', 'assets/test_anim.geom', 0 );
+		ldr.add( 'anim2', 'assets/test_anim2.geom', 0 );
 		
 		var promise = ldr.start( onSuccess, onProgress );
 		

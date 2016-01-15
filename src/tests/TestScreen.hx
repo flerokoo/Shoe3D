@@ -80,7 +80,7 @@ class TestScreen extends GameScreen
 		addLayer( layer );
 		
 		var gd = Main.pack.getGeomDef("cube");
-		for ( i in 0...400 ) {
+		for ( i in 0...200 ) {
 			var go = new GameObject("GO" + i)
 				//.add( new MeshDisplay( new SphereGeometry( Math.random() * 0.5 + 1, 12, 12 ) , new MeshPhongMaterial({color: cast (0xffffff * Math.random()) }) ) );
 				.add(  new GeometryDisplay( gd )	);
@@ -114,6 +114,7 @@ class TestScreen extends GameScreen
 		var ui = newLayer2D("UILAYER");		
 		var g2d = new GameObject("SPRITETEST");		
 		var spr = new Sprite2D( 'logo' );
+		spr.setScale( 0.5 );
 		//spr.setAnchor( 0, 0 );
 		//spr.setTexture( Res.getTexDef( 'button_gameplay_level_menu' ) );
 		g2d.add( spr );		

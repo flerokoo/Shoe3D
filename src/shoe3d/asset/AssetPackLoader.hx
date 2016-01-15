@@ -251,6 +251,8 @@ class AssetPackLoader
 	
 	function onLoadTexture( tex:Texture, e:AssetEntry ) 
 	{
+		tex.minFilter = untyped __js__("THREE.LinearFilter");
+		tex.magFilter = untyped __js__("THREE.LinearFilter");
 		_pack._texMap.set( e.name, 
 		{
 			texture: tex, 
