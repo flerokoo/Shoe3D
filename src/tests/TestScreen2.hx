@@ -8,6 +8,7 @@ import shoe3d.component.GeometryDisplay;
 import shoe3d.component.S3Mesh;
 import shoe3d.component.RandomRotator;
 import shoe3d.core.game.GameObject;
+import shoe3d.core.input.KeyCodes;
 import shoe3d.core.input.PointerEvent;
 import shoe3d.core.Layer;
 import shoe3d.core.Time;
@@ -167,8 +168,10 @@ class TestScreen2 extends GameScreen
 		return  createActionFromTracks( "Idle", untyped skm.geometry.animations, untyped __js__ ("THREE.LoopPingPong"), 1 );
 	}
 	
+	@:allow(shoe3d)
 	override public function onUpdate()
 	{
+		trace( System.input.keyboard._keyStates.get( KeyCodes.toKeyCode(A) ) );
 		mixer.update( Time.dt );
 		
 	}

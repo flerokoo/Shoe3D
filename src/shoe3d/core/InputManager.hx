@@ -2,7 +2,9 @@ package shoe3d.core;
 import js.Browser;
 import js.html.CanvasElement;
 import js.html.DivElement;
+import js.html.KeyboardEvent;
 import js.html.MouseEvent;
+import shoe3d.core.input.KeyboardManager;
 import shoe3d.core.input.MouseManager;
 import shoe3d.core.input.PointerManager;
 import shoe3d.core.input.TouchManager;
@@ -19,6 +21,7 @@ class InputManager
 	public static var pointer(default, null):PointerManager;
 	public static var mouse(default, null):MouseManager;
 	public static var touch(default, null):TouchManager;
+	public static var keyboard(default, null):KeyboardManager;
 	
 	static var _canvas:CanvasElement;
 	static var _div:DivElement;
@@ -29,7 +32,7 @@ class InputManager
 		pointer = new PointerManager( );
 		mouse = new MouseManager( );
 		touch = new TouchManager( );
-		
+		keyboard = new KeyboardManager();
 		_canvas = System.renderer.renderer.domElement;
 		_div = System.renderer.container;
 		
@@ -127,6 +130,22 @@ class InputManager
 		} else {
 			touch._disabled = true;
 		}
+		
+		
+		
+		// KEYBOARD
+		keyboard = new KeyboardManager();
+		var onKey = function( event:KeyboardEvent ) {
+			switch( event.type ) {
+				case "keydown":
+					if ( keyboard.submitDown( event.keyCode ) )
+						event.preventDefault();
+				case "keyup":
+					keyboard.submitUp( event.keyCode );
+			}
+		}
+		Browser.window.addEventListener("keydown", onKey, false);
+        Browser.window.addEventListener("keyup", onKey, false);
 	}
 	
 	private static inline function getX (event :Dynamic, bounds :Dynamic) :Float

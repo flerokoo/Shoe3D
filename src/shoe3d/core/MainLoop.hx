@@ -15,6 +15,9 @@ import shoe3d.util.signal.ZeroSignal;
 class MainLoop
 {
 
+	/**
+	 * Called on frame exit (Everything is updated)
+	 */
 	private var _frame:SingleSignal<Float>;
 	private var _frames:Int = 0;
 	private var _paused:Bool = true;
@@ -93,6 +96,7 @@ class MainLoop
 		// TODO Fix average FPS measurement
 		averageFPS = 1 / (_totalUpdateTime/(_frames-1));
 		
+		System.input.keyboard.onFrameExit();
 		_frame.emit( Time.dt );	
 		
 	}

@@ -295,6 +295,13 @@ haxe.ds.IntMap.prototype = {
 		delete(this.h[key]);
 		return true;
 	}
+	,keys: function() {
+		var a = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) a.push(key | 0);
+		}
+		return HxOverrides.iter(a);
+	}
 	,__class__: haxe.ds.IntMap
 };
 haxe.ds.StringMap = function() {
@@ -671,6 +678,7 @@ shoe3d.core.InputManager.init = function() {
 	shoe3d.core.InputManager.pointer = new shoe3d.core.input.PointerManager();
 	shoe3d.core.InputManager.mouse = new shoe3d.core.input.MouseManager();
 	shoe3d.core.InputManager.touch = new shoe3d.core.input.TouchManager();
+	shoe3d.core.InputManager.keyboard = new shoe3d.core.input.KeyboardManager();
 	shoe3d.core.InputManager._canvas = shoe3d.System.renderer.renderer.domElement;
 	shoe3d.core.InputManager._div = shoe3d.System.renderer.container;
 	var onMouse = function(event) {
@@ -773,6 +781,20 @@ shoe3d.core.InputManager.init = function() {
 			shoe3d.core.InputManager._canvas.addEventListener("MSPointerUp",onTouch,false);
 		}
 	} else shoe3d.core.InputManager.touch._disabled = true;
+	shoe3d.core.InputManager.keyboard = new shoe3d.core.input.KeyboardManager();
+	var onKey = function(event1) {
+		var _g2 = event1.type;
+		switch(_g2) {
+		case "keydown":
+			if(shoe3d.core.InputManager.keyboard.submitDown(event1.keyCode)) event1.preventDefault();
+			break;
+		case "keyup":
+			shoe3d.core.InputManager.keyboard.submitUp(event1.keyCode);
+			break;
+		}
+	};
+	window.addEventListener("keydown",onKey,false);
+	window.addEventListener("keyup",onKey,false);
 };
 shoe3d.core.InputManager.getX = function(event,bounds) {
 	return (event.clientX - bounds.left) * shoe3d.System.window.get_width() / bounds.width;
@@ -1951,6 +1973,7 @@ shoe3d.core.MainLoop.prototype = {
 		this._totalUpdateTime += this.frameTime;
 		this.FPS = 1 / this.frameTime;
 		this.averageFPS = 1 / (this._totalUpdateTime / (this._frames - 1));
+		shoe3d.System.input.keyboard.onFrameExit();
 		this._frame.emit(shoe3d.core.Time.dt);
 	}
 	,skipFrame: function() {
@@ -2098,6 +2121,795 @@ shoe3d.core.input = {};
 shoe3d.core.input.EventSource = { __ename__ : true, __constructs__ : ["Mouse","Touch"] };
 shoe3d.core.input.EventSource.Mouse = function(e) { var $x = ["Mouse",0,e]; $x.__enum__ = shoe3d.core.input.EventSource; $x.toString = $estr; return $x; };
 shoe3d.core.input.EventSource.Touch = function(e) { var $x = ["Touch",1,e]; $x.__enum__ = shoe3d.core.input.EventSource; $x.toString = $estr; return $x; };
+shoe3d.core.input.Key = { __ename__ : true, __constructs__ : ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","Number0","Number1","Number2","Number3","Number4","Number5","Number6","Number7","Number8","Number9","Numpad0","Numpad1","Numpad2","Numpad3","Numpad4","Numpad5","Numpad6","Numpad7","Numpad8","Numpad9","NumpadAdd","NumpadDecimal","NumpadDivide","NumpadEnter","NumpadMultiply","NumpadSubtract","F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","F13","F14","F15","Left","Up","Right","Down","Alt","Backquote","Backslash","Backspace","CapsLock","Comma","Command","Control","Delete","End","Enter","Equals","Escape","Home","Insert","LeftBracket","Minus","PageDown","PageUp","Period","Quote","RightBracket","Semicolon","Shift","Slash","Space","Tab","Menu","Search","Unknown"] };
+shoe3d.core.input.Key.A = ["A",0];
+shoe3d.core.input.Key.A.toString = $estr;
+shoe3d.core.input.Key.A.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.B = ["B",1];
+shoe3d.core.input.Key.B.toString = $estr;
+shoe3d.core.input.Key.B.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.C = ["C",2];
+shoe3d.core.input.Key.C.toString = $estr;
+shoe3d.core.input.Key.C.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.D = ["D",3];
+shoe3d.core.input.Key.D.toString = $estr;
+shoe3d.core.input.Key.D.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.E = ["E",4];
+shoe3d.core.input.Key.E.toString = $estr;
+shoe3d.core.input.Key.E.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F = ["F",5];
+shoe3d.core.input.Key.F.toString = $estr;
+shoe3d.core.input.Key.F.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.G = ["G",6];
+shoe3d.core.input.Key.G.toString = $estr;
+shoe3d.core.input.Key.G.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.H = ["H",7];
+shoe3d.core.input.Key.H.toString = $estr;
+shoe3d.core.input.Key.H.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.I = ["I",8];
+shoe3d.core.input.Key.I.toString = $estr;
+shoe3d.core.input.Key.I.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.J = ["J",9];
+shoe3d.core.input.Key.J.toString = $estr;
+shoe3d.core.input.Key.J.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.K = ["K",10];
+shoe3d.core.input.Key.K.toString = $estr;
+shoe3d.core.input.Key.K.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.L = ["L",11];
+shoe3d.core.input.Key.L.toString = $estr;
+shoe3d.core.input.Key.L.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.M = ["M",12];
+shoe3d.core.input.Key.M.toString = $estr;
+shoe3d.core.input.Key.M.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.N = ["N",13];
+shoe3d.core.input.Key.N.toString = $estr;
+shoe3d.core.input.Key.N.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.O = ["O",14];
+shoe3d.core.input.Key.O.toString = $estr;
+shoe3d.core.input.Key.O.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.P = ["P",15];
+shoe3d.core.input.Key.P.toString = $estr;
+shoe3d.core.input.Key.P.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Q = ["Q",16];
+shoe3d.core.input.Key.Q.toString = $estr;
+shoe3d.core.input.Key.Q.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.R = ["R",17];
+shoe3d.core.input.Key.R.toString = $estr;
+shoe3d.core.input.Key.R.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.S = ["S",18];
+shoe3d.core.input.Key.S.toString = $estr;
+shoe3d.core.input.Key.S.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.T = ["T",19];
+shoe3d.core.input.Key.T.toString = $estr;
+shoe3d.core.input.Key.T.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.U = ["U",20];
+shoe3d.core.input.Key.U.toString = $estr;
+shoe3d.core.input.Key.U.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.V = ["V",21];
+shoe3d.core.input.Key.V.toString = $estr;
+shoe3d.core.input.Key.V.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.W = ["W",22];
+shoe3d.core.input.Key.W.toString = $estr;
+shoe3d.core.input.Key.W.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.X = ["X",23];
+shoe3d.core.input.Key.X.toString = $estr;
+shoe3d.core.input.Key.X.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Y = ["Y",24];
+shoe3d.core.input.Key.Y.toString = $estr;
+shoe3d.core.input.Key.Y.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Z = ["Z",25];
+shoe3d.core.input.Key.Z.toString = $estr;
+shoe3d.core.input.Key.Z.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Number0 = ["Number0",26];
+shoe3d.core.input.Key.Number0.toString = $estr;
+shoe3d.core.input.Key.Number0.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Number1 = ["Number1",27];
+shoe3d.core.input.Key.Number1.toString = $estr;
+shoe3d.core.input.Key.Number1.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Number2 = ["Number2",28];
+shoe3d.core.input.Key.Number2.toString = $estr;
+shoe3d.core.input.Key.Number2.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Number3 = ["Number3",29];
+shoe3d.core.input.Key.Number3.toString = $estr;
+shoe3d.core.input.Key.Number3.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Number4 = ["Number4",30];
+shoe3d.core.input.Key.Number4.toString = $estr;
+shoe3d.core.input.Key.Number4.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Number5 = ["Number5",31];
+shoe3d.core.input.Key.Number5.toString = $estr;
+shoe3d.core.input.Key.Number5.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Number6 = ["Number6",32];
+shoe3d.core.input.Key.Number6.toString = $estr;
+shoe3d.core.input.Key.Number6.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Number7 = ["Number7",33];
+shoe3d.core.input.Key.Number7.toString = $estr;
+shoe3d.core.input.Key.Number7.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Number8 = ["Number8",34];
+shoe3d.core.input.Key.Number8.toString = $estr;
+shoe3d.core.input.Key.Number8.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Number9 = ["Number9",35];
+shoe3d.core.input.Key.Number9.toString = $estr;
+shoe3d.core.input.Key.Number9.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Numpad0 = ["Numpad0",36];
+shoe3d.core.input.Key.Numpad0.toString = $estr;
+shoe3d.core.input.Key.Numpad0.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Numpad1 = ["Numpad1",37];
+shoe3d.core.input.Key.Numpad1.toString = $estr;
+shoe3d.core.input.Key.Numpad1.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Numpad2 = ["Numpad2",38];
+shoe3d.core.input.Key.Numpad2.toString = $estr;
+shoe3d.core.input.Key.Numpad2.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Numpad3 = ["Numpad3",39];
+shoe3d.core.input.Key.Numpad3.toString = $estr;
+shoe3d.core.input.Key.Numpad3.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Numpad4 = ["Numpad4",40];
+shoe3d.core.input.Key.Numpad4.toString = $estr;
+shoe3d.core.input.Key.Numpad4.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Numpad5 = ["Numpad5",41];
+shoe3d.core.input.Key.Numpad5.toString = $estr;
+shoe3d.core.input.Key.Numpad5.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Numpad6 = ["Numpad6",42];
+shoe3d.core.input.Key.Numpad6.toString = $estr;
+shoe3d.core.input.Key.Numpad6.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Numpad7 = ["Numpad7",43];
+shoe3d.core.input.Key.Numpad7.toString = $estr;
+shoe3d.core.input.Key.Numpad7.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Numpad8 = ["Numpad8",44];
+shoe3d.core.input.Key.Numpad8.toString = $estr;
+shoe3d.core.input.Key.Numpad8.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Numpad9 = ["Numpad9",45];
+shoe3d.core.input.Key.Numpad9.toString = $estr;
+shoe3d.core.input.Key.Numpad9.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.NumpadAdd = ["NumpadAdd",46];
+shoe3d.core.input.Key.NumpadAdd.toString = $estr;
+shoe3d.core.input.Key.NumpadAdd.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.NumpadDecimal = ["NumpadDecimal",47];
+shoe3d.core.input.Key.NumpadDecimal.toString = $estr;
+shoe3d.core.input.Key.NumpadDecimal.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.NumpadDivide = ["NumpadDivide",48];
+shoe3d.core.input.Key.NumpadDivide.toString = $estr;
+shoe3d.core.input.Key.NumpadDivide.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.NumpadEnter = ["NumpadEnter",49];
+shoe3d.core.input.Key.NumpadEnter.toString = $estr;
+shoe3d.core.input.Key.NumpadEnter.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.NumpadMultiply = ["NumpadMultiply",50];
+shoe3d.core.input.Key.NumpadMultiply.toString = $estr;
+shoe3d.core.input.Key.NumpadMultiply.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.NumpadSubtract = ["NumpadSubtract",51];
+shoe3d.core.input.Key.NumpadSubtract.toString = $estr;
+shoe3d.core.input.Key.NumpadSubtract.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F1 = ["F1",52];
+shoe3d.core.input.Key.F1.toString = $estr;
+shoe3d.core.input.Key.F1.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F2 = ["F2",53];
+shoe3d.core.input.Key.F2.toString = $estr;
+shoe3d.core.input.Key.F2.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F3 = ["F3",54];
+shoe3d.core.input.Key.F3.toString = $estr;
+shoe3d.core.input.Key.F3.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F4 = ["F4",55];
+shoe3d.core.input.Key.F4.toString = $estr;
+shoe3d.core.input.Key.F4.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F5 = ["F5",56];
+shoe3d.core.input.Key.F5.toString = $estr;
+shoe3d.core.input.Key.F5.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F6 = ["F6",57];
+shoe3d.core.input.Key.F6.toString = $estr;
+shoe3d.core.input.Key.F6.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F7 = ["F7",58];
+shoe3d.core.input.Key.F7.toString = $estr;
+shoe3d.core.input.Key.F7.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F8 = ["F8",59];
+shoe3d.core.input.Key.F8.toString = $estr;
+shoe3d.core.input.Key.F8.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F9 = ["F9",60];
+shoe3d.core.input.Key.F9.toString = $estr;
+shoe3d.core.input.Key.F9.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F10 = ["F10",61];
+shoe3d.core.input.Key.F10.toString = $estr;
+shoe3d.core.input.Key.F10.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F11 = ["F11",62];
+shoe3d.core.input.Key.F11.toString = $estr;
+shoe3d.core.input.Key.F11.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F12 = ["F12",63];
+shoe3d.core.input.Key.F12.toString = $estr;
+shoe3d.core.input.Key.F12.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F13 = ["F13",64];
+shoe3d.core.input.Key.F13.toString = $estr;
+shoe3d.core.input.Key.F13.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F14 = ["F14",65];
+shoe3d.core.input.Key.F14.toString = $estr;
+shoe3d.core.input.Key.F14.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.F15 = ["F15",66];
+shoe3d.core.input.Key.F15.toString = $estr;
+shoe3d.core.input.Key.F15.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Left = ["Left",67];
+shoe3d.core.input.Key.Left.toString = $estr;
+shoe3d.core.input.Key.Left.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Up = ["Up",68];
+shoe3d.core.input.Key.Up.toString = $estr;
+shoe3d.core.input.Key.Up.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Right = ["Right",69];
+shoe3d.core.input.Key.Right.toString = $estr;
+shoe3d.core.input.Key.Right.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Down = ["Down",70];
+shoe3d.core.input.Key.Down.toString = $estr;
+shoe3d.core.input.Key.Down.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Alt = ["Alt",71];
+shoe3d.core.input.Key.Alt.toString = $estr;
+shoe3d.core.input.Key.Alt.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Backquote = ["Backquote",72];
+shoe3d.core.input.Key.Backquote.toString = $estr;
+shoe3d.core.input.Key.Backquote.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Backslash = ["Backslash",73];
+shoe3d.core.input.Key.Backslash.toString = $estr;
+shoe3d.core.input.Key.Backslash.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Backspace = ["Backspace",74];
+shoe3d.core.input.Key.Backspace.toString = $estr;
+shoe3d.core.input.Key.Backspace.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.CapsLock = ["CapsLock",75];
+shoe3d.core.input.Key.CapsLock.toString = $estr;
+shoe3d.core.input.Key.CapsLock.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Comma = ["Comma",76];
+shoe3d.core.input.Key.Comma.toString = $estr;
+shoe3d.core.input.Key.Comma.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Command = ["Command",77];
+shoe3d.core.input.Key.Command.toString = $estr;
+shoe3d.core.input.Key.Command.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Control = ["Control",78];
+shoe3d.core.input.Key.Control.toString = $estr;
+shoe3d.core.input.Key.Control.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Delete = ["Delete",79];
+shoe3d.core.input.Key.Delete.toString = $estr;
+shoe3d.core.input.Key.Delete.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.End = ["End",80];
+shoe3d.core.input.Key.End.toString = $estr;
+shoe3d.core.input.Key.End.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Enter = ["Enter",81];
+shoe3d.core.input.Key.Enter.toString = $estr;
+shoe3d.core.input.Key.Enter.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Equals = ["Equals",82];
+shoe3d.core.input.Key.Equals.toString = $estr;
+shoe3d.core.input.Key.Equals.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Escape = ["Escape",83];
+shoe3d.core.input.Key.Escape.toString = $estr;
+shoe3d.core.input.Key.Escape.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Home = ["Home",84];
+shoe3d.core.input.Key.Home.toString = $estr;
+shoe3d.core.input.Key.Home.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Insert = ["Insert",85];
+shoe3d.core.input.Key.Insert.toString = $estr;
+shoe3d.core.input.Key.Insert.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.LeftBracket = ["LeftBracket",86];
+shoe3d.core.input.Key.LeftBracket.toString = $estr;
+shoe3d.core.input.Key.LeftBracket.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Minus = ["Minus",87];
+shoe3d.core.input.Key.Minus.toString = $estr;
+shoe3d.core.input.Key.Minus.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.PageDown = ["PageDown",88];
+shoe3d.core.input.Key.PageDown.toString = $estr;
+shoe3d.core.input.Key.PageDown.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.PageUp = ["PageUp",89];
+shoe3d.core.input.Key.PageUp.toString = $estr;
+shoe3d.core.input.Key.PageUp.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Period = ["Period",90];
+shoe3d.core.input.Key.Period.toString = $estr;
+shoe3d.core.input.Key.Period.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Quote = ["Quote",91];
+shoe3d.core.input.Key.Quote.toString = $estr;
+shoe3d.core.input.Key.Quote.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.RightBracket = ["RightBracket",92];
+shoe3d.core.input.Key.RightBracket.toString = $estr;
+shoe3d.core.input.Key.RightBracket.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Semicolon = ["Semicolon",93];
+shoe3d.core.input.Key.Semicolon.toString = $estr;
+shoe3d.core.input.Key.Semicolon.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Shift = ["Shift",94];
+shoe3d.core.input.Key.Shift.toString = $estr;
+shoe3d.core.input.Key.Shift.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Slash = ["Slash",95];
+shoe3d.core.input.Key.Slash.toString = $estr;
+shoe3d.core.input.Key.Slash.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Space = ["Space",96];
+shoe3d.core.input.Key.Space.toString = $estr;
+shoe3d.core.input.Key.Space.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Tab = ["Tab",97];
+shoe3d.core.input.Key.Tab.toString = $estr;
+shoe3d.core.input.Key.Tab.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Menu = ["Menu",98];
+shoe3d.core.input.Key.Menu.toString = $estr;
+shoe3d.core.input.Key.Menu.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Search = ["Search",99];
+shoe3d.core.input.Key.Search.toString = $estr;
+shoe3d.core.input.Key.Search.__enum__ = shoe3d.core.input.Key;
+shoe3d.core.input.Key.Unknown = function(keyCode) { var $x = ["Unknown",100,keyCode]; $x.__enum__ = shoe3d.core.input.Key; $x.toString = $estr; return $x; };
+shoe3d.core.input.KeyCodes = function() { };
+shoe3d.core.input.KeyCodes.__name__ = ["shoe3d","core","input","KeyCodes"];
+shoe3d.core.input.KeyCodes.toKey = function(keyCode) {
+	switch(keyCode) {
+	case 65:
+		return shoe3d.core.input.Key.A;
+	case 66:
+		return shoe3d.core.input.Key.B;
+	case 67:
+		return shoe3d.core.input.Key.C;
+	case 68:
+		return shoe3d.core.input.Key.D;
+	case 69:
+		return shoe3d.core.input.Key.E;
+	case 70:
+		return shoe3d.core.input.Key.F;
+	case 71:
+		return shoe3d.core.input.Key.G;
+	case 72:
+		return shoe3d.core.input.Key.H;
+	case 73:
+		return shoe3d.core.input.Key.I;
+	case 74:
+		return shoe3d.core.input.Key.J;
+	case 75:
+		return shoe3d.core.input.Key.K;
+	case 76:
+		return shoe3d.core.input.Key.L;
+	case 77:
+		return shoe3d.core.input.Key.M;
+	case 78:
+		return shoe3d.core.input.Key.N;
+	case 79:
+		return shoe3d.core.input.Key.O;
+	case 80:
+		return shoe3d.core.input.Key.P;
+	case 81:
+		return shoe3d.core.input.Key.Q;
+	case 82:
+		return shoe3d.core.input.Key.R;
+	case 83:
+		return shoe3d.core.input.Key.S;
+	case 84:
+		return shoe3d.core.input.Key.T;
+	case 85:
+		return shoe3d.core.input.Key.U;
+	case 86:
+		return shoe3d.core.input.Key.V;
+	case 87:
+		return shoe3d.core.input.Key.W;
+	case 88:
+		return shoe3d.core.input.Key.X;
+	case 89:
+		return shoe3d.core.input.Key.Y;
+	case 90:
+		return shoe3d.core.input.Key.Z;
+	case 48:
+		return shoe3d.core.input.Key.Number0;
+	case 49:
+		return shoe3d.core.input.Key.Number1;
+	case 50:
+		return shoe3d.core.input.Key.Number2;
+	case 51:
+		return shoe3d.core.input.Key.Number3;
+	case 52:
+		return shoe3d.core.input.Key.Number4;
+	case 53:
+		return shoe3d.core.input.Key.Number5;
+	case 54:
+		return shoe3d.core.input.Key.Number6;
+	case 55:
+		return shoe3d.core.input.Key.Number7;
+	case 56:
+		return shoe3d.core.input.Key.Number8;
+	case 57:
+		return shoe3d.core.input.Key.Number9;
+	case 96:
+		return shoe3d.core.input.Key.Numpad0;
+	case 97:
+		return shoe3d.core.input.Key.Numpad1;
+	case 98:
+		return shoe3d.core.input.Key.Numpad2;
+	case 99:
+		return shoe3d.core.input.Key.Numpad3;
+	case 100:
+		return shoe3d.core.input.Key.Numpad4;
+	case 101:
+		return shoe3d.core.input.Key.Numpad5;
+	case 102:
+		return shoe3d.core.input.Key.Numpad6;
+	case 103:
+		return shoe3d.core.input.Key.Numpad7;
+	case 104:
+		return shoe3d.core.input.Key.Numpad8;
+	case 105:
+		return shoe3d.core.input.Key.Numpad9;
+	case 107:
+		return shoe3d.core.input.Key.NumpadAdd;
+	case 110:
+		return shoe3d.core.input.Key.NumpadDecimal;
+	case 111:
+		return shoe3d.core.input.Key.NumpadDivide;
+	case 108:
+		return shoe3d.core.input.Key.NumpadEnter;
+	case 106:
+		return shoe3d.core.input.Key.NumpadMultiply;
+	case 109:
+		return shoe3d.core.input.Key.NumpadSubtract;
+	case 112:
+		return shoe3d.core.input.Key.F1;
+	case 113:
+		return shoe3d.core.input.Key.F2;
+	case 114:
+		return shoe3d.core.input.Key.F3;
+	case 115:
+		return shoe3d.core.input.Key.F4;
+	case 116:
+		return shoe3d.core.input.Key.F5;
+	case 117:
+		return shoe3d.core.input.Key.F6;
+	case 118:
+		return shoe3d.core.input.Key.F7;
+	case 119:
+		return shoe3d.core.input.Key.F8;
+	case 120:
+		return shoe3d.core.input.Key.F9;
+	case 121:
+		return shoe3d.core.input.Key.F10;
+	case 122:
+		return shoe3d.core.input.Key.F11;
+	case 123:
+		return shoe3d.core.input.Key.F12;
+	case 37:
+		return shoe3d.core.input.Key.Left;
+	case 38:
+		return shoe3d.core.input.Key.Up;
+	case 39:
+		return shoe3d.core.input.Key.Right;
+	case 40:
+		return shoe3d.core.input.Key.Down;
+	case 18:
+		return shoe3d.core.input.Key.Alt;
+	case 192:
+		return shoe3d.core.input.Key.Backquote;
+	case 220:
+		return shoe3d.core.input.Key.Backslash;
+	case 8:
+		return shoe3d.core.input.Key.Backspace;
+	case 20:
+		return shoe3d.core.input.Key.CapsLock;
+	case 188:
+		return shoe3d.core.input.Key.Comma;
+	case 15:
+		return shoe3d.core.input.Key.Command;
+	case 17:
+		return shoe3d.core.input.Key.Control;
+	case 46:
+		return shoe3d.core.input.Key.Delete;
+	case 35:
+		return shoe3d.core.input.Key.End;
+	case 13:
+		return shoe3d.core.input.Key.Enter;
+	case 187:
+		return shoe3d.core.input.Key.Equals;
+	case 27:
+		return shoe3d.core.input.Key.Escape;
+	case 36:
+		return shoe3d.core.input.Key.Home;
+	case 45:
+		return shoe3d.core.input.Key.Insert;
+	case 219:
+		return shoe3d.core.input.Key.LeftBracket;
+	case 189:
+		return shoe3d.core.input.Key.Minus;
+	case 34:
+		return shoe3d.core.input.Key.PageDown;
+	case 33:
+		return shoe3d.core.input.Key.PageUp;
+	case 190:
+		return shoe3d.core.input.Key.Period;
+	case 222:
+		return shoe3d.core.input.Key.Quote;
+	case 221:
+		return shoe3d.core.input.Key.RightBracket;
+	case 186:
+		return shoe3d.core.input.Key.Semicolon;
+	case 16:
+		return shoe3d.core.input.Key.Shift;
+	case 191:
+		return shoe3d.core.input.Key.Slash;
+	case 32:
+		return shoe3d.core.input.Key.Space;
+	case 9:
+		return shoe3d.core.input.Key.Tab;
+	case 16777234:
+		return shoe3d.core.input.Key.Menu;
+	case 16777247:
+		return shoe3d.core.input.Key.Search;
+	}
+	return shoe3d.core.input.Key.Unknown(keyCode);
+};
+shoe3d.core.input.KeyCodes.toKeyCode = function(key) {
+	switch(key[1]) {
+	case 0:
+		return 65;
+	case 1:
+		return 66;
+	case 2:
+		return 67;
+	case 3:
+		return 68;
+	case 4:
+		return 69;
+	case 5:
+		return 70;
+	case 6:
+		return 71;
+	case 7:
+		return 72;
+	case 8:
+		return 73;
+	case 9:
+		return 74;
+	case 10:
+		return 75;
+	case 11:
+		return 76;
+	case 12:
+		return 77;
+	case 13:
+		return 78;
+	case 14:
+		return 79;
+	case 15:
+		return 80;
+	case 16:
+		return 81;
+	case 17:
+		return 82;
+	case 18:
+		return 83;
+	case 19:
+		return 84;
+	case 20:
+		return 85;
+	case 21:
+		return 86;
+	case 22:
+		return 87;
+	case 23:
+		return 88;
+	case 24:
+		return 89;
+	case 25:
+		return 90;
+	case 26:
+		return 48;
+	case 27:
+		return 49;
+	case 28:
+		return 50;
+	case 29:
+		return 51;
+	case 30:
+		return 52;
+	case 31:
+		return 53;
+	case 32:
+		return 54;
+	case 33:
+		return 55;
+	case 34:
+		return 56;
+	case 35:
+		return 57;
+	case 36:
+		return 96;
+	case 37:
+		return 97;
+	case 38:
+		return 98;
+	case 39:
+		return 99;
+	case 40:
+		return 100;
+	case 41:
+		return 101;
+	case 42:
+		return 102;
+	case 43:
+		return 103;
+	case 44:
+		return 104;
+	case 45:
+		return 105;
+	case 46:
+		return 107;
+	case 47:
+		return 110;
+	case 48:
+		return 111;
+	case 49:
+		return 108;
+	case 50:
+		return 106;
+	case 51:
+		return 109;
+	case 52:
+		return 112;
+	case 53:
+		return 113;
+	case 54:
+		return 114;
+	case 55:
+		return 115;
+	case 56:
+		return 116;
+	case 57:
+		return 117;
+	case 58:
+		return 118;
+	case 59:
+		return 119;
+	case 60:
+		return 120;
+	case 61:
+		return 121;
+	case 62:
+		return 122;
+	case 63:
+		return 123;
+	case 64:
+		return 124;
+	case 65:
+		return 125;
+	case 66:
+		return 126;
+	case 67:
+		return 37;
+	case 68:
+		return 38;
+	case 69:
+		return 39;
+	case 70:
+		return 40;
+	case 71:
+		return 18;
+	case 72:
+		return 192;
+	case 73:
+		return 220;
+	case 74:
+		return 8;
+	case 75:
+		return 20;
+	case 76:
+		return 188;
+	case 77:
+		return 15;
+	case 78:
+		return 17;
+	case 79:
+		return 46;
+	case 80:
+		return 35;
+	case 81:
+		return 13;
+	case 82:
+		return 187;
+	case 83:
+		return 27;
+	case 84:
+		return 36;
+	case 85:
+		return 45;
+	case 86:
+		return 219;
+	case 87:
+		return 189;
+	case 88:
+		return 34;
+	case 89:
+		return 33;
+	case 90:
+		return 190;
+	case 91:
+		return 222;
+	case 92:
+		return 221;
+	case 93:
+		return 186;
+	case 94:
+		return 16;
+	case 95:
+		return 191;
+	case 96:
+		return 32;
+	case 97:
+		return 9;
+	case 98:
+		return 16777234;
+	case 99:
+		return 16777247;
+	case 100:
+		var keyCode = key[2];
+		return keyCode;
+	}
+};
+shoe3d.core.input.KeyboardEvent = function() {
+	this.id = 0;
+};
+shoe3d.core.input.KeyboardEvent.__name__ = ["shoe3d","core","input","KeyboardEvent"];
+shoe3d.core.input.KeyboardEvent.prototype = {
+	key: null
+	,id: null
+	,set: function(id,key) {
+		this.id = id;
+		this.key = key;
+		return this;
+	}
+	,__class__: shoe3d.core.input.KeyboardEvent
+};
+shoe3d.core.input.KeyboardManager = function() {
+	this.down = new shoe3d.util.signal.SingleSignal();
+	this.up = new shoe3d.util.signal.SingleSignal();
+	this.backButton = new shoe3d.util.signal.ZeroSignal();
+	this._keyStates = new haxe.ds.IntMap();
+};
+shoe3d.core.input.KeyboardManager.__name__ = ["shoe3d","core","input","KeyboardManager"];
+shoe3d.core.input.KeyboardManager.prototype = {
+	down: null
+	,up: null
+	,backButton: null
+	,isDown: function(key) {
+		return this.isCodeDown(shoe3d.core.input.KeyCodes.toKeyCode(key));
+	}
+	,isJustPressed: function(key) {
+		return this.isCodeJustPressed(shoe3d.core.input.KeyCodes.toKeyCode(key));
+	}
+	,isCodeDown: function(code) {
+		return this._keyStates.exists(code) && this._keyStates.get(code) != shoe3d.core.input.KeyState.Up;
+	}
+	,isCodeJustPressed: function(code) {
+		return this._keyStates.exists(code) && this._keyStates.get(code) == shoe3d.core.input.KeyState.JustPressed;
+	}
+	,submitDown: function(keyCode) {
+		if(keyCode == 16777238) {
+			if(this.backButton.hasListeners()) {
+				this.backButton.emit();
+				return true;
+			}
+			return false;
+		}
+		if(!this.isCodeDown(keyCode)) {
+			this._keyStates.set(keyCode,shoe3d.core.input.KeyState.JustPressed);
+			shoe3d.core.input.KeyboardManager._sharedEvent.set(shoe3d.core.input.KeyboardManager._sharedEvent.id + 1,shoe3d.core.input.KeyCodes.toKey(keyCode));
+			this.down.emit(shoe3d.core.input.KeyboardManager._sharedEvent);
+		}
+		return true;
+	}
+	,submitUp: function(keyCode) {
+		if(this.isCodeDown(keyCode)) {
+			this._keyStates.remove(keyCode);
+			shoe3d.core.input.KeyboardManager._sharedEvent.set(shoe3d.core.input.KeyboardManager._sharedEvent.id + 1,shoe3d.core.input.KeyCodes.toKey(keyCode));
+			this.up.emit(shoe3d.core.input.KeyboardManager._sharedEvent);
+		}
+	}
+	,onFrameExit: function() {
+		var $it0 = this._keyStates.keys();
+		while( $it0.hasNext() ) {
+			var i = $it0.next();
+			if(this._keyStates.get(i) == shoe3d.core.input.KeyState.JustPressed) this._keyStates.set(i,shoe3d.core.input.KeyState.Down);
+		}
+	}
+	,_keyStates: null
+	,__class__: shoe3d.core.input.KeyboardManager
+};
+shoe3d.core.input.KeyState = { __ename__ : true, __constructs__ : ["Down","JustPressed","Up"] };
+shoe3d.core.input.KeyState.Down = ["Down",0];
+shoe3d.core.input.KeyState.Down.toString = $estr;
+shoe3d.core.input.KeyState.Down.__enum__ = shoe3d.core.input.KeyState;
+shoe3d.core.input.KeyState.JustPressed = ["JustPressed",1];
+shoe3d.core.input.KeyState.JustPressed.toString = $estr;
+shoe3d.core.input.KeyState.JustPressed.__enum__ = shoe3d.core.input.KeyState;
+shoe3d.core.input.KeyState.Up = ["Up",2];
+shoe3d.core.input.KeyState.Up.toString = $estr;
+shoe3d.core.input.KeyState.Up.__enum__ = shoe3d.core.input.KeyState;
 shoe3d.core.input.MouseCursor = { __ename__ : true, __constructs__ : ["Default","Button","None"] };
 shoe3d.core.input.MouseCursor.Default = ["Default",0];
 shoe3d.core.input.MouseCursor.Default.toString = $estr;
@@ -2916,7 +3728,7 @@ tests.TestScreen2 = function() {
 	layer1.addChild(anim);
 	this.skm = skm;
 	var t = this.getIdleAction();
-	haxe.Log.trace(t.clip.tracks,{ fileName : "TestScreen2.hx", lineNumber : 82, className : "tests.TestScreen2", methodName : "new"});
+	haxe.Log.trace(t.clip.tracks,{ fileName : "TestScreen2.hx", lineNumber : 83, className : "tests.TestScreen2", methodName : "new"});
 	var act =  new THREE.AnimationAction( skm.geometry.animations[0] );
 	act.timeScale = 10;
 	act.loop = THREE.LoopOnce;
@@ -2933,11 +3745,11 @@ tests.TestScreen2 = function() {
 	layer1.camera.lookAt(anim.transform.position);
 	layer1.camera.up = new THREE.Vector3(0,0,1);
 	var last = idle;
-	haxe.Log.trace(THREE.LoopPingPong,{ fileName : "TestScreen2.hx", lineNumber : 113, className : "tests.TestScreen2", methodName : "new"});
+	haxe.Log.trace(THREE.LoopPingPong,{ fileName : "TestScreen2.hx", lineNumber : 114, className : "tests.TestScreen2", methodName : "new"});
 	var crossed = false;
 	var click = function(e) {
 		crossed = true;
-		haxe.Log.trace("CROSSFADE",{ fileName : "TestScreen2.hx", lineNumber : 118, className : "tests.TestScreen2", methodName : "new"});
+		haxe.Log.trace("CROSSFADE",{ fileName : "TestScreen2.hx", lineNumber : 119, className : "tests.TestScreen2", methodName : "new"});
 		_g.mixer.removeAllActions();
 		var to = _g.getKickAction();
 		_g.mixer.play(to);
@@ -2947,10 +3759,9 @@ tests.TestScreen2 = function() {
 	var evt;
 	shoe3d.System.input.mouse.up.connect(click);
 	var loop = function(e1) {
-		haxe.Log.trace(e1.action.loopCount,{ fileName : "TestScreen2.hx", lineNumber : 132, className : "tests.TestScreen2", methodName : "new"});
 		if(e1.action == idle || !crossed) return;
 		crossed = false;
-		haxe.Log.trace("FINISHED",{ fileName : "TestScreen2.hx", lineNumber : 137, className : "tests.TestScreen2", methodName : "new"});
+		haxe.Log.trace("FINISHED",{ fileName : "TestScreen2.hx", lineNumber : 136, className : "tests.TestScreen2", methodName : "new"});
 		_g.mixer.removeAllActions();
 		var to1 = _g.getIdleAction();
 		var from = _g.getKickAction();
@@ -2983,6 +3794,12 @@ tests.TestScreen2.prototype = $extend(shoe3d.screen.GameScreen.prototype,{
 		return this.createActionFromTracks("Idle",this.skm.geometry.animations,THREE.LoopPingPong,1);
 	}
 	,onUpdate: function() {
+		haxe.Log.trace((function($this) {
+			var $r;
+			var key = shoe3d.core.input.KeyCodes.toKeyCode(shoe3d.core.input.Key.A);
+			$r = shoe3d.System.input.keyboard._keyStates.get(key);
+			return $r;
+		}(this)),{ fileName : "TestScreen2.hx", lineNumber : 174, className : "tests.TestScreen2", methodName : "onUpdate"});
 		this.mixer.update(shoe3d.core.Time.dt);
 	}
 	,__class__: tests.TestScreen2
@@ -3034,6 +3851,108 @@ shoe3d.System.input = shoe3d.core.InputManager;
 shoe3d.System.updateInfoEveryNthFrame = 6;
 shoe3d.System._infoFrameCounter = 0;
 shoe3d.System._showFPS = false;
+shoe3d.core.input.KeyCodes.A = 65;
+shoe3d.core.input.KeyCodes.B = 66;
+shoe3d.core.input.KeyCodes.C = 67;
+shoe3d.core.input.KeyCodes.D = 68;
+shoe3d.core.input.KeyCodes.E = 69;
+shoe3d.core.input.KeyCodes.F = 70;
+shoe3d.core.input.KeyCodes.G = 71;
+shoe3d.core.input.KeyCodes.H = 72;
+shoe3d.core.input.KeyCodes.I = 73;
+shoe3d.core.input.KeyCodes.J = 74;
+shoe3d.core.input.KeyCodes.K = 75;
+shoe3d.core.input.KeyCodes.L = 76;
+shoe3d.core.input.KeyCodes.M = 77;
+shoe3d.core.input.KeyCodes.N = 78;
+shoe3d.core.input.KeyCodes.O = 79;
+shoe3d.core.input.KeyCodes.P = 80;
+shoe3d.core.input.KeyCodes.Q = 81;
+shoe3d.core.input.KeyCodes.R = 82;
+shoe3d.core.input.KeyCodes.S = 83;
+shoe3d.core.input.KeyCodes.T = 84;
+shoe3d.core.input.KeyCodes.U = 85;
+shoe3d.core.input.KeyCodes.V = 86;
+shoe3d.core.input.KeyCodes.W = 87;
+shoe3d.core.input.KeyCodes.X = 88;
+shoe3d.core.input.KeyCodes.Y = 89;
+shoe3d.core.input.KeyCodes.Z = 90;
+shoe3d.core.input.KeyCodes.NUMBER_0 = 48;
+shoe3d.core.input.KeyCodes.NUMBER_1 = 49;
+shoe3d.core.input.KeyCodes.NUMBER_2 = 50;
+shoe3d.core.input.KeyCodes.NUMBER_3 = 51;
+shoe3d.core.input.KeyCodes.NUMBER_4 = 52;
+shoe3d.core.input.KeyCodes.NUMBER_5 = 53;
+shoe3d.core.input.KeyCodes.NUMBER_6 = 54;
+shoe3d.core.input.KeyCodes.NUMBER_7 = 55;
+shoe3d.core.input.KeyCodes.NUMBER_8 = 56;
+shoe3d.core.input.KeyCodes.NUMBER_9 = 57;
+shoe3d.core.input.KeyCodes.NUMPAD_0 = 96;
+shoe3d.core.input.KeyCodes.NUMPAD_1 = 97;
+shoe3d.core.input.KeyCodes.NUMPAD_2 = 98;
+shoe3d.core.input.KeyCodes.NUMPAD_3 = 99;
+shoe3d.core.input.KeyCodes.NUMPAD_4 = 100;
+shoe3d.core.input.KeyCodes.NUMPAD_5 = 101;
+shoe3d.core.input.KeyCodes.NUMPAD_6 = 102;
+shoe3d.core.input.KeyCodes.NUMPAD_7 = 103;
+shoe3d.core.input.KeyCodes.NUMPAD_8 = 104;
+shoe3d.core.input.KeyCodes.NUMPAD_9 = 105;
+shoe3d.core.input.KeyCodes.NUMPAD_ADD = 107;
+shoe3d.core.input.KeyCodes.NUMPAD_DECIMAL = 110;
+shoe3d.core.input.KeyCodes.NUMPAD_DIVIDE = 111;
+shoe3d.core.input.KeyCodes.NUMPAD_ENTER = 108;
+shoe3d.core.input.KeyCodes.NUMPAD_MULTIPLY = 106;
+shoe3d.core.input.KeyCodes.NUMPAD_SUBTRACT = 109;
+shoe3d.core.input.KeyCodes.F1 = 112;
+shoe3d.core.input.KeyCodes.F2 = 113;
+shoe3d.core.input.KeyCodes.F3 = 114;
+shoe3d.core.input.KeyCodes.F4 = 115;
+shoe3d.core.input.KeyCodes.F5 = 116;
+shoe3d.core.input.KeyCodes.F6 = 117;
+shoe3d.core.input.KeyCodes.F7 = 118;
+shoe3d.core.input.KeyCodes.F8 = 119;
+shoe3d.core.input.KeyCodes.F9 = 120;
+shoe3d.core.input.KeyCodes.F10 = 121;
+shoe3d.core.input.KeyCodes.F11 = 122;
+shoe3d.core.input.KeyCodes.F12 = 123;
+shoe3d.core.input.KeyCodes.F13 = 124;
+shoe3d.core.input.KeyCodes.F14 = 125;
+shoe3d.core.input.KeyCodes.F15 = 126;
+shoe3d.core.input.KeyCodes.LEFT = 37;
+shoe3d.core.input.KeyCodes.UP = 38;
+shoe3d.core.input.KeyCodes.RIGHT = 39;
+shoe3d.core.input.KeyCodes.DOWN = 40;
+shoe3d.core.input.KeyCodes.ALT = 18;
+shoe3d.core.input.KeyCodes.BACKQUOTE = 192;
+shoe3d.core.input.KeyCodes.BACKSLASH = 220;
+shoe3d.core.input.KeyCodes.BACKSPACE = 8;
+shoe3d.core.input.KeyCodes.CAPS_LOCK = 20;
+shoe3d.core.input.KeyCodes.COMMA = 188;
+shoe3d.core.input.KeyCodes.COMMAND = 15;
+shoe3d.core.input.KeyCodes.CONTROL = 17;
+shoe3d.core.input.KeyCodes.DELETE = 46;
+shoe3d.core.input.KeyCodes.END = 35;
+shoe3d.core.input.KeyCodes.ENTER = 13;
+shoe3d.core.input.KeyCodes.EQUALS = 187;
+shoe3d.core.input.KeyCodes.ESCAPE = 27;
+shoe3d.core.input.KeyCodes.HOME = 36;
+shoe3d.core.input.KeyCodes.INSERT = 45;
+shoe3d.core.input.KeyCodes.LEFT_BRACKET = 219;
+shoe3d.core.input.KeyCodes.MINUS = 189;
+shoe3d.core.input.KeyCodes.PAGE_DOWN = 34;
+shoe3d.core.input.KeyCodes.PAGE_UP = 33;
+shoe3d.core.input.KeyCodes.PERIOD = 190;
+shoe3d.core.input.KeyCodes.QUOTE = 222;
+shoe3d.core.input.KeyCodes.RIGHT_BRACKET = 221;
+shoe3d.core.input.KeyCodes.SEMICOLON = 186;
+shoe3d.core.input.KeyCodes.SHIFT = 16;
+shoe3d.core.input.KeyCodes.SLASH = 191;
+shoe3d.core.input.KeyCodes.SPACE = 32;
+shoe3d.core.input.KeyCodes.TAB = 9;
+shoe3d.core.input.KeyCodes.BACK = 16777238;
+shoe3d.core.input.KeyCodes.MENU = 16777234;
+shoe3d.core.input.KeyCodes.SEARCH = 16777247;
+shoe3d.core.input.KeyboardManager._sharedEvent = new shoe3d.core.input.KeyboardEvent();
 shoe3d.core.input.MouseManager._sharedEvent = new shoe3d.core.input.MouseEvent();
 shoe3d.core.input.MouseManager.LEFT = 0;
 shoe3d.core.input.MouseManager.MIDDLE = 1;
