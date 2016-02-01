@@ -56,10 +56,11 @@ class GameScreen
 		return layer;
 	}
 	
-	public function newLayer2D( ?name:String ):Layer2D
+	public function newLayer2D( ?name:String, pointerEnabled:Bool = false ):Layer2D
 	{
 		var layer = new Layer2D( name );
 		layer.addOrthoCamera();
+		layer.pointerEnabled = pointerEnabled;
 		addLayer( layer );
 		return layer;
 	}

@@ -67,8 +67,8 @@ class TestScreen2 extends GameScreen
 		var dl = new DirectionalLight( 0x8EEAFD, 0.8 );
 		dl.position.set(10, 5, 10  );
 		dl.lookAt( new Vector3(0, 0, 0) );
-		layer1.add( dl );
-		layer1.add( new AmbientLight( 0xffffff ) );	
+		layer1.scene.add( dl );
+		layer1.scene.add( new AmbientLight( 0xffffff ) );	
 		
 		
 		var anim = new GameObject();
@@ -93,7 +93,7 @@ class TestScreen2 extends GameScreen
 		//mixer.addEventListener('finished', function (a) { trace("FINISHED"); trace(a); }  );
 		
 		var idle = createActionFromTracks( "Idle", untyped skm.geometry.animations, AnimationLoopType.LoopPingPong, 1 ) ;
-		var kick = createActionFromTracks( "LKick", untyped skm.geometry.animations, untyped __js__ ("THREE.LoopOnce"), 1 ) ;
+		var kick = createActionFromTracks( "LKick", untyped skm.geometry.animations, AnimationLoopType.LoopOnce, 1 ) ;
 		
 		idle.timeScale = 2;
 		kick.timeScale = 5;
@@ -121,7 +121,7 @@ class TestScreen2 extends GameScreen
 			var to = getKickAction();
 			//mixer.play( last );
 			mixer.play( to );
-			mixer.crossFade( last, to, 0.3, true );
+			mixer.crossFade( last, to, 0.3, false );
 			last = kick;
 		};
 		var evt:AnimationEvent;
@@ -133,17 +133,22 @@ class TestScreen2 extends GameScreen
 				if (e.action == idle || ! crossed) return;
 				crossed = false;
 				//mixer.removeEventListener( "loop", loop );
-				trace("FINISHED");			
+				//trace("FINISHED", e.action.clip.name);			
 				mixer.removeAllActions();
 				var to = getIdleAction();
 				var from = getKickAction();
 				//mixer.play( last );
 				mixer.play( to );
-				mixer.crossFade( last, to, 0.3, true );		
+				mixer.crossFade( last, to, 0.3, false );	
 				
 			};
 		
 		mixer.addEventListener( Finished , loop);
+		
+		var end = function(e:AnimationEvent) trace(e.type, e.action.clip.name );
+		
+		mixer.addEventListener( Finished, end );
+		mixer.addEventListener( Loop, end );
 		
 		
 	}
@@ -161,7 +166,7 @@ class TestScreen2 extends GameScreen
 	}
 	
 	function getKickAction() {
-		return createActionFromTracks( "LKick", untyped skm.geometry.animations, untyped __js__ ("THREE.LoopOnce"), 1, 0.01 );
+		return createActionFromTracks( "LKick", untyped skm.geometry.animations, untyped __js__ ("THREE.LoopOnce"), 1, 5 );
 	}
 	
 	function getIdleAction() {
@@ -171,7 +176,7 @@ class TestScreen2 extends GameScreen
 	@:allow(shoe3d)
 	override public function onUpdate()
 	{
-		trace( System.input.keyboard._keyStates.get( KeyCodes.toKeyCode(A) ) );
+		//trace( System.input.keyboard._keyStates.get( KeyCodes.toKeyCode(A) ) );
 		mixer.update( Time.dt );
 		
 	}

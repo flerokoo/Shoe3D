@@ -2,6 +2,7 @@ package shoe3d.core;
 import haxe.Timer;
 import js.Browser;
 import js.html.RequestAnimationFrameCallback;
+import shoe3d.component.Element2D;
 import shoe3d.core.game.GameObject;
 import shoe3d.screen.ScreenManager;
 import shoe3d.util.signal.SingleSignal;
@@ -63,6 +64,8 @@ class MainLoop
 	
 	public function update(  ) 
 	{
+		var startTime;
+		var middleTime;
 		if ( System.window.hidden._ ) return;
 		if ( _skipFrame ) {
 			_skipFrame = false;			
@@ -71,24 +74,36 @@ class MainLoop
 		
 		
 		System.time.update();
-		
-		var startTime = Time.now();		
+		middleTime = startTime = Time.now();		
 		_frames++;
+		Element2D.lastLevel = 0;
 		if ( ScreenManager._currentScreen != null ) 
 		{
 			ScreenManager._currentScreen.onUpdate();
+			for ( layer in ScreenManager._currentScreen.layers ) 
+			{
+				for ( i in layer.children )
+				{
+					Element2D.lastAlpha = 1;
+					updateGameObject( i );
+				}
+			}
+		
+					
+			middleTime = Time.now();
+			updateTime = middleTime - startTime;	
+		
+			render();	
+			
+			#if shoe3d_enable_late_update
 			for ( layer in ScreenManager._currentScreen.layers )
 				for ( i in layer.gameObjects )
 				{
-					updateGameObject( i );
+					lateUpdateGameObject( i );
 				}
+			#end
+			
 		}
-					
-		var middleTime = Time.now();
-		updateTime = middleTime - startTime;	
-		
-		render();		
-		
 		renderTime = Time.now() - middleTime;
 		frameTime = Time.now() - startTime;
 		_totalUpdateTime += frameTime;		
@@ -144,6 +159,24 @@ class MainLoop
 		_paused = true;
 	}*/
 	
+	public function lateUpdateGameObject( go:GameObject )
+	{
+		for ( i in go.components ) {
+			
+			if ( ! i._started ) {
+				i.onStart();
+				i._started = true;
+			}
+				
+			i.onLateUpdate();
+		}
+			
+		
+		for ( child in go.children )		
+			lateUpdateGameObject( child );
+		
+	}
+	
 	public function updateGameObject( go:GameObject ) 
 	{
 		for ( i in go.components ) {
@@ -153,6 +186,7 @@ class MainLoop
 				i._started = true;
 			}
 				
+			
 			i.onUpdate();
 		}
 			
@@ -161,5 +195,7 @@ class MainLoop
 			updateGameObject( child );
 		
 	}
+	
+
 	
 }

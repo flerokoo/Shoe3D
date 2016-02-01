@@ -29,6 +29,12 @@ class Rectangle
 		if ( height != null ) this.height = height;
 	}
 	
+	public function isXYInside( x:Float, y:Float )
+	{
+		var c = getCenter();
+		return Math.abs( c.x - x ) <= width / 2 && Math.abs(c.y - y) <= height / 2;
+	}
+	
 	public function isVector2Inside( v:Vector2 )
 	{
 		var c = getCenter();

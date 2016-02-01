@@ -4,25 +4,28 @@ import shoe3d.core.game.GameObject;
 import three.Camera;
 import three.OrthographicCamera;
 import three.PerspectiveCamera;
+import three.Renderer;
 import three.Scene;
 import three.Vector3;
+import three.WebGLRenderer;
 
 /**
  * ...
  * @author as
  */
-class Layer extends Scene 
+class Layer 
 {
-	
+	public var name:String;
+	public var scene(default,null):Scene;
 	public var camera(default, null):Camera;
-	public var gameObjects(default, null):Array<GameObject>;
+	public var children(default, null):Array<GameObject>;
 	//public var visible:Bool = true;	
 	
 	public function new( ?name:String ) 
 	{
-		super();
 		this.name = name;
-		gameObjects = [];
+		scene = new Scene();
+		children = [];
 		System.window._prePublicResize.connect( reconfigureCamera );
 	}
 	
@@ -50,24 +53,24 @@ class Layer extends Scene
 	
 	public function addChild( child:GameObject ) 
 	{
-		gameObjects.push( child );
+		children.push( child );
 		child.setLayerReferenceRecursive( this );
-		super.add( child.transform );
+		scene.add( child.transform );
 		return this;
 	}
 	
 	public function removeChild( child:GameObject ) 
 	{
-		gameObjects.remove( child );
+		children.remove( child );
 		child.setLayerReferenceRecursive( null );
-		super.remove( child.transform );
+		scene.remove( child.transform );
 		return this;
 	}
 	
 	public function setCamera( cam:Camera )
 	{
 		camera = cam;
-		camera.up = new Vector3( 0, 0, 1);
+		if( camera != null ) camera.up = new Vector3( 0, 0, 1);
 		reconfigureCamera();
 		return this;
 	}
@@ -86,4 +89,10 @@ class Layer extends Scene
 		return pc;
 	}
 	
+	public function render( renderer:WebGLRenderer)
+	{
+		if ( camera == null ) return;
+		renderer.sortObjects = true;
+		renderer.render( scene, camera );
+	}
 }

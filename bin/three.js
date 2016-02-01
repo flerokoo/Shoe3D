@@ -21858,7 +21858,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 	// Buffer rendering
 
 	this.renderBufferImmediate = function ( object, program, material ) {
-
+		
 		state.initAttributes();
 
 		var buffers = properties.get( object );
@@ -22590,17 +22590,17 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			object.modelViewMatrix.multiplyMatrices( camera.matrixWorldInverse, object.matrixWorld );
 			object.normalMatrix.getNormalMatrix( object.modelViewMatrix );
-
+			
 			if ( object instanceof THREE.ImmediateRenderObject ) {
-
+				
 				setMaterial( material );
 
 				var program = setProgram( camera, lights, fog, material, object );
 
 				_currentGeometryProgram = '';
-
+				
 				object.render( function ( object ) {
-
+					
 					_this.renderBufferImmediate( object, program, material );
 
 				} );

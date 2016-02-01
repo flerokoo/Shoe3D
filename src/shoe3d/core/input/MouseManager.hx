@@ -82,7 +82,6 @@ class MouseManager
     {
         if (isCodeDown(buttonCode)) {
             _buttonStates.remove(buttonCode);
-
             prepare(viewX, viewY, toButton(buttonCode));
             System.input.pointer.submitUp(viewX, viewY, _source);
             up.emit(_sharedEvent);

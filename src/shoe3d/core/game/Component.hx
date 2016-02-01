@@ -12,6 +12,7 @@ class Component
 	private var _started:Bool = false;
 	
 	
+	
 	public function new() 
 	{
 		

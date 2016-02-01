@@ -19,7 +19,7 @@ class GeometryDisplay extends Component
 		super();
 		mesh = new Mesh( 
 			geom.geom, 
-			geom.material == null ? geom.material : new MeshPhongMaterial( { map:geom.texDef.texture, transparent:true } ) 
+			geom.material != null ? geom.material : new MeshPhongMaterial( { map:geom.texDef.texture, transparent:true } ) 
 			);
 	}
 	

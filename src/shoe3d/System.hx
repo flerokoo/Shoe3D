@@ -30,6 +30,8 @@ class System
 	public static var renderer(default, null) = RenderManager;
 	public static var input(default, null) = InputManager;
 	public static var updateInfoEveryNthFrame:Int = 6;
+	public static var W = 640;
+	public static var H = 640;
 	
 	private static var _infoFrameCounter:Int = 0;
 	private static var _info:DivElement;
@@ -39,8 +41,10 @@ class System
 	//private static var _baseScene:Scene;
 	
 	
-	public static function init() 
+	public static function init( originalWidth:Int = 640, originalHeight = 800) 
 	{
+		W = originalWidth;
+		H = originalHeight;
 		//_baseScene = new Scene();
 		WindowManager.init();
 		RenderManager.init();

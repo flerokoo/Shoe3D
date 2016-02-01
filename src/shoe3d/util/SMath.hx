@@ -53,7 +53,7 @@ class SMath
 	
 	public static inline function fabs( a:Float ) 
 	{
-		return a < 0 ? -a : a
+		return a < 0 ? -a : a;
 	}
 	
 	/**
@@ -64,7 +64,7 @@ class SMath
 	 */
 	public static inline function fsin(x:Float )
 	{
-		var y = B * x + C * x * abs(x);
+		var y = B * x + C * x * fabs(x);
 		
 		return P * (y * fabs(y) - y) + y;
 	}
@@ -74,8 +74,8 @@ class SMath
 		x = x + HALF_PI;
 		if (x > PI)
 			x -= TWO_PI;
-		var y = B * x + C * x * abs(x);
+		var y = B * x + C * x * fabs(x);
 		
-		return P * (y * abs(y) - y) + y;
+		return P * (y * fabs(y) - y) + y;
 	}
 }

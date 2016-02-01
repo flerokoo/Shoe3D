@@ -48,7 +48,6 @@ class InputManager
 			var bounds = _canvas.getBoundingClientRect();
 			var x = getX( event, bounds );
 			var y = getY( event, bounds );
-			
 			switch( event.type ) {
 				case "mousedown":
 					if ( event.target == _canvas ) {

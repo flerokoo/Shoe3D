@@ -25,6 +25,11 @@ class KeyboardManager
 
 	}
 	
+	public function onKey( key:Key, handler:KeyboardEvent->Void )
+	{
+		return up.connect( function(e:KeyboardEvent) if ( e.key == key ) handler(e) );
+	}
+	
     public function isDown (key :Key) :Bool
     {		
         return isCodeDown( key.toKeyCode() );

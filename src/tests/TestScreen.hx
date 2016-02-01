@@ -1,5 +1,7 @@
 package tests;
 import js.Browser;
+import js.html.ArrayBuffer;
+import js.html.Float32Array;
 import js.html.ImageElement;
 import shoe3d.asset.Res;
 import shoe3d.component.CameraHolder;
@@ -10,9 +12,13 @@ import shoe3d.component.S3Mesh;
 import shoe3d.component.S3Mesh;
 import shoe3d.component.Sprite2D;
 import shoe3d.core.game.GameObject;
+import shoe3d.core.input.MouseEvent;
+import shoe3d.core.input.PointerEvent;
 import shoe3d.core.Layer;
+import shoe3d.core.Layer2D;
 import shoe3d.screen.GameScreen;
 import shoe3d.System;
+import shoe3d.util.Tools;
 import soundjs.SoundManager;
 import three.AmbientLight;
 import three.BoxGeometry;
@@ -21,10 +27,14 @@ import three.Color;
 import three.DirectionalLight;
 import three.Geometry;
 import three.ImageLoader;
+import three.ImmediateRenderObject;
 import three.LoadingManager;
+import three.MeshBasicMaterial;
 import three.MeshPhongMaterial;
 import three.OrthographicCamera;
 import three.PerspectiveCamera;
+import three.RawShaderMaterial;
+import three.Side;
 import three.SphereGeometry;
 import three.Sprite;
 import three.SpriteMaterial;
@@ -40,6 +50,7 @@ import three.Vector3;
 class TestScreen extends GameScreen
 {
 
+	var layer2d:Layer2D;
 	@:keep
 	public function new() 
 	{
@@ -79,7 +90,14 @@ class TestScreen extends GameScreen
 		var layer = new Layer( "layer" );
 		addLayer( layer );
 		
+		
+		//System.renderer.renderer.sortObjects = false;
 		var gd = Main.pack.getGeomDef("cube");
+		//gd.material.depthTest = false;
+		//gd.material.depthWrite = false;
+		//gd.material.transparent = false;
+		//layer.overrideMaterial = new MeshPhongMaterial( { transparent: false, depthWrite: true, depthTest: false, color: 0x6C0000 } );
+		
 		for ( i in 0...200 ) {
 			var go = new GameObject("GO" + i)
 				//.add( new MeshDisplay( new SphereGeometry( Math.random() * 0.5 + 1, 12, 12 ) , new MeshPhongMaterial({color: cast (0xffffff * Math.random()) }) ) );
@@ -90,7 +108,12 @@ class TestScreen extends GameScreen
 			go.transform.rotateX( Math.random() * 3.14 );
 			go.transform.rotateY( Math.random() * 3.14 );
 			go.transform.rotateZ( Math.random() * 3.14 );
-			
+			/*if ( Math.random() < 0.5 )
+				go.transform.renderOrder = 100000000
+			else
+				go.transform.renderOrder = 1;*/
+				
+			//go.transform.renderOrder = i * 10;
 			layer.addChild( go );
 		}
 		
@@ -98,8 +121,8 @@ class TestScreen extends GameScreen
 		dl.rotateX( 0.9 );
 		dl.rotateY( 0.5 );
 		dl.rotateZ( 0.2);
-		layer.add( dl );
-		layer.add( new AmbientLight( 0xffffff ) );
+		layer.scene.add( dl );
+		layer.scene.add( new AmbientLight( 0xffffff ) );
 		
 		layer.addChild(
 			new GameObject().add( new CameraHolder() )
@@ -108,18 +131,18 @@ class TestScreen extends GameScreen
 		layer.setCamera( new PerspectiveCamera( 60, 800 / 600, 0.1, 1000 ) );
 		
 		
+
 		
 		
-		
-		var ui = newLayer2D("UILAYER");		
+		var ui = layer2d = newLayer2D("UILAYER", true);		
 		var g2d = new GameObject("SPRITETEST");		
 		var spr = new Sprite2D( 'logo' );
-		spr.setScale( 0.5 );
+		//spr.setScale( 0.5 );
 		//spr.setAnchor( 0, 0 );
 		//spr.setTexture( Res.getTexDef( 'button_gameplay_level_menu' ) );
 		g2d.add( spr );		
 		//g2d.transform.rotateZ( 0.5 );
-		ui.addChild( g2d );		
+		//ui.addChild( g2d );		
 		//g2d.transform.position.set( 0, 0, 0 );
 		
 		var mgr = new LoadingManager();
@@ -127,11 +150,37 @@ class TestScreen extends GameScreen
 
 		
 		
+		
+		
+		//io.render( function( a, b, c) trace(a, b, c) );
+		
+		
 		var cc = cast(ui.camera, OrthographicCamera );
 		
+		var a:Array<Sprite2D> = [];
+		for ( i in 0...3 )
+		{
+			a[i] = addSprite( i == 66 ? a[0].owner : layer2d );
+			
+		}
 		
+		//a[0].owner.transform.scale.set( 1.2, 1.2, 1 );
+		//untyped a[0].alpha._ = 0.7;
+		//a[1].alpha._ = 0.5;
 		
+		System.input.mouse.move.connect( function(e:MouseEvent) {
+			//trace( a[0].contains( e.viewX, e.viewY ), a[1].contains( e.viewX, e.viewY ), a[2].contains( e.viewX, e.viewY ) );
+		});
 		
+		System.input.pointer.down.connect( function (e:PointerEvent) {
+			trace("SYSTEM>PDOWN", e.hit != null );
+		} );
+		
+		for( i in 0...a.length ) a[i].pointerDown.connect( function(e:PointerEvent) trace("S" + i) );
+		
+		/*var s1 = addSprite().owner;
+		var s2 = addSprite().owner;
+		var s3 = addSprite().owner;*/
 		
 		/*cc.left = -10;
 		cc.right = -cc.left;
@@ -146,8 +195,82 @@ class TestScreen extends GameScreen
 		
 		//cc.updateMatrix();
 		//cc.updateProjectionMatrix();
-		//Main.pack.getSound("tnt").play();
+		//Main.pack.getSound("tnt").play();		
 		
+		
+		var ir = new ImmediateRenderObject();
+		var b = "precision mediump float;\nprecision mediump int;\n";		
+		var mat = new RawShaderMaterial( {
+			uniforms: {
+				map: {
+					type: "t",
+					value: a
+				}
+			},
+			//attributes: {},
+			vertexShader: b + "	uniform mat4 modelViewMatrix;	uniform mat4 projectionMatrix;	attribute vec2 position;	attribute vec4 color;	attribute vec2 uv;	varying vec4 vColor;	varying vec2 vUv;	void main() {		vColor = color;		vUv = uv;		gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 0.0, 1.0);	}",
+			fragmentShader: b + "	varying vec4 vColor; varying vec2 vUv; uniform sampler2D map;		void main() {		gl_FragColor = vColor * texture2D(map, vUv);	}",
+			depthTest: false,
+			depthWrite: false,
+			transparent: true,
+			side : Side.DoubleSide
+		});
+		untyped mat.map = Main.pack.getTexDef("logo").texture;
+		ir.material = mat;
+		untyped ir.render = function (cb) {
+			
+			untyped ir.positionArray = new Float32Array( [ 
+				0, 0, 0, 
+				0, 100, 0, 
+				100, 100, 100 
+				] );
+			untyped ir.uvArray = new Float32Array( [ 
+				0, 0, 0, 
+				0, 1, 0, 
+				1, 1, 1 
+				] );
+			untyped ir.hasPositions = true;
+			untyped ir.hasUvs = true;
+			untyped ir.count = 3;
+			cb(ir);
+		};
+		
+		layer2d.scene.add( ir );
+	}
+	
+	override public function onUpdate()
+	{
+
+	}
+	
+	var last = -1;	
+	var io:three.ImmediateRenderObject;
+	function addSprite( owner:Dynamic = null, name:String = '' )
+	{
+		
+		var tn = name == '' ? Tools.getRandomFromArray( ['logo' ] ) : name;
+		var go = new GameObject()
+			.add( new Sprite2D( tn ) );
+		
+		go.transform.position.set( last * 250 + 300  , 250 * last + 300 , go.transform.position.z );
+		//go.transform.position.multiplyScalar( 0 );
+		
+		//go.transform.scale.x = Math.random() * 0.5 * 0 + 0.5;
+		//go.transform.scale.y = Math.random() * 0.5 + 0.5;
+		
+		go.transform.scale.set( (last+2) * 0.05 * 0 + 1, (last+2) * 0.05 * 0 + 1, 1 );
+		
+		last != 0  
+			?	go.transform.position.set( 400 + 0 * last, 400 + 200 * last, 0 )
+			: 	go.transform.position.set( 0, 50, 0 );
+		go.transform.position.set( 400 + 0 * last, 400 + 200 * last, 0 );
+		//go.get(Sprite2D).anchorX = Math.random() * 200 - 100;
+		//go.get(Sprite2D).anchorY = Math.random() * 200 - 100;
+		
+		last += 1;
+		if ( owner != null )
+			owner.addChild( go );
+		return go.get(Sprite2D);
 	}
 	
 }

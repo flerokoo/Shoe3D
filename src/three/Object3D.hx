@@ -63,7 +63,7 @@ extern class Object3D
 	/**
 	 * Override depth-sorting order if non null.
 	 */
-	var renderDepth : Float;
+	var renderOrder : Float;
 
 	/**
 	 * When this is set, then the rotationMatrix gets calculated every frame.
