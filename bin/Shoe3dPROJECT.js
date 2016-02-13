@@ -811,10 +811,10 @@ shoe3d.core.RenderManager.init = function() {
 	shoe3d.core.RenderManager.renderer = new THREE.WebGLRenderer();
 	shoe3d.core.RenderManager.renderer.setSize(800,600);
 	shoe3d.core.RenderManager.container.appendChild(shoe3d.core.RenderManager.renderer.domElement);
-	shoe3d.core.RenderManager.renderer.setClearColor(15893267);
 	shoe3d.core.RenderManager.renderer.autoClear = false;
 };
 shoe3d.core.RenderManager.render = function() {
+	shoe3d.core.RenderManager.renderer.setClearColor(shoe3d.core.RenderManager.clearColor);
 	shoe3d.core.RenderManager.renderer.clear();
 	if(shoe3d.System.screen._currentScreen != null) {
 		var _g = 0;
@@ -1781,13 +1781,13 @@ shoe3d.component.Element2D.prototype = $extend(shoe3d.core.game.Component.protot
 		this.onHover(e);
 		if(this._pointerMove != null) this._pointerMove.emit(e);
 	}
-	,onPointerUp: function(e) {
+	,onPointerUp: function(event) {
 		{
-			var _g = e.source;
+			var _g = event.source;
 			switch(_g[1]) {
 			case 1:
-				var pointerDown = _g[2];
-				if(this._pointerOut != null && this._hovering) this._pointerOut.emit(e);
+				var touchpoint = _g[2];
+				if(this._pointerOut != null && this._hovering) this._pointerOut.emit(event);
 				this._hovering = false;
 				if(this._hoverConnection != null) {
 					this._hoverConnection.dispose();
@@ -1797,7 +1797,7 @@ shoe3d.component.Element2D.prototype = $extend(shoe3d.core.game.Component.protot
 			default:
 			}
 		}
-		if(this._pointerUp != null) this._pointerUp.emit(e);
+		if(this._pointerUp != null) this._pointerUp.emit(event);
 	}
 	,get_pointerDown: function() {
 		if(this._pointerDown == null) this._pointerDown = new shoe3d.util.signal.SingleSignal();
@@ -3161,6 +3161,7 @@ shoe3d.core.input.MouseManager = function() {
 	this.down = new shoe3d.util.signal.SingleSignal();
 	this.move = new shoe3d.util.signal.SingleSignal();
 	this.scroll = new shoe3d.util.signal.SingleSignal();
+	this._source = shoe3d.core.input.EventSource.Mouse(shoe3d.core.input.MouseManager._sharedEvent);
 };
 shoe3d.core.input.MouseManager.__name__ = ["shoe3d","core","input","MouseManager"];
 shoe3d.core.input.MouseManager.toButton = function(buttonCode) {
@@ -3331,18 +3332,23 @@ shoe3d.core.input.PointerManager.prototype = {
 				if(js.Boot.__instanceof(i,shoe3d.core.Layer2D)) {
 					if((js.Boot.__cast(i , shoe3d.core.Layer2D)).pointerEnabled) {
 						var chain = [];
-						var hit = shoe3d.component.Element2D.hitTest(i.children[0],viewX,viewY);
-						haxe.Log.trace("hit == null == ",{ fileName : "PointerManager.hx", lineNumber : 75, className : "shoe3d.core.input.PointerManager", methodName : "submitDown", customParams : [hit == null]});
-						if(hit != null) {
-							lastHit = hit;
-							var e = hit.owner;
-							do {
-								var spr = e.get(shoe3d.component.Element2D);
-								if(spr != null) chain.push(spr);
-								e = e.parent;
-							} while(e != null);
+						var hit = null;
+						var n = i.children.length - 1;
+						while(n >= 0) {
+							hit = shoe3d.component.Element2D.hitTest(i.children[n],viewX,viewY);
+							if(hit != null) {
+								lastHit = hit;
+								var e = hit.owner;
+								do {
+									var spr = e.get(shoe3d.component.Element2D);
+									if(spr != null) chain.push(spr);
+									e = e.parent;
+								} while(e != null);
+								chains.push(chain);
+								break;
+							}
+							n--;
 						}
-						chains.push(chain);
 					}
 				}
 			}
@@ -3373,7 +3379,51 @@ shoe3d.core.input.PointerManager.prototype = {
 		var hit = null;
 		this.submitMove(viewX,viewY,source);
 		this._isDown = false;
-		this.prepare(viewX,viewY,hit,source);
+		var lastHit = null;
+		var chains = [];
+		if(shoe3d.System.screen._currentScreen != null) {
+			var _g = 0;
+			var _g1 = shoe3d.System.screen._currentScreen.layers;
+			while(_g < _g1.length) {
+				var i = _g1[_g];
+				++_g;
+				if(js.Boot.__instanceof(i,shoe3d.core.Layer2D)) {
+					if((js.Boot.__cast(i , shoe3d.core.Layer2D)).pointerEnabled) {
+						var chain = [];
+						var hit1 = null;
+						var n = i.children.length - 1;
+						while(n >= 0) {
+							hit1 = shoe3d.component.Element2D.hitTest(i.children[n],viewX,viewY);
+							if(hit1 != null) {
+								if(lastHit == null) lastHit = hit1;
+								var e = hit1.owner;
+								do {
+									var spr = e.get(shoe3d.component.Element2D);
+									if(spr != null) chain.push(spr);
+									e = e.parent;
+								} while(e != null);
+								chains.push(chain);
+								break;
+							}
+							n--;
+						}
+					}
+				}
+			}
+		}
+		this.prepare(viewX,viewY,lastHit,source);
+		var _g2 = 0;
+		while(_g2 < chains.length) {
+			var chain1 = chains[_g2];
+			++_g2;
+			var _g11 = 0;
+			while(_g11 < chain1.length) {
+				var e1 = chain1[_g11];
+				++_g11;
+				e1.onPointerUp(shoe3d.core.input.PointerManager._sharedEvent);
+				if(shoe3d.core.input.PointerManager._sharedEvent._stopped) return;
+			}
+		}
 		this.up.emit(shoe3d.core.input.PointerManager._sharedEvent);
 	}
 	,prepare: function(viewX,viewY,hit,source) {
@@ -3988,20 +4038,17 @@ tests.TestScreen = function() {
 	var _g1 = 0;
 	while(_g1 < 3) {
 		var i1 = _g1++;
-		a[i1] = this.addSprite(i1 == 66?a[0].owner:this.layer2d);
+		a[i1] = this.addSprite(i1 == 1?a[0].owner:this.layer2d);
 	}
 	shoe3d.System.input.mouse.move.connect(function(e) {
-	});
-	shoe3d.System.input.pointer.down.connect(function(e1) {
-		haxe.Log.trace("SYSTEM>PDOWN",{ fileName : "TestScreen.hx", lineNumber : 176, className : "tests.TestScreen", methodName : "new", customParams : [e1.hit != null]});
 	});
 	var _g11 = 0;
 	var _g2 = a.length;
 	while(_g11 < _g2) {
 		var i2 = [_g11++];
-		a[i2[0]].get_pointerDown().connect((function(i2) {
-			return function(e2) {
-				haxe.Log.trace("S" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 179, className : "tests.TestScreen", methodName : "new"});
+		a[i2[0]].get_pointerUp().connect((function(i2) {
+			return function(e1) {
+				haxe.Log.trace("S" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 180, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 	}
@@ -4177,6 +4224,7 @@ Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
 shoe3d.core.InputManager._lastTouchTime = 0;
+shoe3d.core.RenderManager.clearColor = 4009518;
 shoe3d.screen.ScreenManager._currentScreenName = "";
 shoe3d.screen.ScreenManager.width = 0;
 shoe3d.screen.ScreenManager.height = 0;

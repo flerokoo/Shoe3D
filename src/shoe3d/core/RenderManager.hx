@@ -14,8 +14,10 @@ import three.WebGLRenderer;
 class RenderManager
 {
 
+	public static var clearColor:Int = 0x3D2E2E;
 	public static var container:DivElement;
 	public static var renderer:WebGLRenderer;
+	
 	
 	private static var stats:RenderStats;
 	
@@ -28,12 +30,13 @@ class RenderManager
 		renderer.setSize( 800, 600);			
 		container.appendChild( renderer.domElement );
 		
-		renderer.setClearColor(0xF28313);
+		
 		renderer.autoClear = false;				
 	}
 	
 	private static function render() 
 	{		
+		renderer.setClearColor(clearColor);
 		renderer.clear( );
 		if( System.screen._currentScreen != null )
 			for ( layer in System.screen._currentScreen.layers )

@@ -71,20 +71,26 @@ class PointerManager
 					if( cast( i, Layer2D ).pointerEnabled )
 					{						
 						var chain = [];
-						var hit = Element2D.hitTest( i.children[0], viewX, viewY );
-						trace("hit == null == ", hit == null);
-						if ( hit != null )
+						var hit:Element2D = null;
+						var n = i.children.length - 1;
+						while ( n >= 0 )
 						{
-							lastHit = hit;
-							var e = hit.owner;
-							do {
-								var spr = e.get( Element2D );
-								if ( spr != null ) 
-									chain.push( spr );
-								e = e.parent;
-							} while (e != null );
+							hit = Element2D.hitTest( i.children[n], viewX, viewY );
+							if ( hit != null )
+							{
+								lastHit = hit;
+								var e = hit.owner;
+								do {
+									var spr = e.get( Element2D );
+									if ( spr != null ) 
+										chain.push( spr );
+									e = e.parent;
+								} while (e != null );
+								chains.push( chain );
+								break;
+							}
+							n--;
 						}
-						chains.push( chain );
 					}
 						
 		
@@ -115,13 +121,51 @@ class PointerManager
 	function submitUp(viewX :Float, viewY :Float, source :EventSource)
 	{
 		if ( ! _isDown ) return;
-		
 		var hit:Element2D = null;
 		
 		submitMove( viewX, viewY, source );
 		_isDown = false;
 		
-		prepare(viewX, viewY, hit, source);
+		var lastHit:Element2D = null;
+		var chains:Array<Array<Element2D>> = [];
+		if ( System.screen._currentScreen != null ) 
+			for ( i in System.screen._currentScreen.layers )			
+				if ( Std.is(i, Layer2D) )
+					if( cast( i, Layer2D ).pointerEnabled )
+					{						
+						var chain = [];
+						var hit:Element2D = null;
+						var n = i.children.length - 1;
+						while ( n >= 0 )
+						{
+							hit = Element2D.hitTest( i.children[n], viewX, viewY );
+							if ( hit != null )
+							{
+								if( lastHit == null ) lastHit = hit;
+								var e = hit.owner;
+								do {
+									var spr = e.get( Element2D );
+									if ( spr != null ) 
+										chain.push( spr );
+									e = e.parent;
+								} while (e != null );
+								chains.push( chain );
+								break;
+							}
+							n--;
+						}
+					}
+						
+		
+		
+		
+		prepare(viewX, viewY, lastHit, source);
+		for ( chain in chains )
+			for ( e in chain ) 
+			{
+				e.onPointerUp( _sharedEvent );
+				if ( _sharedEvent._stopped ) return;
+			}
 		up.emit(_sharedEvent);
 	}
 	

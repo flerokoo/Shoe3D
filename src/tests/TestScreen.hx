@@ -160,7 +160,7 @@ class TestScreen extends GameScreen
 		var a:Array<Sprite2D> = [];
 		for ( i in 0...3 )
 		{
-			a[i] = addSprite( i == 66 ? a[0].owner : layer2d );
+			a[i] = addSprite( i == 1 ? a[0].owner : layer2d );
 			
 		}
 		
@@ -172,11 +172,14 @@ class TestScreen extends GameScreen
 			//trace( a[0].contains( e.viewX, e.viewY ), a[1].contains( e.viewX, e.viewY ), a[2].contains( e.viewX, e.viewY ) );
 		});
 		
-		System.input.pointer.down.connect( function (e:PointerEvent) {
+		/*System.input.pointer.down.connect( function (e:PointerEvent) {
 			trace("SYSTEM>PDOWN", e.hit != null );
-		} );
+		} );*/
 		
-		for( i in 0...a.length ) a[i].pointerDown.connect( function(e:PointerEvent) trace("S" + i) );
+		for ( i in 0...a.length ) a[i].pointerUp.connect( function(e:PointerEvent) {
+			trace("S" + i) ;
+			//e.stopPropagation();
+		} );
 		
 		/*var s1 = addSprite().owner;
 		var s2 = addSprite().owner;

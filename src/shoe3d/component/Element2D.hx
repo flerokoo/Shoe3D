@@ -1,6 +1,7 @@
 package shoe3d.component;
 import shoe3d.core.game.Component;
 import shoe3d.core.game.GameObject;
+import shoe3d.core.input.EventSource;
 import shoe3d.core.input.PointerEvent;
 import shoe3d.util.math.Rectangle;
 import shoe3d.util.signal.Sentinel;
@@ -108,7 +109,7 @@ class Element2D extends Component
 	public static function hitTestBackwards(entity :GameObject, x :Float, y :Float)
 	{
 		if (entity != null) {
-            var result = hitTestBackwards(
+			 var result = hitTestBackwards(
 				entity.parent != null 
 				? entity.parent.children[ entity.parent.children.indexOf(entity) + 1 ] 
 				: null, x, y);
@@ -173,13 +174,13 @@ class Element2D extends Component
 	}
 	
 	@:allow(shoe3d) 
-	private function onPointerUp( e:PointerEvent )
+	private function onPointerUp( event:PointerEvent )
 	{
-		switch(e.source)
+		switch(event.source)
 		{
-			case Touch(pointerDown):
+			case Touch(touchpoint):
 				if ( _pointerOut != null && _hovering )
-					_pointerOut.emit(e);
+					_pointerOut.emit(event);
 				_hovering = false;
 				if ( _hoverConnection != null )
 				{
@@ -190,7 +191,7 @@ class Element2D extends Component
 		}
 		
 		if ( _pointerUp != null )
-			_pointerUp.emit(e);
+			_pointerUp.emit(event);
 	}	
 	
 	function get_pointerDown():SingleSignal<PointerEvent> 

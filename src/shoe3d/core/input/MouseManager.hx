@@ -30,6 +30,7 @@ class MouseManager
 		down = new SingleSignal();
 		move = new SingleSignal();
 		scroll = new SingleSignal();
+		_source = Mouse(_sharedEvent);
 	}
 	
     public function set_cursor (cursor :MouseCursor) :MouseCursor
