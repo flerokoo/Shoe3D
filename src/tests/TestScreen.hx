@@ -5,7 +5,9 @@ import js.html.Float32Array;
 import js.html.ImageElement;
 import shoe3d.asset.Res;
 import shoe3d.component.CameraHolder;
+import shoe3d.component.Element2D;
 import shoe3d.component.GeometryDisplay;
+import shoe3d.component.ProgressBar;
 import shoe3d.component.S3Mesh;
 import shoe3d.component.RandomRotator;
 import shoe3d.component.S3Mesh;
@@ -175,6 +177,13 @@ class TestScreen extends GameScreen
 			trace("SYSTEM>PDOWN", e.hit != null );
 		} );*/
 		
+		var addL = function( e:Element2D, name:String ) {
+			e.pointerUp.connect( function(e:PointerEvent) trace("UP " + name) );					
+			e.pointerIn.connect( function(e:PointerEvent) trace("IN " + name)  );
+			e.pointerOut.connect( function(e:PointerEvent) trace("OUT " + name)  );
+			e.pointerDown.connect( function(e:PointerEvent) trace("DOWN " + name)  );
+		}
+		
 		for ( i in 0...a.length ) 
 		{
 			a[i].pointerUp.connect( function(e:PointerEvent) {
@@ -187,6 +196,18 @@ class TestScreen extends GameScreen
 			//e.stopPropagation();
 		}
 		
+		
+		var progress = new ProgressBar( "game_pattern" );
+		addL(progress, "PROGRESS");
+		var pgo = new GameObject().add( progress );
+		pgo.transform.position.set( 400, 400, 0 );
+		layer2d.addChild( pgo );
+		
+		System._loop._frame.connect( function(d) 
+		{			
+			//progress.progress += - 0.005;
+			progress.progress = 0.64;
+		});
 		
 		/*var s1 = addSprite().owner;
 		var s2 = addSprite().owner;

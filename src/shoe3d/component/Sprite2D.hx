@@ -157,6 +157,7 @@ class Sprite2D extends Element2D
 	
 	public override function contains( x:Float, y:Float ):Bool
 	{
+		if ( texDef == null ) return false;
 		y = System.window.height - y;
 		var v = mesh.worldToLocal( new Vector3( x, y, 0 ) );
 		x = v.x;

@@ -1837,39 +1837,6 @@ shoe3d.component.GeometryDisplay.prototype = $extend(shoe3d.core.game.Component.
 	}
 	,__class__: shoe3d.component.GeometryDisplay
 });
-shoe3d.component.RandomRotator = function() {
-	this.t = 0;
-	shoe3d.core.game.Component.call(this);
-};
-shoe3d.component.RandomRotator.__name__ = ["shoe3d","component","RandomRotator"];
-shoe3d.component.RandomRotator.__super__ = shoe3d.core.game.Component;
-shoe3d.component.RandomRotator.prototype = $extend(shoe3d.core.game.Component.prototype,{
-	t: null
-	,onUpdate: function() {
-		this.owner.transform.position.set(Math.cos(shoe3d.core.Time.timeSinceGameStart),Math.sin(shoe3d.core.Time.timeSinceGameStart),0).multiplyScalar(20);
-		this.owner.transform.lookAt(this.owner.transform.worldToLocal(new THREE.Vector3(0,0,0)));
-	}
-	,__class__: shoe3d.component.RandomRotator
-});
-shoe3d.component.S3Mesh = function(geom,mat) {
-	shoe3d.core.game.Component.call(this);
-	this.geometry = geom;
-	this.material = mat;
-	js.Boot.__cast(this.material , THREE.MeshPhongMaterial);
-	this.mesh = new THREE.Mesh(this.geometry,this.material);
-	if(this.owner != null) this.owner.transform.add(this.mesh);
-};
-shoe3d.component.S3Mesh.__name__ = ["shoe3d","component","S3Mesh"];
-shoe3d.component.S3Mesh.__super__ = shoe3d.core.game.Component;
-shoe3d.component.S3Mesh.prototype = $extend(shoe3d.core.game.Component.prototype,{
-	geometry: null
-	,material: null
-	,mesh: null
-	,onAdded: function() {
-		this.owner.transform.add(this.mesh);
-	}
-	,__class__: shoe3d.component.S3Mesh
-});
 shoe3d.component.Sprite2D = function(textureName) {
 	this.anchorY = 0;
 	this.anchorX = 0;
@@ -1944,6 +1911,7 @@ shoe3d.component.Sprite2D.prototype = $extend(shoe3d.component.Element2D.prototy
 		this.owner.transform.scale.set(s,s,1);
 	}
 	,contains: function(x,y) {
+		if(this.texDef == null) return false;
 		y = shoe3d.System.window.get_height() - y;
 		var v = this.mesh.worldToLocal(new THREE.Vector3(x,y,0));
 		x = v.x;
@@ -1962,6 +1930,96 @@ shoe3d.component.Sprite2D.prototype = $extend(shoe3d.component.Element2D.prototy
 		return this;
 	}
 	,__class__: shoe3d.component.Sprite2D
+});
+shoe3d.component.ProgressBar = function(textureName) {
+	this.progress = 1;
+	shoe3d.component.Sprite2D.call(this,textureName);
+};
+shoe3d.component.ProgressBar.__name__ = ["shoe3d","component","ProgressBar"];
+shoe3d.component.ProgressBar.__super__ = shoe3d.component.Sprite2D;
+shoe3d.component.ProgressBar.prototype = $extend(shoe3d.component.Sprite2D.prototype,{
+	progressChange: null
+	,progress: null
+	,get_progressChange: function() {
+		if(this.progressChange == null) this.progressChange = new shoe3d.util.signal.DoubleSignal();
+		return this.progressChange;
+	}
+	,redefineSprite: function() {
+		if(this.texDef == null) return;
+		var w = this.texDef.width;
+		var h = this.texDef.height;
+		var uv = this.texDef.uv;
+		this.geom.uvsNeedUpdate = true;
+		this.geom.verticesNeedUpdate = true;
+		this.geom.vertices[0].set(-w / 2,h / 2,0);
+		this.geom.vertices[1].set(shoe3d.util.SMath.lerp(this.progress,-w / 2,w / 2),h / 2,0);
+		this.geom.vertices[2].set(-w / 2,-h / 2,0);
+		this.geom.vertices[3].set(shoe3d.util.SMath.lerp(this.progress,-w / 2,w / 2),-h / 2,0);
+		var uvs = this.geom.faceVertexUvs[0];
+		uvs[0][0].set(uv.umin,uv.vmax);
+		uvs[0][1].set(uv.umin,uv.vmin);
+		uvs[0][2].set(shoe3d.util.SMath.lerp(this.progress,uv.umin,uv.umax),uv.vmax);
+		uvs[1][0].set(uv.umin,uv.vmin);
+		uvs[1][1].set(shoe3d.util.SMath.lerp(this.progress,uv.umin,uv.umax),uv.vmin);
+		uvs[1][2].set(shoe3d.util.SMath.lerp(this.progress,uv.umin,uv.umax),uv.vmax);
+		this.material.map = this.texDef.texture;
+	}
+	,set_progress: function(value) {
+		var newValue = shoe3d.util.SMath.clamp(value,0,1);
+		if(newValue != this.progress && this.get_progressChange() != null) {
+			var oldValue = this.progress;
+			this.progress = newValue;
+			this.get_progressChange().emit(newValue,oldValue);
+			this.redefineSprite();
+		}
+		return this.progress;
+	}
+	,setProgress: function(v) {
+		this.set_progress(v);
+		return this;
+	}
+	,contains: function(x,y) {
+		if(this.texDef == null) return false;
+		y = shoe3d.System.window.get_height() - y;
+		var v = this.mesh.worldToLocal(new THREE.Vector3(x,y,0));
+		x = v.x;
+		y = v.y;
+		return x > -this.texDef.width / 2 && x < shoe3d.util.SMath.lerp(this.progress,-this.texDef.width / 2,this.texDef.width / 2) && this.texDef.height * 0.5 >= (y < 0?-y:y);
+	}
+	,__class__: shoe3d.component.ProgressBar
+});
+shoe3d.component.RandomRotator = function() {
+	this.t = 0;
+	shoe3d.core.game.Component.call(this);
+};
+shoe3d.component.RandomRotator.__name__ = ["shoe3d","component","RandomRotator"];
+shoe3d.component.RandomRotator.__super__ = shoe3d.core.game.Component;
+shoe3d.component.RandomRotator.prototype = $extend(shoe3d.core.game.Component.prototype,{
+	t: null
+	,onUpdate: function() {
+		this.owner.transform.position.set(Math.cos(shoe3d.core.Time.timeSinceGameStart),Math.sin(shoe3d.core.Time.timeSinceGameStart),0).multiplyScalar(20);
+		this.owner.transform.lookAt(this.owner.transform.worldToLocal(new THREE.Vector3(0,0,0)));
+	}
+	,__class__: shoe3d.component.RandomRotator
+});
+shoe3d.component.S3Mesh = function(geom,mat) {
+	shoe3d.core.game.Component.call(this);
+	this.geometry = geom;
+	this.material = mat;
+	js.Boot.__cast(this.material , THREE.MeshPhongMaterial);
+	this.mesh = new THREE.Mesh(this.geometry,this.material);
+	if(this.owner != null) this.owner.transform.add(this.mesh);
+};
+shoe3d.component.S3Mesh.__name__ = ["shoe3d","component","S3Mesh"];
+shoe3d.component.S3Mesh.__super__ = shoe3d.core.game.Component;
+shoe3d.component.S3Mesh.prototype = $extend(shoe3d.core.game.Component.prototype,{
+	geometry: null
+	,material: null
+	,mesh: null
+	,onAdded: function() {
+		this.owner.transform.add(this.mesh);
+	}
+	,__class__: shoe3d.component.S3Mesh
 });
 shoe3d.core.ComponentContainer = function() { };
 shoe3d.core.ComponentContainer.__name__ = ["shoe3d","core","ComponentContainer"];
@@ -4014,31 +4072,53 @@ tests.TestScreen = function() {
 	}
 	shoe3d.System.input.mouse.move.connect(function(e) {
 	});
+	var addL = function(e1,name) {
+		e1.get_pointerUp().connect(function(e2) {
+			haxe.Log.trace("UP " + name,{ fileName : "TestScreen.hx", lineNumber : 181, className : "tests.TestScreen", methodName : "new"});
+		});
+		e1.get_pointerIn().connect(function(e3) {
+			haxe.Log.trace("IN " + name,{ fileName : "TestScreen.hx", lineNumber : 182, className : "tests.TestScreen", methodName : "new"});
+		});
+		e1.get_pointerOut().connect(function(e4) {
+			haxe.Log.trace("OUT " + name,{ fileName : "TestScreen.hx", lineNumber : 183, className : "tests.TestScreen", methodName : "new"});
+		});
+		e1.get_pointerDown().connect(function(e5) {
+			haxe.Log.trace("DOWN " + name,{ fileName : "TestScreen.hx", lineNumber : 184, className : "tests.TestScreen", methodName : "new"});
+		});
+	};
 	var _g11 = 0;
 	var _g2 = a.length;
 	while(_g11 < _g2) {
 		var i2 = [_g11++];
 		a[i2[0]].get_pointerUp().connect((function(i2) {
-			return function(e1) {
-				haxe.Log.trace("UP" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 181, className : "tests.TestScreen", methodName : "new"});
+			return function(e6) {
+				haxe.Log.trace("UP" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 190, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerIn().connect((function(i2) {
-			return function(e2) {
-				haxe.Log.trace("IN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 184, className : "tests.TestScreen", methodName : "new"});
+			return function(e7) {
+				haxe.Log.trace("IN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 193, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerOut().connect((function(i2) {
-			return function(e3) {
-				haxe.Log.trace("OUT" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 185, className : "tests.TestScreen", methodName : "new"});
+			return function(e8) {
+				haxe.Log.trace("OUT" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 194, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerDown().connect((function(i2) {
-			return function(e4) {
-				haxe.Log.trace("DOWN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 186, className : "tests.TestScreen", methodName : "new"});
+			return function(e9) {
+				haxe.Log.trace("DOWN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 195, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 	}
+	var progress = new shoe3d.component.ProgressBar("game_pattern");
+	addL(progress,"PROGRESS");
+	var pgo = new shoe3d.core.game.GameObject().add(progress);
+	pgo.transform.position.set(400,400,0);
+	this.layer2d.addChild(pgo);
+	shoe3d.System._loop._frame.connect(function(d) {
+		progress.set_progress(0.64);
+	});
 	var ir = new THREE.ImmediateRenderObject();
 	var b = "precision mediump float;\nprecision mediump int;\n";
 	var mat = new THREE.RawShaderMaterial({ uniforms : { map : { type : "t", value : a}}, vertexShader : b + "\tuniform mat4 modelViewMatrix;\tuniform mat4 projectionMatrix;\tattribute vec2 position;\tattribute vec4 color;\tattribute vec2 uv;\tvarying vec4 vColor;\tvarying vec2 vUv;\tvoid main() {\t\tvColor = color;\t\tvUv = uv;\t\tgl_Position = projectionMatrix * modelViewMatrix * vec4(position, 0.0, 1.0);\t}", fragmentShader : b + "\tvarying vec4 vColor; varying vec2 vUv; uniform sampler2D map;\t\tvoid main() {\t\tgl_FragColor = vColor * texture2D(map, vUv);\t}", depthTest : false, depthWrite : false, transparent : true, side : THREE.DoubleSide});
