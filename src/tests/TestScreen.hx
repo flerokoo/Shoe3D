@@ -160,8 +160,7 @@ class TestScreen extends GameScreen
 		var a:Array<Sprite2D> = [];
 		for ( i in 0...3 )
 		{
-			a[i] = addSprite( i == 1 ? a[0].owner : layer2d );
-			
+			a[i] = addSprite( i == 1 ? a[0].owner : layer2d );			
 		}
 		
 		//a[0].owner.transform.scale.set( 1.2, 1.2, 1 );
@@ -176,10 +175,18 @@ class TestScreen extends GameScreen
 			trace("SYSTEM>PDOWN", e.hit != null );
 		} );*/
 		
-		for ( i in 0...a.length ) a[i].pointerUp.connect( function(e:PointerEvent) {
-			trace("S" + i) ;
+		for ( i in 0...a.length ) 
+		{
+			a[i].pointerUp.connect( function(e:PointerEvent) {
+				trace("UP" + i) ;			
+			} );
+			
+			a[i].pointerIn.connect( function(e:PointerEvent) trace("IN" + i)  );
+			a[i].pointerOut.connect( function(e:PointerEvent) trace("OUT" + i)  );
+			a[i].pointerDown.connect( function(e:PointerEvent) trace("DOWN" + i)  );
 			//e.stopPropagation();
-		} );
+		}
+		
 		
 		/*var s1 = addSprite().owner;
 		var s2 = addSprite().owner;

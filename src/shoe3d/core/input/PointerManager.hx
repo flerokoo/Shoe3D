@@ -63,42 +63,13 @@ class PointerManager
 		
 		
 		//
-		var lastHit:Element2D = null;
-		var chains:Array<Array<Element2D>> = [];
-		if ( System.screen._currentScreen != null ) 
-			for ( i in System.screen._currentScreen.layers )			
-				if ( Std.is(i, Layer2D) )
-					if( cast( i, Layer2D ).pointerEnabled )
-					{						
-						var chain = [];
-						var hit:Element2D = null;
-						var n = i.children.length - 1;
-						while ( n >= 0 )
-						{
-							hit = Element2D.hitTest( i.children[n], viewX, viewY );
-							if ( hit != null )
-							{
-								lastHit = hit;
-								var e = hit.owner;
-								do {
-									var spr = e.get( Element2D );
-									if ( spr != null ) 
-										chain.push( spr );
-									e = e.parent;
-								} while (e != null );
-								chains.push( chain );
-								break;
-							}
-							n--;
-						}
-					}
-						
+		var result = getHitAndChain( viewX, viewY );
+	
 		
-		
-		
-		prepare(viewX, viewY, lastHit, source);
-		for ( chain in chains )
-			for ( e in chain ) 
+		prepare(viewX, viewY, result != null ? result.hit : null , source);
+		//for ( chain in chains )
+		if( result != null )
+			for ( e in result.chain ) 
 			{
 				e.onPointerDown( _sharedEvent );
 				if ( _sharedEvent._stopped ) return;
@@ -107,14 +78,61 @@ class PointerManager
 		down.emit( _sharedEvent );
 	}
 	
+	function getHitAndChain( viewX:Float, viewY:Float ) : { hit:Element2D, chain:Array<Element2D> }
+	{
+		//var lastHit:Element2D = null;
+		//var chains:Array<Array<Element2D>> = [];
+		if ( System.screen._currentScreen != null ) { 
+			var li = System.screen._currentScreen.layers.length - 1;
+			while( li >= 0 )
+			{
+				var layer = System.screen._currentScreen.layers[li];
+				if ( Std.is(layer, Layer2D) && cast( layer, Layer2D ).pointerEnabled ) {					
+					var chain = [];
+					var hit:Element2D = null;
+					var n = layer.children.length - 1;
+					while ( n >= 0 )
+					{
+						var hit = Element2D.hitTest( layer.children[n], viewX, viewY );
+						if ( hit != null )
+						{
+							//lastHit = hit;
+							var e = hit.owner;
+							do {
+								var spr = e.get( Element2D );
+								if ( spr != null ) 
+									chain.push( spr );
+								e = e.parent;
+							} while (e != null );
+							//chains.push( chain );
+							//break;
+							return { hit: hit, chain: chain };
+						}
+						n--;
+					}					
+				}
+				li--;
+			}
+		}
+		
+		return null;
+	}
+	
 	function submitMove(viewX :Float, viewY :Float, source :EventSource)
 	{
 		if (viewX == _x && viewY == _y) return;
 		
-		var hit:Element2D = null;
+		var result = getHitAndChain( viewX, viewY );
+	
 		
-		prepare(viewX, viewY, hit, source);
+		prepare(viewX, viewY, result != null ? result.hit : null , source);
 		
+		if( result != null )
+			for ( e in result.chain ) 
+			{
+				e.onPointerMove( _sharedEvent );
+				if ( _sharedEvent._stopped ) return;
+			}
 		move.emit( _sharedEvent );
 	}
 	
@@ -125,43 +143,14 @@ class PointerManager
 		
 		submitMove( viewX, viewY, source );
 		_isDown = false;
+
 		
-		var lastHit:Element2D = null;
-		var chains:Array<Array<Element2D>> = [];
-		if ( System.screen._currentScreen != null ) 
-			for ( i in System.screen._currentScreen.layers )			
-				if ( Std.is(i, Layer2D) )
-					if( cast( i, Layer2D ).pointerEnabled )
-					{						
-						var chain = [];
-						var hit:Element2D = null;
-						var n = i.children.length - 1;
-						while ( n >= 0 )
-						{
-							hit = Element2D.hitTest( i.children[n], viewX, viewY );
-							if ( hit != null )
-							{
-								if( lastHit == null ) lastHit = hit;
-								var e = hit.owner;
-								do {
-									var spr = e.get( Element2D );
-									if ( spr != null ) 
-										chain.push( spr );
-									e = e.parent;
-								} while (e != null );
-								chains.push( chain );
-								break;
-							}
-							n--;
-						}
-					}
-						
+		var result = getHitAndChain( viewX, viewY );		
 		
-		
-		
-		prepare(viewX, viewY, lastHit, source);
-		for ( chain in chains )
-			for ( e in chain ) 
+		prepare(viewX, viewY, result != null ? result.hit : null, source);
+		//for ( chain in chains )
+		if( result != null )
+			for ( e in result.chain ) 
 			{
 				e.onPointerUp( _sharedEvent );
 				if ( _sharedEvent._stopped ) return;

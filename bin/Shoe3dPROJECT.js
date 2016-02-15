@@ -3321,57 +3321,62 @@ shoe3d.core.input.PointerManager.prototype = {
 		if(this._isDown) return;
 		this.submitMove(viewX,viewY,source);
 		this._isDown = true;
-		var lastHit = null;
-		var chains = [];
-		if(shoe3d.System.screen._currentScreen != null) {
+		var result = this.getHitAndChain(viewX,viewY);
+		this.prepare(viewX,viewY,result != null?result.hit:null,source);
+		if(result != null) {
 			var _g = 0;
-			var _g1 = shoe3d.System.screen._currentScreen.layers;
+			var _g1 = result.chain;
 			while(_g < _g1.length) {
-				var i = _g1[_g];
+				var e = _g1[_g];
 				++_g;
-				if(js.Boot.__instanceof(i,shoe3d.core.Layer2D)) {
-					if((js.Boot.__cast(i , shoe3d.core.Layer2D)).pointerEnabled) {
-						var chain = [];
-						var hit = null;
-						var n = i.children.length - 1;
-						while(n >= 0) {
-							hit = shoe3d.component.Element2D.hitTest(i.children[n],viewX,viewY);
-							if(hit != null) {
-								lastHit = hit;
-								var e = hit.owner;
-								do {
-									var spr = e.get(shoe3d.component.Element2D);
-									if(spr != null) chain.push(spr);
-									e = e.parent;
-								} while(e != null);
-								chains.push(chain);
-								break;
-							}
-							n--;
-						}
-					}
-				}
-			}
-		}
-		this.prepare(viewX,viewY,lastHit,source);
-		var _g2 = 0;
-		while(_g2 < chains.length) {
-			var chain1 = chains[_g2];
-			++_g2;
-			var _g11 = 0;
-			while(_g11 < chain1.length) {
-				var e1 = chain1[_g11];
-				++_g11;
-				e1.onPointerDown(shoe3d.core.input.PointerManager._sharedEvent);
+				e.onPointerDown(shoe3d.core.input.PointerManager._sharedEvent);
 				if(shoe3d.core.input.PointerManager._sharedEvent._stopped) return;
 			}
 		}
 		this.down.emit(shoe3d.core.input.PointerManager._sharedEvent);
 	}
+	,getHitAndChain: function(viewX,viewY) {
+		if(shoe3d.System.screen._currentScreen != null) {
+			var li = shoe3d.System.screen._currentScreen.layers.length - 1;
+			while(li >= 0) {
+				var layer = shoe3d.System.screen._currentScreen.layers[li];
+				if(js.Boot.__instanceof(layer,shoe3d.core.Layer2D) && (js.Boot.__cast(layer , shoe3d.core.Layer2D)).pointerEnabled) {
+					var chain = [];
+					var hit = null;
+					var n = layer.children.length - 1;
+					while(n >= 0) {
+						var hit1 = shoe3d.component.Element2D.hitTest(layer.children[n],viewX,viewY);
+						if(hit1 != null) {
+							var e = hit1.owner;
+							do {
+								var spr = e.get(shoe3d.component.Element2D);
+								if(spr != null) chain.push(spr);
+								e = e.parent;
+							} while(e != null);
+							return { hit : hit1, chain : chain};
+						}
+						n--;
+					}
+				}
+				li--;
+			}
+		}
+		return null;
+	}
 	,submitMove: function(viewX,viewY,source) {
 		if(viewX == this._x && viewY == this._y) return;
-		var hit = null;
-		this.prepare(viewX,viewY,hit,source);
+		var result = this.getHitAndChain(viewX,viewY);
+		this.prepare(viewX,viewY,result != null?result.hit:null,source);
+		if(result != null) {
+			var _g = 0;
+			var _g1 = result.chain;
+			while(_g < _g1.length) {
+				var e = _g1[_g];
+				++_g;
+				e.onPointerMove(shoe3d.core.input.PointerManager._sharedEvent);
+				if(shoe3d.core.input.PointerManager._sharedEvent._stopped) return;
+			}
+		}
 		this.move.emit(shoe3d.core.input.PointerManager._sharedEvent);
 	}
 	,submitUp: function(viewX,viewY,source) {
@@ -3379,48 +3384,15 @@ shoe3d.core.input.PointerManager.prototype = {
 		var hit = null;
 		this.submitMove(viewX,viewY,source);
 		this._isDown = false;
-		var lastHit = null;
-		var chains = [];
-		if(shoe3d.System.screen._currentScreen != null) {
+		var result = this.getHitAndChain(viewX,viewY);
+		this.prepare(viewX,viewY,result != null?result.hit:null,source);
+		if(result != null) {
 			var _g = 0;
-			var _g1 = shoe3d.System.screen._currentScreen.layers;
+			var _g1 = result.chain;
 			while(_g < _g1.length) {
-				var i = _g1[_g];
+				var e = _g1[_g];
 				++_g;
-				if(js.Boot.__instanceof(i,shoe3d.core.Layer2D)) {
-					if((js.Boot.__cast(i , shoe3d.core.Layer2D)).pointerEnabled) {
-						var chain = [];
-						var hit1 = null;
-						var n = i.children.length - 1;
-						while(n >= 0) {
-							hit1 = shoe3d.component.Element2D.hitTest(i.children[n],viewX,viewY);
-							if(hit1 != null) {
-								if(lastHit == null) lastHit = hit1;
-								var e = hit1.owner;
-								do {
-									var spr = e.get(shoe3d.component.Element2D);
-									if(spr != null) chain.push(spr);
-									e = e.parent;
-								} while(e != null);
-								chains.push(chain);
-								break;
-							}
-							n--;
-						}
-					}
-				}
-			}
-		}
-		this.prepare(viewX,viewY,lastHit,source);
-		var _g2 = 0;
-		while(_g2 < chains.length) {
-			var chain1 = chains[_g2];
-			++_g2;
-			var _g11 = 0;
-			while(_g11 < chain1.length) {
-				var e1 = chain1[_g11];
-				++_g11;
-				e1.onPointerUp(shoe3d.core.input.PointerManager._sharedEvent);
+				e.onPointerUp(shoe3d.core.input.PointerManager._sharedEvent);
 				if(shoe3d.core.input.PointerManager._sharedEvent._stopped) return;
 			}
 		}
@@ -4048,7 +4020,22 @@ tests.TestScreen = function() {
 		var i2 = [_g11++];
 		a[i2[0]].get_pointerUp().connect((function(i2) {
 			return function(e1) {
-				haxe.Log.trace("S" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 180, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("UP" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 181, className : "tests.TestScreen", methodName : "new"});
+			};
+		})(i2));
+		a[i2[0]].get_pointerIn().connect((function(i2) {
+			return function(e2) {
+				haxe.Log.trace("IN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 184, className : "tests.TestScreen", methodName : "new"});
+			};
+		})(i2));
+		a[i2[0]].get_pointerOut().connect((function(i2) {
+			return function(e3) {
+				haxe.Log.trace("OUT" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 185, className : "tests.TestScreen", methodName : "new"});
+			};
+		})(i2));
+		a[i2[0]].get_pointerDown().connect((function(i2) {
+			return function(e4) {
+				haxe.Log.trace("DOWN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 186, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 	}
