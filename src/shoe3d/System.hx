@@ -30,8 +30,6 @@ class System
 	public static var renderer(default, null) = RenderManager;
 	public static var input(default, null) = InputManager;
 	public static var updateInfoEveryNthFrame:Int = 6;
-	public static var W = 640;
-	public static var H = 640;
 	
 	private static var _infoFrameCounter:Int = 0;
 	private static var _info:DivElement;
@@ -43,8 +41,6 @@ class System
 	
 	public static function init( originalWidth:Int = 640, originalHeight = 800) 
 	{
-		W = originalWidth;
-		H = originalHeight;
 		//_baseScene = new Scene();
 		WindowManager.init();
 		RenderManager.init();
@@ -52,6 +48,7 @@ class System
 		Time.init();		
 		InputManager.init();
 		
+		ScreenManager.setSize( originalWidth, originalHeight );
 		window.updateLayout();
 		
 		_loop = new MainLoop();

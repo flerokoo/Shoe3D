@@ -3,7 +3,9 @@ import js.Browser;
 import js.html.ArrayBuffer;
 import js.html.Float32Array;
 import js.html.ImageElement;
+import motion.Actuate;
 import shoe3d.asset.Res;
+import shoe3d.component.AutoPosition;
 import shoe3d.component.CameraHolder;
 import shoe3d.component.Element2D;
 import shoe3d.component.GeometryDisplay;
@@ -12,6 +14,7 @@ import shoe3d.component.S3Mesh;
 import shoe3d.component.RandomRotator;
 import shoe3d.component.S3Mesh;
 import shoe3d.component.S3Mesh;
+import shoe3d.component.ScaleButton;
 import shoe3d.component.Sprite2D;
 import shoe3d.core.game.GameObject;
 import shoe3d.core.input.MouseEvent;
@@ -100,7 +103,7 @@ class TestScreen extends GameScreen
 		//gd.material.transparent = false;
 		//layer.overrideMaterial = new MeshPhongMaterial( { transparent: false, depthWrite: true, depthTest: false, color: 0x6C0000 } );
 		
-		for ( i in 0...200 ) {
+		for ( i in 0...10 ) {
 			var go = new GameObject("GO" + i)
 				//.add( new MeshDisplay( new SphereGeometry( Math.random() * 0.5 + 1, 12, 12 ) , new MeshPhongMaterial({color: cast (0xffffff * Math.random()) }) ) );
 				.add(  new GeometryDisplay( gd )	);
@@ -160,9 +163,12 @@ class TestScreen extends GameScreen
 		var cc = cast(ui.camera, OrthographicCamera );
 		
 		var a:Array<Sprite2D> = [];
+		var cont = new GameObject().add( new AutoPosition().setAsOnScreenContainer() );
+		layer2d.addChild( cont );
 		for ( i in 0...3 )
 		{
-			a[i] = addSprite( i == 1 ? a[0].owner : layer2d );			
+			//a[i] = addSprite( i == 155 ? a[0].owner : layer2d );			
+			a[i] = addSprite( cont );			
 		}
 		
 		//a[0].owner.transform.scale.set( 1.2, 1.2, 1 );
@@ -196,6 +202,8 @@ class TestScreen extends GameScreen
 			//e.stopPropagation();
 		}
 		
+		a[0].owner.add( new AutoPosition().setPos( 0.5, 0.5, 640/4 ) );
+		
 		
 		var progress = new ProgressBar( "game_pattern" );
 		addL(progress, "PROGRESS");
@@ -206,7 +214,7 @@ class TestScreen extends GameScreen
 		System._loop._frame.connect( function(d) 
 		{			
 			//progress.progress += - 0.005;
-			progress.progress = 0.64;
+			progress.progress = 0.01;
 		});
 		
 		/*var s1 = addSprite().owner;
@@ -271,7 +279,7 @@ class TestScreen extends GameScreen
 	
 	override public function onUpdate()
 	{
-
+		
 	}
 	
 	var last = -1;	
@@ -279,10 +287,10 @@ class TestScreen extends GameScreen
 	function addSprite( owner:Dynamic = null, name:String = '' )
 	{
 		
-		var tn = name == '' ? Tools.getRandomFromArray( ['logo' ] ) : name;
+		var tn = name == '' ? Tools.getRandomFromArray( ['button_play' ] ) : name;
 		var go = new GameObject()
 			.add( new Sprite2D( tn ) );
-		
+			//.add( new ScaleButton( function(e:PointerEvent) e.hit.owner.transform.rotateZ( 0.2 ) ) );
 		go.transform.position.set( last * 250 + 300  , 250 * last + 300 , go.transform.position.z );
 		//go.transform.position.multiplyScalar( 0 );
 		
@@ -294,11 +302,12 @@ class TestScreen extends GameScreen
 		last != 0  
 			?	go.transform.position.set( 400 + 0 * last, 400 + 200 * last, 0 )
 			: 	go.transform.position.set( 0, 50, 0 );
-		go.transform.position.set( 400 + 0 * last, 400 + 200 * last, 0 );
+		go.transform.position.set( 200 + 0 * last, 400 + 200 * last, 0 );
 		//go.get(Sprite2D).anchorX = Math.random() * 200 - 100;
 		//go.get(Sprite2D).anchorY = Math.random() * 200 - 100;
 		
 		last += 1;
+		
 		if ( owner != null )
 			owner.addChild( go );
 		return go.get(Sprite2D);

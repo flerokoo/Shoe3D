@@ -20,8 +20,21 @@ class ScreenManager
 	private static var _screens:Map<String,Class<GameScreen>>;
 	private static var _base:GameObject;
 	
+	/**
+	 * Original game width
+	 */
 	public static var width(default, null):Int = 0;
+		
+	/**
+	 * Original game height
+	 */
 	public static var height(default, null):Int = 0;
+	
+		
+	/**
+	 * Original-sized screen scale to fit current window size
+	 */
+	public static var scale(default, null):Float = 1;
 	
 	private static function init() 
 	{
@@ -31,6 +44,13 @@ class ScreenManager
 		defaultTransition = new Transition();
 		//defaultTransition.setHolder(_base);
 		//System._baseScene.add( _base );
+		
+		System.window._prePublicResize.connect( recalcScale );
+	}
+	
+	static function recalcScale()
+	{
+		scale = Math.min(  System.window.width / width,  System.window.height / height );
 	}
 	
 	public static function show( name:String, ?changeFn:Void->Void ) 
@@ -77,5 +97,6 @@ class ScreenManager
 		width = w;
 		height = h;
 	}
+	
 	
 }

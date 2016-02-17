@@ -119,6 +119,17 @@ Reflect.field = function(o,field) {
 		return null;
 	}
 };
+Reflect.setField = function(o,field,value) {
+	o[field] = value;
+};
+Reflect.getProperty = function(o,field) {
+	var tmp;
+	if(o == null) return null; else if(o.__properties__ && (tmp = o.__properties__["get_" + field])) return o[tmp](); else return o[field];
+};
+Reflect.setProperty = function(o,field,value) {
+	var tmp;
+	if(o.__properties__ && (tmp = o.__properties__["set_" + field])) o[tmp](value); else o[field] = value;
+};
 Reflect.callMethod = function(o,func,args) {
 	return func.apply(o,args);
 };
@@ -273,6 +284,22 @@ haxe.Log.__name__ = ["haxe","Log"];
 haxe.Log.trace = function(v,infos) {
 	js.Boot.__trace(v,infos);
 };
+haxe.Timer = function(time_ms) {
+	var me = this;
+	this.id = setInterval(function() {
+		me.run();
+	},time_ms);
+};
+haxe.Timer.__name__ = ["haxe","Timer"];
+haxe.Timer.stamp = function() {
+	return new Date().getTime() / 1000;
+};
+haxe.Timer.prototype = {
+	id: null
+	,run: function() {
+	}
+	,__class__: haxe.Timer
+};
 haxe.ds = {};
 haxe.ds.IntMap = function() {
 	this.h = { };
@@ -303,6 +330,49 @@ haxe.ds.IntMap.prototype = {
 		return HxOverrides.iter(a);
 	}
 	,__class__: haxe.ds.IntMap
+};
+haxe.ds.ObjectMap = function() {
+	this.h = { };
+	this.h.__keys__ = { };
+};
+haxe.ds.ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
+haxe.ds.ObjectMap.__interfaces__ = [IMap];
+haxe.ds.ObjectMap.prototype = {
+	h: null
+	,set: function(key,value) {
+		var id = key.__id__ || (key.__id__ = ++haxe.ds.ObjectMap.count);
+		this.h[id] = value;
+		this.h.__keys__[id] = key;
+	}
+	,get: function(key) {
+		return this.h[key.__id__];
+	}
+	,exists: function(key) {
+		return this.h.__keys__[key.__id__] != null;
+	}
+	,remove: function(key) {
+		var id = key.__id__;
+		if(this.h.__keys__[id] == null) return false;
+		delete(this.h[id]);
+		delete(this.h.__keys__[id]);
+		return true;
+	}
+	,keys: function() {
+		var a = [];
+		for( var key in this.h.__keys__ ) {
+		if(this.h.hasOwnProperty(key)) a.push(this.h.__keys__[key]);
+		}
+		return HxOverrides.iter(a);
+	}
+	,iterator: function() {
+		return { ref : this.h, it : this.keys(), hasNext : function() {
+			return this.it.hasNext();
+		}, next : function() {
+			var i = this.it.next();
+			return this.ref[i.__id__];
+		}};
+	}
+	,__class__: haxe.ds.ObjectMap
 };
 haxe.ds.StringMap = function() {
 	this.h = { };
@@ -670,6 +740,948 @@ js.Boot.__instanceof = function(o,cl) {
 js.Boot.__cast = function(o,t) {
 	if(js.Boot.__instanceof(o,t)) return o; else throw "Cannot cast " + Std.string(o) + " to " + Std.string(t);
 };
+var motion = {};
+motion.actuators = {};
+motion.actuators.IGenericActuator = function() { };
+motion.actuators.IGenericActuator.__name__ = ["motion","actuators","IGenericActuator"];
+motion.actuators.IGenericActuator.prototype = {
+	autoVisible: null
+	,delay: null
+	,ease: null
+	,onComplete: null
+	,onRepeat: null
+	,onUpdate: null
+	,reflect: null
+	,repeat: null
+	,reverse: null
+	,smartRotation: null
+	,snapping: null
+	,__class__: motion.actuators.IGenericActuator
+};
+motion.actuators.GenericActuator = function(target,duration,properties) {
+	this._autoVisible = true;
+	this._delay = 0;
+	this._reflect = false;
+	this._repeat = 0;
+	this._reverse = false;
+	this._smartRotation = false;
+	this._snapping = false;
+	this.special = false;
+	this.target = target;
+	this.properties = properties;
+	this.duration = duration;
+	this._ease = motion.Actuate.defaultEase;
+};
+motion.actuators.GenericActuator.__name__ = ["motion","actuators","GenericActuator"];
+motion.actuators.GenericActuator.__interfaces__ = [motion.actuators.IGenericActuator];
+motion.actuators.GenericActuator.prototype = {
+	duration: null
+	,id: null
+	,properties: null
+	,target: null
+	,_autoVisible: null
+	,_delay: null
+	,_ease: null
+	,_onComplete: null
+	,_onCompleteParams: null
+	,_onRepeat: null
+	,_onRepeatParams: null
+	,_onUpdate: null
+	,_onUpdateParams: null
+	,_reflect: null
+	,_repeat: null
+	,_reverse: null
+	,_smartRotation: null
+	,_snapping: null
+	,special: null
+	,apply: function() {
+		var _g = 0;
+		var _g1 = Reflect.fields(this.properties);
+		while(_g < _g1.length) {
+			var i = _g1[_g];
+			++_g;
+			if(Object.prototype.hasOwnProperty.call(this.target,i)) Reflect.setField(this.target,i,Reflect.field(this.properties,i)); else Reflect.setProperty(this.target,i,Reflect.field(this.properties,i));
+		}
+	}
+	,autoVisible: function(value) {
+		if(value == null) value = true;
+		this._autoVisible = value;
+		return this;
+	}
+	,callMethod: function(method,params) {
+		if(params == null) params = [];
+		return method.apply(method,params);
+	}
+	,change: function() {
+		if(this._onUpdate != null) this.callMethod(this._onUpdate,this._onUpdateParams);
+	}
+	,complete: function(sendEvent) {
+		if(sendEvent == null) sendEvent = true;
+		if(sendEvent) {
+			this.change();
+			if(this._onComplete != null) this.callMethod(this._onComplete,this._onCompleteParams);
+		}
+		motion.Actuate.unload(this);
+	}
+	,delay: function(duration) {
+		this._delay = duration;
+		return this;
+	}
+	,ease: function(easing) {
+		this._ease = easing;
+		return this;
+	}
+	,move: function() {
+	}
+	,onComplete: function(handler,parameters) {
+		this._onComplete = handler;
+		if(parameters == null) this._onCompleteParams = []; else this._onCompleteParams = parameters;
+		if(this.duration == 0) this.complete();
+		return this;
+	}
+	,onRepeat: function(handler,parameters) {
+		this._onRepeat = handler;
+		if(parameters == null) this._onRepeatParams = []; else this._onRepeatParams = parameters;
+		return this;
+	}
+	,onUpdate: function(handler,parameters) {
+		this._onUpdate = handler;
+		if(parameters == null) this._onUpdateParams = []; else this._onUpdateParams = parameters;
+		return this;
+	}
+	,pause: function() {
+	}
+	,reflect: function(value) {
+		if(value == null) value = true;
+		this._reflect = value;
+		this.special = true;
+		return this;
+	}
+	,repeat: function(times) {
+		if(times == null) times = -1;
+		this._repeat = times;
+		return this;
+	}
+	,resume: function() {
+	}
+	,reverse: function(value) {
+		if(value == null) value = true;
+		this._reverse = value;
+		this.special = true;
+		return this;
+	}
+	,smartRotation: function(value) {
+		if(value == null) value = true;
+		this._smartRotation = value;
+		this.special = true;
+		return this;
+	}
+	,snapping: function(value) {
+		if(value == null) value = true;
+		this._snapping = value;
+		this.special = true;
+		return this;
+	}
+	,stop: function(properties,complete,sendEvent) {
+	}
+	,__class__: motion.actuators.GenericActuator
+};
+motion.actuators.SimpleActuator = function(target,duration,properties) {
+	this.active = true;
+	this.propertyDetails = new Array();
+	this.sendChange = false;
+	this.paused = false;
+	this.cacheVisible = false;
+	this.initialized = false;
+	this.setVisible = false;
+	this.toggleVisible = false;
+	this.startTime = haxe.Timer.stamp();
+	motion.actuators.GenericActuator.call(this,target,duration,properties);
+	if(!motion.actuators.SimpleActuator.addedEvent) {
+		motion.actuators.SimpleActuator.addedEvent = true;
+		motion.actuators.SimpleActuator.timer = new haxe.Timer(33);
+		motion.actuators.SimpleActuator.timer.run = motion.actuators.SimpleActuator.stage_onEnterFrame;
+	}
+};
+motion.actuators.SimpleActuator.__name__ = ["motion","actuators","SimpleActuator"];
+motion.actuators.SimpleActuator.stage_onEnterFrame = function() {
+	var currentTime = haxe.Timer.stamp();
+	var actuator;
+	var j = 0;
+	var cleanup = false;
+	var _g1 = 0;
+	var _g = motion.actuators.SimpleActuator.actuatorsLength;
+	while(_g1 < _g) {
+		var i = _g1++;
+		actuator = motion.actuators.SimpleActuator.actuators[j];
+		if(actuator != null && actuator.active) {
+			if(currentTime > actuator.timeOffset) actuator.update(currentTime);
+			j++;
+		} else {
+			motion.actuators.SimpleActuator.actuators.splice(j,1);
+			--motion.actuators.SimpleActuator.actuatorsLength;
+		}
+	}
+};
+motion.actuators.SimpleActuator.__super__ = motion.actuators.GenericActuator;
+motion.actuators.SimpleActuator.prototype = $extend(motion.actuators.GenericActuator.prototype,{
+	timeOffset: null
+	,active: null
+	,cacheVisible: null
+	,detailsLength: null
+	,initialized: null
+	,paused: null
+	,pauseTime: null
+	,propertyDetails: null
+	,sendChange: null
+	,setVisible: null
+	,startTime: null
+	,toggleVisible: null
+	,autoVisible: function(value) {
+		if(value == null) value = true;
+		this._autoVisible = value;
+		if(!value) {
+			this.toggleVisible = false;
+			if(this.setVisible) this.setField(this.target,"visible",this.cacheVisible);
+		}
+		return this;
+	}
+	,delay: function(duration) {
+		this._delay = duration;
+		this.timeOffset = this.startTime + duration;
+		return this;
+	}
+	,getField: function(target,propertyName) {
+		var value = null;
+		if(Object.prototype.hasOwnProperty.call(target,propertyName)) value = Reflect.field(target,propertyName); else value = Reflect.getProperty(target,propertyName);
+		return value;
+	}
+	,initialize: function() {
+		var details;
+		var start;
+		var _g = 0;
+		var _g1 = Reflect.fields(this.properties);
+		while(_g < _g1.length) {
+			var i = _g1[_g];
+			++_g;
+			var isField = true;
+			if(Object.prototype.hasOwnProperty.call(this.target,i)) start = Reflect.field(this.target,i); else {
+				isField = false;
+				start = Reflect.getProperty(this.target,i);
+			}
+			if(typeof(start) == "number") {
+				details = new motion.actuators.PropertyDetails(this.target,i,start,this.getField(this.properties,i) - start,isField);
+				this.propertyDetails.push(details);
+			}
+		}
+		this.detailsLength = this.propertyDetails.length;
+		this.initialized = true;
+	}
+	,move: function() {
+		this.toggleVisible = Object.prototype.hasOwnProperty.call(this.properties,"alpha") && Object.prototype.hasOwnProperty.call(this.properties,"visible");
+		if(this.toggleVisible && this.properties.alpha != 0 && !this.getField(this.target,"visible")) {
+			this.setVisible = true;
+			this.cacheVisible = this.getField(this.target,"visible");
+			this.setField(this.target,"visible",true);
+		}
+		this.timeOffset = this.startTime;
+		motion.actuators.SimpleActuator.actuators.push(this);
+		++motion.actuators.SimpleActuator.actuatorsLength;
+	}
+	,onUpdate: function(handler,parameters) {
+		this._onUpdate = handler;
+		if(parameters == null) this._onUpdateParams = []; else this._onUpdateParams = parameters;
+		this.sendChange = true;
+		return this;
+	}
+	,pause: function() {
+		this.paused = true;
+		this.pauseTime = haxe.Timer.stamp();
+	}
+	,resume: function() {
+		if(this.paused) {
+			this.paused = false;
+			this.timeOffset += (haxe.Timer.stamp() - this.pauseTime) / 1000;
+		}
+	}
+	,setField: function(target,propertyName,value) {
+		if(Object.prototype.hasOwnProperty.call(target,propertyName)) target[propertyName] = value; else Reflect.setProperty(target,propertyName,value);
+	}
+	,setProperty: function(details,value) {
+		if(details.isField) details.target[details.propertyName] = value; else Reflect.setProperty(details.target,details.propertyName,value);
+	}
+	,stop: function(properties,complete,sendEvent) {
+		if(this.active) {
+			if(properties == null) {
+				this.active = false;
+				if(complete) this.apply();
+				this.complete(sendEvent);
+				return;
+			}
+			var _g = 0;
+			var _g1 = Reflect.fields(properties);
+			while(_g < _g1.length) {
+				var i = _g1[_g];
+				++_g;
+				if(Object.prototype.hasOwnProperty.call(this.properties,i)) {
+					this.active = false;
+					if(complete) this.apply();
+					this.complete(sendEvent);
+					return;
+				}
+			}
+		}
+	}
+	,update: function(currentTime) {
+		if(!this.paused) {
+			var details;
+			var easing;
+			var i;
+			var tweenPosition = (currentTime - this.timeOffset) / this.duration;
+			if(tweenPosition > 1) tweenPosition = 1;
+			if(!this.initialized) this.initialize();
+			if(!this.special) {
+				easing = this._ease.calculate(tweenPosition);
+				var _g1 = 0;
+				var _g = this.detailsLength;
+				while(_g1 < _g) {
+					var i1 = _g1++;
+					details = this.propertyDetails[i1];
+					this.setProperty(details,details.start + details.change * easing);
+				}
+			} else {
+				if(!this._reverse) easing = this._ease.calculate(tweenPosition); else easing = this._ease.calculate(1 - tweenPosition);
+				var endValue;
+				var _g11 = 0;
+				var _g2 = this.detailsLength;
+				while(_g11 < _g2) {
+					var i2 = _g11++;
+					details = this.propertyDetails[i2];
+					if(this._smartRotation && (details.propertyName == "rotation" || details.propertyName == "rotationX" || details.propertyName == "rotationY" || details.propertyName == "rotationZ")) {
+						var rotation = details.change % 360;
+						if(rotation > 180) rotation -= 360; else if(rotation < -180) rotation += 360;
+						endValue = details.start + rotation * easing;
+					} else endValue = details.start + details.change * easing;
+					if(!this._snapping) {
+						if(details.isField) details.target[details.propertyName] = endValue; else Reflect.setProperty(details.target,details.propertyName,endValue);
+					} else this.setProperty(details,Math.round(endValue));
+				}
+			}
+			if(tweenPosition == 1) {
+				if(this._repeat == 0) {
+					this.active = false;
+					if(this.toggleVisible && this.getField(this.target,"alpha") == 0) this.setField(this.target,"visible",false);
+					this.complete(true);
+					return;
+				} else {
+					if(this._onRepeat != null) this.callMethod(this._onRepeat,this._onRepeatParams);
+					if(this._reflect) this._reverse = !this._reverse;
+					this.startTime = currentTime;
+					this.timeOffset = this.startTime + this._delay;
+					if(this._repeat > 0) this._repeat--;
+				}
+			}
+			if(this.sendChange) this.change();
+		}
+	}
+	,__class__: motion.actuators.SimpleActuator
+});
+motion.easing = {};
+motion.easing.Expo = function() { };
+motion.easing.Expo.__name__ = ["motion","easing","Expo"];
+motion.easing.Expo.__properties__ = {get_easeOut:"get_easeOut",get_easeInOut:"get_easeInOut",get_easeIn:"get_easeIn"}
+motion.easing.Expo.get_easeIn = function() {
+	return new motion.easing.ExpoEaseIn();
+};
+motion.easing.Expo.get_easeInOut = function() {
+	return new motion.easing.ExpoEaseInOut();
+};
+motion.easing.Expo.get_easeOut = function() {
+	return new motion.easing.ExpoEaseOut();
+};
+motion.easing.IEasing = function() { };
+motion.easing.IEasing.__name__ = ["motion","easing","IEasing"];
+motion.easing.IEasing.prototype = {
+	calculate: null
+	,ease: null
+	,__class__: motion.easing.IEasing
+};
+motion.easing.ExpoEaseOut = function() {
+};
+motion.easing.ExpoEaseOut.__name__ = ["motion","easing","ExpoEaseOut"];
+motion.easing.ExpoEaseOut.__interfaces__ = [motion.easing.IEasing];
+motion.easing.ExpoEaseOut.prototype = {
+	calculate: function(k) {
+		if(k == 1) return 1; else return 1 - Math.pow(2,-10 * k);
+	}
+	,ease: function(t,b,c,d) {
+		if(t == d) return b + c; else return c * (1 - Math.pow(2,-10 * t / d)) + b;
+	}
+	,__class__: motion.easing.ExpoEaseOut
+};
+motion.Actuate = function() { };
+motion.Actuate.__name__ = ["motion","Actuate"];
+motion.Actuate.apply = function(target,properties,customActuator) {
+	motion.Actuate.stop(target,properties);
+	if(customActuator == null) customActuator = motion.Actuate.defaultActuator;
+	var actuator = Type.createInstance(customActuator,[target,0,properties]);
+	actuator.apply();
+	return actuator;
+};
+motion.Actuate.getLibrary = function(target,allowCreation) {
+	if(allowCreation == null) allowCreation = true;
+	if(!motion.Actuate.targetLibraries.exists(target) && allowCreation) motion.Actuate.targetLibraries.set(target,new Array());
+	return motion.Actuate.targetLibraries.get(target);
+};
+motion.Actuate.motionPath = function(target,duration,properties,overwrite) {
+	if(overwrite == null) overwrite = true;
+	return motion.Actuate.tween(target,duration,properties,overwrite,motion.actuators.MotionPathActuator);
+};
+motion.Actuate.pause = function(target) {
+	if(js.Boot.__instanceof(target,motion.actuators.GenericActuator)) (js.Boot.__cast(target , motion.actuators.GenericActuator)).pause(); else {
+		var library = motion.Actuate.getLibrary(target,false);
+		if(library != null) {
+			var _g = 0;
+			while(_g < library.length) {
+				var actuator = library[_g];
+				++_g;
+				actuator.pause();
+			}
+		}
+	}
+};
+motion.Actuate.pauseAll = function() {
+	var $it0 = motion.Actuate.targetLibraries.iterator();
+	while( $it0.hasNext() ) {
+		var library = $it0.next();
+		var _g = 0;
+		while(_g < library.length) {
+			var actuator = library[_g];
+			++_g;
+			actuator.pause();
+		}
+	}
+};
+motion.Actuate.reset = function() {
+	var $it0 = motion.Actuate.targetLibraries.iterator();
+	while( $it0.hasNext() ) {
+		var library = $it0.next();
+		var i = library.length - 1;
+		while(i >= 0) {
+			library[i].stop(null,false,false);
+			i--;
+		}
+	}
+	motion.Actuate.targetLibraries = new haxe.ds.ObjectMap();
+};
+motion.Actuate.resume = function(target) {
+	if(js.Boot.__instanceof(target,motion.actuators.GenericActuator)) (js.Boot.__cast(target , motion.actuators.GenericActuator)).resume(); else {
+		var library = motion.Actuate.getLibrary(target,false);
+		if(library != null) {
+			var _g = 0;
+			while(_g < library.length) {
+				var actuator = library[_g];
+				++_g;
+				actuator.resume();
+			}
+		}
+	}
+};
+motion.Actuate.resumeAll = function() {
+	var $it0 = motion.Actuate.targetLibraries.iterator();
+	while( $it0.hasNext() ) {
+		var library = $it0.next();
+		var _g = 0;
+		while(_g < library.length) {
+			var actuator = library[_g];
+			++_g;
+			actuator.resume();
+		}
+	}
+};
+motion.Actuate.stop = function(target,properties,complete,sendEvent) {
+	if(sendEvent == null) sendEvent = true;
+	if(complete == null) complete = false;
+	if(target != null) {
+		if(js.Boot.__instanceof(target,motion.actuators.GenericActuator)) (js.Boot.__cast(target , motion.actuators.GenericActuator)).stop(null,complete,sendEvent); else {
+			var library = motion.Actuate.getLibrary(target,false);
+			if(library != null) {
+				if(typeof(properties) == "string") {
+					var temp = { };
+					Reflect.setField(temp,properties,null);
+					properties = temp;
+				} else if((properties instanceof Array) && properties.__enum__ == null) {
+					var temp1 = { };
+					var _g = 0;
+					var _g1;
+					_g1 = js.Boot.__cast(properties , Array);
+					while(_g < _g1.length) {
+						var property = _g1[_g];
+						++_g;
+						Reflect.setField(temp1,property,null);
+					}
+					properties = temp1;
+				}
+				var i = library.length - 1;
+				while(i >= 0) {
+					library[i].stop(properties,complete,sendEvent);
+					i--;
+				}
+			}
+		}
+	}
+};
+motion.Actuate.timer = function(duration,customActuator) {
+	return motion.Actuate.tween(new motion._Actuate.TweenTimer(0),duration,new motion._Actuate.TweenTimer(1),false,customActuator);
+};
+motion.Actuate.tween = function(target,duration,properties,overwrite,customActuator) {
+	if(overwrite == null) overwrite = true;
+	if(target != null) {
+		if(duration > 0) {
+			if(customActuator == null) customActuator = motion.Actuate.defaultActuator;
+			var actuator = Type.createInstance(customActuator,[target,duration,properties]);
+			var library = motion.Actuate.getLibrary(actuator.target);
+			if(overwrite) {
+				var i = library.length - 1;
+				while(i >= 0) {
+					library[i].stop(actuator.properties,false,false);
+					i--;
+				}
+				library = motion.Actuate.getLibrary(actuator.target);
+			}
+			library.push(actuator);
+			actuator.move();
+			return actuator;
+		} else return motion.Actuate.apply(target,properties,customActuator);
+	}
+	return null;
+};
+motion.Actuate.unload = function(actuator) {
+	var target = actuator.target;
+	if(motion.Actuate.targetLibraries.h.__keys__[target.__id__] != null) {
+		HxOverrides.remove(motion.Actuate.targetLibraries.h[target.__id__],actuator);
+		if(motion.Actuate.targetLibraries.h[target.__id__].length == 0) motion.Actuate.targetLibraries.remove(target);
+	}
+};
+motion.Actuate.update = function(target,duration,start,end,overwrite) {
+	if(overwrite == null) overwrite = true;
+	var properties = { start : start, end : end};
+	return motion.Actuate.tween(target,duration,properties,overwrite,motion.actuators.MethodActuator);
+};
+motion._Actuate = {};
+motion._Actuate.TweenTimer = function(progress) {
+	this.progress = progress;
+};
+motion._Actuate.TweenTimer.__name__ = ["motion","_Actuate","TweenTimer"];
+motion._Actuate.TweenTimer.prototype = {
+	progress: null
+	,__class__: motion._Actuate.TweenTimer
+};
+motion.MotionPath = function() {
+	this._x = new motion.ComponentPath();
+	this._y = new motion.ComponentPath();
+	this._rotation = null;
+};
+motion.MotionPath.__name__ = ["motion","MotionPath"];
+motion.MotionPath.prototype = {
+	rotation: null
+	,x: null
+	,y: null
+	,_rotation: null
+	,_x: null
+	,_y: null
+	,bezier: function(x,y,controlX,controlY,strength) {
+		if(strength == null) strength = 1;
+		this._x.addPath(new motion.BezierPath(x,controlX,strength));
+		this._y.addPath(new motion.BezierPath(y,controlY,strength));
+		return this;
+	}
+	,line: function(x,y,strength) {
+		if(strength == null) strength = 1;
+		this._x.addPath(new motion.LinearPath(x,strength));
+		this._y.addPath(new motion.LinearPath(y,strength));
+		return this;
+	}
+	,get_rotation: function() {
+		if(this._rotation == null) this._rotation = new motion.RotationPath(this._x,this._y);
+		return this._rotation;
+	}
+	,get_x: function() {
+		return this._x;
+	}
+	,get_y: function() {
+		return this._y;
+	}
+	,__class__: motion.MotionPath
+	,__properties__: {get_y:"get_y",get_x:"get_x",get_rotation:"get_rotation"}
+};
+motion.IComponentPath = function() { };
+motion.IComponentPath.__name__ = ["motion","IComponentPath"];
+motion.IComponentPath.prototype = {
+	end: null
+	,start: null
+	,calculate: null
+	,__class__: motion.IComponentPath
+};
+motion.ComponentPath = function() {
+	this.paths = new Array();
+	this.start = 0;
+	this.totalStrength = 0;
+};
+motion.ComponentPath.__name__ = ["motion","ComponentPath"];
+motion.ComponentPath.__interfaces__ = [motion.IComponentPath];
+motion.ComponentPath.prototype = {
+	start: null
+	,end: null
+	,paths: null
+	,totalStrength: null
+	,addPath: function(path) {
+		this.paths.push(path);
+		this.totalStrength += path.strength;
+	}
+	,calculate: function(k) {
+		if(this.paths.length == 1) return this.paths[0].calculate(this.start,k); else {
+			var ratio = k * this.totalStrength;
+			var lastEnd = this.start;
+			var _g = 0;
+			var _g1 = this.paths;
+			while(_g < _g1.length) {
+				var path = _g1[_g];
+				++_g;
+				if(ratio > path.strength) {
+					ratio -= path.strength;
+					lastEnd = path.end;
+				} else return path.calculate(lastEnd,ratio / path.strength);
+			}
+		}
+		return 0;
+	}
+	,get_end: function() {
+		if(this.paths.length > 0) {
+			var path = this.paths[this.paths.length - 1];
+			return path.end;
+		} else return this.start;
+	}
+	,__class__: motion.ComponentPath
+	,__properties__: {get_end:"get_end"}
+};
+motion.BezierPath = function(end,control,strength) {
+	this.end = end;
+	this.control = control;
+	this.strength = strength;
+};
+motion.BezierPath.__name__ = ["motion","BezierPath"];
+motion.BezierPath.prototype = {
+	control: null
+	,end: null
+	,strength: null
+	,calculate: function(start,k) {
+		return (1 - k) * (1 - k) * start + 2 * (1 - k) * k * this.control + k * k * this.end;
+	}
+	,__class__: motion.BezierPath
+};
+motion.LinearPath = function(end,strength) {
+	motion.BezierPath.call(this,end,0,strength);
+};
+motion.LinearPath.__name__ = ["motion","LinearPath"];
+motion.LinearPath.__super__ = motion.BezierPath;
+motion.LinearPath.prototype = $extend(motion.BezierPath.prototype,{
+	calculate: function(start,k) {
+		return start + k * (this.end - start);
+	}
+	,__class__: motion.LinearPath
+});
+motion.RotationPath = function(x,y) {
+	this.step = 0.01;
+	this._x = x;
+	this._y = y;
+	this.offset = 0;
+	this.start = this.calculate(0.0);
+};
+motion.RotationPath.__name__ = ["motion","RotationPath"];
+motion.RotationPath.__interfaces__ = [motion.IComponentPath];
+motion.RotationPath.prototype = {
+	end: null
+	,offset: null
+	,start: null
+	,step: null
+	,_x: null
+	,_y: null
+	,calculate: function(k) {
+		var dX = this._x.calculate(k) - this._x.calculate(k + this.step);
+		var dY = this._y.calculate(k) - this._y.calculate(k + this.step);
+		var angle = Math.atan2(dY,dX) * (180 / Math.PI);
+		angle = (angle + this.offset) % 360;
+		return angle;
+	}
+	,get_end: function() {
+		return this.calculate(1.0);
+	}
+	,__class__: motion.RotationPath
+	,__properties__: {get_end:"get_end"}
+};
+motion.actuators.MethodActuator = function(target,duration,properties) {
+	this.currentParameters = new Array();
+	this.tweenProperties = { };
+	motion.actuators.SimpleActuator.call(this,target,duration,properties);
+	if(!Object.prototype.hasOwnProperty.call(properties,"start")) this.properties.start = new Array();
+	if(!Object.prototype.hasOwnProperty.call(properties,"end")) this.properties.end = this.properties.start;
+	var _g1 = 0;
+	var _g = this.properties.start.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		this.currentParameters.push(null);
+	}
+};
+motion.actuators.MethodActuator.__name__ = ["motion","actuators","MethodActuator"];
+motion.actuators.MethodActuator.__super__ = motion.actuators.SimpleActuator;
+motion.actuators.MethodActuator.prototype = $extend(motion.actuators.SimpleActuator.prototype,{
+	currentParameters: null
+	,tweenProperties: null
+	,apply: function() {
+		this.callMethod(this.target,this.properties.end);
+	}
+	,complete: function(sendEvent) {
+		if(sendEvent == null) sendEvent = true;
+		var _g1 = 0;
+		var _g = this.properties.start.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			this.currentParameters[i] = Reflect.field(this.tweenProperties,"param" + i);
+		}
+		this.callMethod(this.target,this.currentParameters);
+		motion.actuators.SimpleActuator.prototype.complete.call(this,sendEvent);
+	}
+	,initialize: function() {
+		var details;
+		var propertyName;
+		var start;
+		var _g1 = 0;
+		var _g = this.properties.start.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			propertyName = "param" + i;
+			start = this.properties.start[i];
+			this.tweenProperties[propertyName] = start;
+			if(typeof(start) == "number" || ((start | 0) === start)) {
+				details = new motion.actuators.PropertyDetails(this.tweenProperties,propertyName,start,this.properties.end[i] - start);
+				this.propertyDetails.push(details);
+			}
+		}
+		this.detailsLength = this.propertyDetails.length;
+		this.initialized = true;
+	}
+	,update: function(currentTime) {
+		motion.actuators.SimpleActuator.prototype.update.call(this,currentTime);
+		if(this.active) {
+			var _g1 = 0;
+			var _g = this.properties.start.length;
+			while(_g1 < _g) {
+				var i = _g1++;
+				this.currentParameters[i] = Reflect.field(this.tweenProperties,"param" + i);
+			}
+			this.callMethod(this.target,this.currentParameters);
+		}
+	}
+	,__class__: motion.actuators.MethodActuator
+});
+motion.actuators.MotionPathActuator = function(target,duration,properties) {
+	motion.actuators.SimpleActuator.call(this,target,duration,properties);
+};
+motion.actuators.MotionPathActuator.__name__ = ["motion","actuators","MotionPathActuator"];
+motion.actuators.MotionPathActuator.__super__ = motion.actuators.SimpleActuator;
+motion.actuators.MotionPathActuator.prototype = $extend(motion.actuators.SimpleActuator.prototype,{
+	apply: function() {
+		var _g = 0;
+		var _g1 = Reflect.fields(this.properties);
+		while(_g < _g1.length) {
+			var propertyName = _g1[_g];
+			++_g;
+			if(Object.prototype.hasOwnProperty.call(this.target,propertyName)) Reflect.setField(this.target,propertyName,(js.Boot.__cast(Reflect.field(this.properties,propertyName) , motion.IComponentPath)).get_end()); else Reflect.setProperty(this.target,propertyName,(js.Boot.__cast(Reflect.field(this.properties,propertyName) , motion.IComponentPath)).get_end());
+		}
+	}
+	,initialize: function() {
+		var details;
+		var path;
+		var _g = 0;
+		var _g1 = Reflect.fields(this.properties);
+		while(_g < _g1.length) {
+			var propertyName = _g1[_g];
+			++_g;
+			path = js.Boot.__cast(Reflect.field(this.properties,propertyName) , motion.IComponentPath);
+			if(path != null) {
+				var isField = true;
+				if(Object.prototype.hasOwnProperty.call(this.target,propertyName)) path.start = Reflect.field(this.target,propertyName); else {
+					isField = false;
+					path.start = Reflect.getProperty(this.target,propertyName);
+				}
+				details = new motion.actuators.PropertyPathDetails(this.target,propertyName,path,isField);
+				this.propertyDetails.push(details);
+			}
+		}
+		this.detailsLength = this.propertyDetails.length;
+		this.initialized = true;
+	}
+	,update: function(currentTime) {
+		if(!this.paused) {
+			var details;
+			var easing;
+			var tweenPosition = (currentTime - this.timeOffset) / this.duration;
+			if(tweenPosition > 1) tweenPosition = 1;
+			if(!this.initialized) this.initialize();
+			if(!this.special) {
+				easing = this._ease.calculate(tweenPosition);
+				var _g = 0;
+				var _g1 = this.propertyDetails;
+				while(_g < _g1.length) {
+					var details1 = _g1[_g];
+					++_g;
+					if(details1.isField) Reflect.setField(details1.target,details1.propertyName,(js.Boot.__cast(details1 , motion.actuators.PropertyPathDetails)).path.calculate(easing)); else Reflect.setProperty(details1.target,details1.propertyName,(js.Boot.__cast(details1 , motion.actuators.PropertyPathDetails)).path.calculate(easing));
+				}
+			} else {
+				if(!this._reverse) easing = this._ease.calculate(tweenPosition); else easing = this._ease.calculate(1 - tweenPosition);
+				var endValue;
+				var _g2 = 0;
+				var _g11 = this.propertyDetails;
+				while(_g2 < _g11.length) {
+					var details2 = _g11[_g2];
+					++_g2;
+					if(!this._snapping) {
+						if(details2.isField) Reflect.setField(details2.target,details2.propertyName,(js.Boot.__cast(details2 , motion.actuators.PropertyPathDetails)).path.calculate(easing)); else Reflect.setProperty(details2.target,details2.propertyName,(js.Boot.__cast(details2 , motion.actuators.PropertyPathDetails)).path.calculate(easing));
+					} else if(details2.isField) Reflect.setField(details2.target,details2.propertyName,Math.round((js.Boot.__cast(details2 , motion.actuators.PropertyPathDetails)).path.calculate(easing))); else Reflect.setProperty(details2.target,details2.propertyName,Math.round((js.Boot.__cast(details2 , motion.actuators.PropertyPathDetails)).path.calculate(easing)));
+				}
+			}
+			if(tweenPosition == 1) {
+				if(this._repeat == 0) {
+					this.active = false;
+					if(this.toggleVisible && this.getField(this.target,"alpha") == 0) this.setField(this.target,"visible",false);
+					this.complete(true);
+					return;
+				} else {
+					if(this._reflect) this._reverse = !this._reverse;
+					this.startTime = currentTime;
+					this.timeOffset = this.startTime + this._delay;
+					if(this._repeat > 0) this._repeat--;
+				}
+			}
+			if(this.sendChange) this.change();
+		}
+	}
+	,__class__: motion.actuators.MotionPathActuator
+});
+motion.actuators.PropertyDetails = function(target,propertyName,start,change,isField) {
+	if(isField == null) isField = true;
+	this.target = target;
+	this.propertyName = propertyName;
+	this.start = start;
+	this.change = change;
+	this.isField = isField;
+};
+motion.actuators.PropertyDetails.__name__ = ["motion","actuators","PropertyDetails"];
+motion.actuators.PropertyDetails.prototype = {
+	change: null
+	,isField: null
+	,propertyName: null
+	,start: null
+	,target: null
+	,__class__: motion.actuators.PropertyDetails
+};
+motion.actuators.PropertyPathDetails = function(target,propertyName,path,isField) {
+	if(isField == null) isField = true;
+	motion.actuators.PropertyDetails.call(this,target,propertyName,0,0,isField);
+	this.path = path;
+};
+motion.actuators.PropertyPathDetails.__name__ = ["motion","actuators","PropertyPathDetails"];
+motion.actuators.PropertyPathDetails.__super__ = motion.actuators.PropertyDetails;
+motion.actuators.PropertyPathDetails.prototype = $extend(motion.actuators.PropertyDetails.prototype,{
+	path: null
+	,__class__: motion.actuators.PropertyPathDetails
+});
+motion.easing.ExpoEaseIn = function() {
+};
+motion.easing.ExpoEaseIn.__name__ = ["motion","easing","ExpoEaseIn"];
+motion.easing.ExpoEaseIn.__interfaces__ = [motion.easing.IEasing];
+motion.easing.ExpoEaseIn.prototype = {
+	calculate: function(k) {
+		if(k == 0) return 0; else return Math.pow(2,10 * (k - 1));
+	}
+	,ease: function(t,b,c,d) {
+		if(t == 0) return b; else return c * Math.pow(2,10 * (t / d - 1)) + b;
+	}
+	,__class__: motion.easing.ExpoEaseIn
+};
+motion.easing.ExpoEaseInOut = function() {
+};
+motion.easing.ExpoEaseInOut.__name__ = ["motion","easing","ExpoEaseInOut"];
+motion.easing.ExpoEaseInOut.__interfaces__ = [motion.easing.IEasing];
+motion.easing.ExpoEaseInOut.prototype = {
+	calculate: function(k) {
+		if(k == 0) return 0;
+		if(k == 1) return 1;
+		if((k /= 0.5) < 1.0) return 0.5 * Math.pow(2,10 * (k - 1));
+		return 0.5 * (2 - Math.pow(2,-10 * --k));
+	}
+	,ease: function(t,b,c,d) {
+		if(t == 0) return b;
+		if(t == d) return b + c;
+		if((t /= d / 2.0) < 1.0) return c / 2 * Math.pow(2,10 * (t - 1)) + b;
+		return c / 2 * (2 - Math.pow(2,-10 * --t)) + b;
+	}
+	,__class__: motion.easing.ExpoEaseInOut
+};
+motion.easing.Quad = function() { };
+motion.easing.Quad.__name__ = ["motion","easing","Quad"];
+motion.easing.Quad.__properties__ = {get_easeOut:"get_easeOut",get_easeInOut:"get_easeInOut",get_easeIn:"get_easeIn"}
+motion.easing.Quad.get_easeIn = function() {
+	return new motion.easing.QuadEaseIn();
+};
+motion.easing.Quad.get_easeInOut = function() {
+	return new motion.easing.QuadEaseInOut();
+};
+motion.easing.Quad.get_easeOut = function() {
+	return new motion.easing.QuadEaseOut();
+};
+motion.easing.QuadEaseIn = function() {
+};
+motion.easing.QuadEaseIn.__name__ = ["motion","easing","QuadEaseIn"];
+motion.easing.QuadEaseIn.__interfaces__ = [motion.easing.IEasing];
+motion.easing.QuadEaseIn.prototype = {
+	calculate: function(k) {
+		return k * k;
+	}
+	,ease: function(t,b,c,d) {
+		return c * (t /= d) * t + b;
+	}
+	,__class__: motion.easing.QuadEaseIn
+};
+motion.easing.QuadEaseInOut = function() {
+};
+motion.easing.QuadEaseInOut.__name__ = ["motion","easing","QuadEaseInOut"];
+motion.easing.QuadEaseInOut.__interfaces__ = [motion.easing.IEasing];
+motion.easing.QuadEaseInOut.prototype = {
+	calculate: function(k) {
+		if((k *= 2) < 1) return 0.5 * k * k;
+		return -0.5 * ((k - 1) * (k - 3) - 1);
+	}
+	,ease: function(t,b,c,d) {
+		if((t /= d / 2) < 1) return c / 2 * t * t + b;
+		return -c / 2 * ((t - 1) * (t - 3) - 1) + b;
+	}
+	,__class__: motion.easing.QuadEaseInOut
+};
+motion.easing.QuadEaseOut = function() {
+};
+motion.easing.QuadEaseOut.__name__ = ["motion","easing","QuadEaseOut"];
+motion.easing.QuadEaseOut.__interfaces__ = [motion.easing.IEasing];
+motion.easing.QuadEaseOut.prototype = {
+	calculate: function(k) {
+		return -k * (k - 2);
+	}
+	,ease: function(t,b,c,d) {
+		return -c * (t /= d) * (t - 2) + b;
+	}
+	,__class__: motion.easing.QuadEaseOut
+};
 var shoe3d = {};
 shoe3d.core = {};
 shoe3d.core.InputManager = function() { };
@@ -844,6 +1856,10 @@ shoe3d.screen.ScreenManager.init = function() {
 	shoe3d.screen.ScreenManager._screens = new haxe.ds.StringMap();
 	shoe3d.screen.ScreenManager._base = new shoe3d.core.game.GameObject();
 	shoe3d.screen.ScreenManager.defaultTransition = new shoe3d.screen.transition.Transition();
+	shoe3d.System.window._prePublicResize.connect(shoe3d.screen.ScreenManager.recalcScale);
+};
+shoe3d.screen.ScreenManager.recalcScale = function() {
+	shoe3d.screen.ScreenManager.scale = Math.min(shoe3d.System.window.get_width() / shoe3d.screen.ScreenManager.width,shoe3d.System.window.get_height() / shoe3d.screen.ScreenManager.height);
 };
 shoe3d.screen.ScreenManager.show = function(name,changeFn) {
 	shoe3d.util.Assert.that(shoe3d.screen.ScreenManager._screens.exists(name),"Screen not exists: " + name);
@@ -911,6 +1927,7 @@ shoe3d.core.WindowMode.Default.toString = $estr;
 shoe3d.core.WindowMode.Default.__enum__ = shoe3d.core.WindowMode;
 shoe3d.core.WindowManager = function() { };
 shoe3d.core.WindowManager.__name__ = ["shoe3d","core","WindowManager"];
+shoe3d.core.WindowManager.__properties__ = {get_height:"get_height",get_width:"get_width",set_mode:"set_mode"}
 shoe3d.core.WindowManager.init = function() {
 	shoe3d.core.WindowManager.hidden = new shoe3d.util.Value(false);
 	shoe3d.core.WindowManager._prePublicResize = new shoe3d.util.signal.ZeroSignal();
@@ -1036,16 +2053,16 @@ shoe3d.core.WindowManager.setSize = function(w,h,fit) {
 };
 shoe3d.System = function() { };
 shoe3d.System.__name__ = ["shoe3d","System"];
+shoe3d.System.__properties__ = {get_root:"get_root"}
 shoe3d.System.init = function(originalWidth,originalHeight) {
 	if(originalHeight == null) originalHeight = 800;
 	if(originalWidth == null) originalWidth = 640;
-	shoe3d.System.W = originalWidth;
-	shoe3d.System.H = originalHeight;
 	shoe3d.core.WindowManager.init();
 	shoe3d.core.RenderManager.init();
 	shoe3d.screen.ScreenManager.init();
 	shoe3d.core.Time.init();
 	shoe3d.core.InputManager.init();
+	shoe3d.screen.ScreenManager.setSize(originalWidth,originalHeight);
 	shoe3d.System.window.updateLayout();
 	shoe3d.System._loop = new shoe3d.core.MainLoop();
 	shoe3d.System._loop._frame.connect(shoe3d.System.clearInfoBox);
@@ -1663,6 +2680,122 @@ shoe3d.core.game.Component.prototype = {
 	,__class__: shoe3d.core.game.Component
 };
 shoe3d.component = {};
+shoe3d.component.AutoPosition = function() {
+	this.scaleOffsetYRatio = 0;
+	this.scaleOffsetXRatio = 0;
+	this.scaleYRatio = 1;
+	this.scaleXRatio = 1;
+	this.yOffset = 0;
+	this.xOffset = 0;
+	this.posY = 0.5;
+	this.posX = 0.5;
+	shoe3d.core.game.Component.call(this);
+};
+shoe3d.component.AutoPosition.__name__ = ["shoe3d","component","AutoPosition"];
+shoe3d.component.AutoPosition.container = function() {
+	return new shoe3d.component.AutoPosition().setAsOnScreenContainer();
+};
+shoe3d.component.AutoPosition.__super__ = shoe3d.core.game.Component;
+shoe3d.component.AutoPosition.prototype = $extend(shoe3d.core.game.Component.prototype,{
+	conn: null
+	,posX: null
+	,posY: null
+	,xOffset: null
+	,yOffset: null
+	,scaleXRatio: null
+	,scaleYRatio: null
+	,scaleOffsetXRatio: null
+	,scaleOffsetYRatio: null
+	,onAdded: function() {
+		shoe3d.core.game.Component.prototype.onAdded.call(this);
+		this.conn = shoe3d.System.window.resize.connect($bind(this,this.reoverlay));
+		this.reoverlay();
+	}
+	,onRemoved: function() {
+		shoe3d.core.game.Component.prototype.onRemoved.call(this);
+		if(this.conn != null) this.conn.dispose();
+	}
+	,reoverlay: function() {
+		if(this.owner == null) return this;
+		this.owner.transform.position.set(shoe3d.System.window.get_width() * this.posX + shoe3d.util.SMath.lerp(this.scaleOffsetXRatio,this.xOffset,this.xOffset * shoe3d.System.screen.scale),shoe3d.System.window.get_height() * this.posY + shoe3d.util.SMath.lerp(this.scaleOffsetYRatio,this.yOffset,this.yOffset * shoe3d.System.screen.scale),0);
+		this.owner.transform.scale.set(1 + (shoe3d.System.screen.scale - 1) * this.scaleXRatio,1 + (shoe3d.System.screen.scale - 1) * this.scaleYRatio,1);
+		return this;
+	}
+	,setScaleRatio: function(x,y) {
+		this.scaleXRatio = x;
+		this.scaleYRatio = y;
+		this.reoverlay();
+		return this;
+	}
+	,setOffsets: function(x,y) {
+		this.xOffset = x;
+		this.yOffset = y;
+		this.reoverlay();
+		return this;
+	}
+	,left: function() {
+		this.posX = 0;
+		this.reoverlay();
+		return this;
+	}
+	,right: function() {
+		this.posX = 1;
+		this.reoverlay();
+		return this;
+	}
+	,top: function() {
+		this.posY = 1;
+		this.reoverlay();
+		return this;
+	}
+	,bottom: function() {
+		this.posY = 0;
+		this.reoverlay();
+		return this;
+	}
+	,centerX: function() {
+		this.posX = 0.5;
+		this.reoverlay();
+		return this;
+	}
+	,centerY: function() {
+		this.posY = 0.5;
+		this.reoverlay();
+		return this;
+	}
+	,setAsOnScreenContainer: function() {
+		this.setPos(0,0);
+		this.setScaleRatio(0,0);
+		return this;
+	}
+	,setPos: function(posX,posY,xOffset,yOffset) {
+		if(yOffset == null) yOffset = 0;
+		if(xOffset == null) xOffset = 0;
+		this.posX = posX;
+		this.posY = posY;
+		this.xOffset = xOffset;
+		this.yOffset = yOffset;
+		this.reoverlay();
+		return this;
+	}
+	,__class__: shoe3d.component.AutoPosition
+});
+shoe3d.component.Position = { __ename__ : true, __constructs__ : ["Left","Right","Top","Bottom","Center"] };
+shoe3d.component.Position.Left = ["Left",0];
+shoe3d.component.Position.Left.toString = $estr;
+shoe3d.component.Position.Left.__enum__ = shoe3d.component.Position;
+shoe3d.component.Position.Right = ["Right",1];
+shoe3d.component.Position.Right.toString = $estr;
+shoe3d.component.Position.Right.__enum__ = shoe3d.component.Position;
+shoe3d.component.Position.Top = ["Top",2];
+shoe3d.component.Position.Top.toString = $estr;
+shoe3d.component.Position.Top.__enum__ = shoe3d.component.Position;
+shoe3d.component.Position.Bottom = ["Bottom",3];
+shoe3d.component.Position.Bottom.toString = $estr;
+shoe3d.component.Position.Bottom.__enum__ = shoe3d.component.Position;
+shoe3d.component.Position.Center = ["Center",4];
+shoe3d.component.Position.Center.toString = $estr;
+shoe3d.component.Position.Center.__enum__ = shoe3d.component.Position;
 shoe3d.component.CameraHolder = function() {
 	shoe3d.core.game.Component.call(this);
 };
@@ -1820,6 +2953,7 @@ shoe3d.component.Element2D.prototype = $extend(shoe3d.core.game.Component.protot
 		return this._pointerOut;
 	}
 	,__class__: shoe3d.component.Element2D
+	,__properties__: {get_pointerOut:"get_pointerOut",get_pointerIn:"get_pointerIn",get_pointerMove:"get_pointerMove",get_pointerDown:"get_pointerDown",get_pointerUp:"get_pointerUp"}
 });
 shoe3d.component.GeometryDisplay = function(geom) {
 	shoe3d.core.game.Component.call(this);
@@ -1930,6 +3064,7 @@ shoe3d.component.Sprite2D.prototype = $extend(shoe3d.component.Element2D.prototy
 		return this;
 	}
 	,__class__: shoe3d.component.Sprite2D
+	,__properties__: $extend(shoe3d.component.Element2D.prototype.__properties__,{set_anchorY:"set_anchorY",set_anchorX:"set_anchorX"})
 });
 shoe3d.component.ProgressBar = function(textureName) {
 	this.progress = 1;
@@ -1987,6 +3122,7 @@ shoe3d.component.ProgressBar.prototype = $extend(shoe3d.component.Sprite2D.proto
 		return x > -this.texDef.width / 2 && x < shoe3d.util.SMath.lerp(this.progress,-this.texDef.width / 2,this.texDef.width / 2) && this.texDef.height * 0.5 >= (y < 0?-y:y);
 	}
 	,__class__: shoe3d.component.ProgressBar
+	,__properties__: $extend(shoe3d.component.Sprite2D.prototype.__properties__,{set_progress:"set_progress",get_progressChange:"get_progressChange"})
 });
 shoe3d.component.RandomRotator = function() {
 	this.t = 0;
@@ -2020,6 +3156,55 @@ shoe3d.component.S3Mesh.prototype = $extend(shoe3d.core.game.Component.prototype
 		this.owner.transform.add(this.mesh);
 	}
 	,__class__: shoe3d.component.S3Mesh
+});
+shoe3d.component.ScaleButton = function(fn,activeStateScale) {
+	if(activeStateScale == null) activeStateScale = 0.9;
+	this.active = true;
+	this.targetScale = 1.0;
+	this.fn = null;
+	this.isDown = false;
+	this.activeStateScale = 0.9;
+	this.startScale = 0;
+	shoe3d.core.game.Component.call(this);
+	this.activeStateScale = activeStateScale;
+	this.fn = fn;
+};
+shoe3d.component.ScaleButton.__name__ = ["shoe3d","component","ScaleButton"];
+shoe3d.component.ScaleButton.__super__ = shoe3d.core.game.Component;
+shoe3d.component.ScaleButton.prototype = $extend(shoe3d.core.game.Component.prototype,{
+	target: null
+	,startScale: null
+	,activeStateScale: null
+	,isDown: null
+	,fn: null
+	,targetScale: null
+	,active: null
+	,onAdded: function() {
+		this.target = this.owner.get(shoe3d.component.Element2D);
+		this.target.get_pointerDown().connect($bind(this,this.down));
+		this.target.get_pointerUp().connect($bind(this,this.up));
+		this.target.get_pointerOut().connect($bind(this,this.out));
+	}
+	,down: function(e) {
+		this.isDown = true;
+		this.targetScale = this.activeStateScale;
+	}
+	,onUpdate: function() {
+		if(this.owner.transform.scale.x != this.targetScale) this.owner.transform.scale.x = this.owner.transform.scale.y = shoe3d.util.SMath.lerp(0.3,this.owner.transform.scale.x,this.targetScale);
+	}
+	,up: function(e) {
+		if(this.isDown) {
+			this.isDown = false;
+			if(this.fn != null) this.fn(e);
+			this.targetScale = 1;
+		}
+	}
+	,out: function(e) {
+		if(this.isDown) this.targetScale = 1;
+	}
+	,onRemoved: function() {
+	}
+	,__class__: shoe3d.component.ScaleButton
 });
 shoe3d.core.ComponentContainer = function() { };
 shoe3d.core.ComponentContainer.__name__ = ["shoe3d","core","ComponentContainer"];
@@ -2371,6 +3556,7 @@ shoe3d.core.game.GameObject.prototype = {
 		return this.components.length;
 	}
 	,__class__: shoe3d.core.game.GameObject
+	,__properties__: {get_numComponents:"get_numComponents"}
 };
 shoe3d.core.input = {};
 shoe3d.core.input.EventSource = { __ename__ : true, __constructs__ : ["Mouse","Touch"] };
@@ -3318,6 +4504,7 @@ shoe3d.core.input.MouseManager.prototype = {
 		shoe3d.core.input.MouseManager._sharedEvent.set(shoe3d.core.input.MouseManager._sharedEvent.id + 1,viewX,viewY,button);
 	}
 	,__class__: shoe3d.core.input.MouseManager
+	,__properties__: {set_cursor:"set_cursor",get_cursor:"get_cursor"}
 };
 shoe3d.core.input.PointerEvent = function() {
 	this.id = 0;
@@ -3462,6 +4649,7 @@ shoe3d.core.input.PointerManager.prototype = {
 		shoe3d.core.input.PointerManager._sharedEvent.set(shoe3d.core.input.PointerManager._sharedEvent.id + 1,viewX,viewY,hit,source);
 	}
 	,__class__: shoe3d.core.input.PointerManager
+	,__properties__: {get_y:"get_y",get_x:"get_x",get_supported:"get_supported"}
 };
 shoe3d.core.input.TouchManager = function() {
 	this._disabled = false;
@@ -3791,6 +4979,7 @@ shoe3d.util.Value.prototype = {
 		return this.get__();
 	}
 	,__class__: shoe3d.util.Value
+	,__properties__: {set__:"set__",get__:"get__"}
 };
 shoe3d.util.math = {};
 shoe3d.util.math.Rectangle = function(x,y,width,height) {
@@ -3859,6 +5048,7 @@ shoe3d.util.promise.Promise.prototype = {
 		return this._result;
 	}
 	,__class__: shoe3d.util.promise.Promise
+	,__properties__: {set_result:"set_result",get_result:"get_result"}
 };
 shoe3d.util.signal = {};
 shoe3d.util.signal.Sentinel = function(signal,fn) {
@@ -4037,7 +5227,7 @@ tests.TestScreen = function() {
 	this.addLayer(layer);
 	var gd = tests.Main.pack.getGeomDef("cube");
 	var _g = 0;
-	while(_g < 200) {
+	while(_g < 10) {
 		var i = _g++;
 		var go = new shoe3d.core.game.GameObject("GO" + i).add(new shoe3d.component.GeometryDisplay(gd));
 		go.transform.position.x = Math.random() * 40 - 20;
@@ -4065,25 +5255,27 @@ tests.TestScreen = function() {
 	var cc;
 	cc = js.Boot.__cast(ui.camera , THREE.OrthographicCamera);
 	var a = [];
+	var cont = new shoe3d.core.game.GameObject().add(new shoe3d.component.AutoPosition().setAsOnScreenContainer());
+	this.layer2d.addChild(cont);
 	var _g1 = 0;
 	while(_g1 < 3) {
 		var i1 = _g1++;
-		a[i1] = this.addSprite(i1 == 1?a[0].owner:this.layer2d);
+		a[i1] = this.addSprite(cont);
 	}
 	shoe3d.System.input.mouse.move.connect(function(e) {
 	});
 	var addL = function(e1,name) {
 		e1.get_pointerUp().connect(function(e2) {
-			haxe.Log.trace("UP " + name,{ fileName : "TestScreen.hx", lineNumber : 181, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("UP " + name,{ fileName : "TestScreen.hx", lineNumber : 187, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerIn().connect(function(e3) {
-			haxe.Log.trace("IN " + name,{ fileName : "TestScreen.hx", lineNumber : 182, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("IN " + name,{ fileName : "TestScreen.hx", lineNumber : 188, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerOut().connect(function(e4) {
-			haxe.Log.trace("OUT " + name,{ fileName : "TestScreen.hx", lineNumber : 183, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("OUT " + name,{ fileName : "TestScreen.hx", lineNumber : 189, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerDown().connect(function(e5) {
-			haxe.Log.trace("DOWN " + name,{ fileName : "TestScreen.hx", lineNumber : 184, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("DOWN " + name,{ fileName : "TestScreen.hx", lineNumber : 190, className : "tests.TestScreen", methodName : "new"});
 		});
 	};
 	var _g11 = 0;
@@ -4092,32 +5284,33 @@ tests.TestScreen = function() {
 		var i2 = [_g11++];
 		a[i2[0]].get_pointerUp().connect((function(i2) {
 			return function(e6) {
-				haxe.Log.trace("UP" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 190, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("UP" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 196, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerIn().connect((function(i2) {
 			return function(e7) {
-				haxe.Log.trace("IN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 193, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("IN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 199, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerOut().connect((function(i2) {
 			return function(e8) {
-				haxe.Log.trace("OUT" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 194, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("OUT" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 200, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerDown().connect((function(i2) {
 			return function(e9) {
-				haxe.Log.trace("DOWN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 195, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("DOWN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 201, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 	}
+	a[0].owner.add(new shoe3d.component.AutoPosition().setPos(0.5,0.5,160.));
 	var progress = new shoe3d.component.ProgressBar("game_pattern");
 	addL(progress,"PROGRESS");
 	var pgo = new shoe3d.core.game.GameObject().add(progress);
 	pgo.transform.position.set(400,400,0);
 	this.layer2d.addChild(pgo);
 	shoe3d.System._loop._frame.connect(function(d) {
-		progress.set_progress(0.64);
+		progress.set_progress(0.01);
 	});
 	var ir = new THREE.ImmediateRenderObject();
 	var b = "precision mediump float;\nprecision mediump int;\n";
@@ -4145,12 +5338,12 @@ tests.TestScreen.prototype = $extend(shoe3d.screen.GameScreen.prototype,{
 	,addSprite: function(owner,name) {
 		if(name == null) name = "";
 		var tn;
-		if(name == "") tn = shoe3d.util.Tools.getRandomFromArray(["logo"]); else tn = name;
+		if(name == "") tn = shoe3d.util.Tools.getRandomFromArray(["button_play"]); else tn = name;
 		var go = new shoe3d.core.game.GameObject().add(new shoe3d.component.Sprite2D(tn));
 		go.transform.position.set(this.last * 250 + 300,250 * this.last + 300,go.transform.position.z);
 		go.transform.scale.set((this.last + 2) * 0.05 * 0 + 1,(this.last + 2) * 0.05 * 0 + 1,1);
 		if(this.last != 0) go.transform.position.set(400 + 0 * this.last,400 + 200 * this.last,0); else go.transform.position.set(0,50,0);
-		go.transform.position.set(400 + 0 * this.last,400 + 200 * this.last,0);
+		go.transform.position.set(200 + 0 * this.last,400 + 200 * this.last,0);
 		this.last += 1;
 		if(owner != null) owner.addChild(go);
 		return go.get(shoe3d.component.Sprite2D);
@@ -4290,11 +5483,19 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
+haxe.ds.ObjectMap.count = 0;
+motion.actuators.SimpleActuator.actuators = new Array();
+motion.actuators.SimpleActuator.actuatorsLength = 0;
+motion.actuators.SimpleActuator.addedEvent = false;
+motion.Actuate.defaultActuator = motion.actuators.SimpleActuator;
+motion.Actuate.defaultEase = motion.easing.Expo.get_easeOut();
+motion.Actuate.targetLibraries = new haxe.ds.ObjectMap();
 shoe3d.core.InputManager._lastTouchTime = 0;
 shoe3d.core.RenderManager.clearColor = 4009518;
 shoe3d.screen.ScreenManager._currentScreenName = "";
 shoe3d.screen.ScreenManager.width = 0;
 shoe3d.screen.ScreenManager.height = 0;
+shoe3d.screen.ScreenManager.scale = 1;
 shoe3d.core.WindowManager.mode = shoe3d.core.WindowMode.Fill;
 shoe3d.core.WindowManager.width = 640;
 shoe3d.core.WindowManager.height = 800;
@@ -4304,8 +5505,6 @@ shoe3d.System.window = shoe3d.core.WindowManager;
 shoe3d.System.renderer = shoe3d.core.RenderManager;
 shoe3d.System.input = shoe3d.core.InputManager;
 shoe3d.System.updateInfoEveryNthFrame = 6;
-shoe3d.System.W = 640;
-shoe3d.System.H = 640;
 shoe3d.System._infoFrameCounter = 0;
 shoe3d.System._showFPS = false;
 shoe3d.component.Element2D.lastLevel = 0;
