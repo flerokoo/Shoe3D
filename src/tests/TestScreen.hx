@@ -8,6 +8,7 @@ import shoe3d.asset.Res;
 import shoe3d.component.AutoPosition;
 import shoe3d.component.CameraHolder;
 import shoe3d.component.Element2D;
+import shoe3d.component.FillSprite;
 import shoe3d.component.GeometryDisplay;
 import shoe3d.component.ProgressBar;
 import shoe3d.component.S3Mesh;
@@ -220,6 +221,9 @@ class TestScreen extends GameScreen
 			progress.progress = 0.01;
 		});
 		
+		var fss = new FillSprite( 300, 100, 0xff00ff );
+		layer2d.addChild( new GameObject().add( fss ) );
+		fss.owner.transform.position.set( 300, 300, 0);
 		/*var s1 = addSprite().owner;
 		var s2 = addSprite().owner;
 		var s3 = addSprite().owner;*/

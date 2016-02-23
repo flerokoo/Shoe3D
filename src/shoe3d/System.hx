@@ -132,7 +132,8 @@ class System
 		
 		promise.success.connect(
 				function(pack:AssetPack)
-					Res.registerPack( pack, registerThisPackWithName )
+					Res.registerPack( pack, registerThisPackWithName ),
+					true
 					).once();
 		return promise;		
 	}

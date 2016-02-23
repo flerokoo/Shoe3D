@@ -9,6 +9,7 @@ import js.Lib;
 import shoe3d.asset.AssetPack;
 import shoe3d.component.S3Mesh;
 import shoe3d.core.game.GameObject;
+import shoe3d.screen.BasicPreloader;
 import shoe3d.System;
 import shoe3d.util.Log;
 import shoe3d.util.Tools;
@@ -52,8 +53,9 @@ class Main
 		//System.window.mode = Default;
 		//System.window.setSize( 600, 600 );
 		
-
-		System.loadFolderFromAssets( 'biba', function(pc) 
+		BasicPreloader.loadFolderFromAssets( 'biba', 
+		//System.loadFolderFromAssets( 'biba', 
+		function(pc) 
 		{
 			Browser.window.console.log("COMPLETE");
 			Main.pack = pc;

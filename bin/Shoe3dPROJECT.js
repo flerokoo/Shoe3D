@@ -2120,7 +2120,7 @@ shoe3d.System.loadFolderFromAssets = function(folder,onSuccess,onProgress,regist
 	var promise = ldr.start(onSuccess,onProgress);
 	promise.success.connect(function(pack) {
 		shoe3d.asset.Res.registerPack(pack,registerThisPackWithName);
-	}).once();
+	},true).once();
 	return promise;
 };
 shoe3d.System.addInfo = function(text,breakLine) {
@@ -2964,6 +2964,65 @@ shoe3d.component.Element2D.prototype = $extend(shoe3d.core.game.Component.protot
 	}
 	,__class__: shoe3d.component.Element2D
 	,__properties__: {get_pointerOut:"get_pointerOut",get_pointerIn:"get_pointerIn",get_pointerMove:"get_pointerMove",get_pointerDown:"get_pointerDown",get_pointerUp:"get_pointerUp"}
+});
+shoe3d.component.FillSprite = function(width,height,color) {
+	this.color = 0;
+	this.height = 0;
+	this.width = 0;
+	shoe3d.core.game.Component.call(this);
+	this.geom = new THREE.PlaneGeometry(width,height,1,1);
+	this.material = new THREE.MeshBasicMaterial({ transparent : false, side : THREE.DoubleSide});
+	this.mesh = new THREE.Mesh(this.geom,this.material);
+	this.set_width(width);
+	this.set_height(height);
+	this.set_color((function($this) {
+		var $r;
+		var $int = color;
+		$r = $int < 0?4294967296.0 + $int:$int + 0.0;
+		return $r;
+	}(this)) == null?16776960:color);
+};
+shoe3d.component.FillSprite.__name__ = ["shoe3d","component","FillSprite"];
+shoe3d.component.FillSprite.__super__ = shoe3d.core.game.Component;
+shoe3d.component.FillSprite.prototype = $extend(shoe3d.core.game.Component.prototype,{
+	mesh: null
+	,geom: null
+	,material: null
+	,width: null
+	,height: null
+	,color: null
+	,redefineSprite: function() {
+		var w = this.width;
+		var h = this.height;
+		this.geom.verticesNeedUpdate = true;
+		this.geom.vertices[0].set(-w / 2,h / 2,0);
+		this.geom.vertices[1].set(w / 2,h / 2,0);
+		this.geom.vertices[2].set(-w / 2,-h / 2,0);
+		this.geom.vertices[3].set(w / 2,-h / 2,0);
+	}
+	,onAdded: function() {
+		this.owner.transform.add(this.mesh);
+	}
+	,onRemoved: function() {
+		this.owner.transform.remove(this.mesh);
+	}
+	,set_width: function(value) {
+		this.width = value;
+		this.redefineSprite();
+		return this.width;
+	}
+	,set_height: function(value) {
+		this.height = value;
+		this.redefineSprite();
+		return this.height;
+	}
+	,set_color: function(value) {
+		this.color = value;
+		this.material.color = new THREE.Color(value);
+		return this.color;
+	}
+	,__class__: shoe3d.component.FillSprite
+	,__properties__: {set_color:"set_color",set_height:"set_height",set_width:"set_width"}
 });
 shoe3d.component.GeometryDisplay = function(geom) {
 	shoe3d.core.game.Component.call(this);
@@ -4769,6 +4828,36 @@ shoe3d.screen.GameScreen.prototype = {
 	}
 	,__class__: shoe3d.screen.GameScreen
 };
+shoe3d.screen.BasicPreloader = function() {
+	shoe3d.screen.GameScreen.call(this);
+	this.layer = this.newLayer2D("main",true);
+	var spr = new shoe3d.component.FillSprite(0,50,15440933);
+	var go = new shoe3d.core.game.GameObject().add(spr);
+	this.layer.addChild(go);
+	shoe3d.screen.BasicPreloader.init();
+	shoe3d.screen.BasicPreloader.progress.change.connect(function(n,p) {
+		spr.owner.transform.position.set(shoe3d.System.window.get_width() / 2,shoe3d.System.window.get_height() / 2,0);
+		spr.set_width(n * shoe3d.System.window.get_width());
+	});
+};
+shoe3d.screen.BasicPreloader.__name__ = ["shoe3d","screen","BasicPreloader"];
+shoe3d.screen.BasicPreloader.init = function() {
+	if(shoe3d.screen.BasicPreloader.progress == null) shoe3d.screen.BasicPreloader.progress = new shoe3d.util.Value(0.0);
+};
+shoe3d.screen.BasicPreloader.loadFolderFromAssets = function(folder,onSuccess,registerThisPackWithName) {
+	shoe3d.System.screen.addScreen("basic_preloader",shoe3d.screen.BasicPreloader);
+	shoe3d.System.screen.show("basic_preloader");
+	shoe3d.screen.BasicPreloader.init();
+	shoe3d.screen.BasicPreloader.progress.set__(0);
+	return shoe3d.System.loadFolderFromAssets(folder,onSuccess,function(p) {
+		shoe3d.screen.BasicPreloader.progress.set__(p);
+	},registerThisPackWithName);
+};
+shoe3d.screen.BasicPreloader.__super__ = shoe3d.screen.GameScreen;
+shoe3d.screen.BasicPreloader.prototype = $extend(shoe3d.screen.GameScreen.prototype,{
+	layer: null
+	,__class__: shoe3d.screen.BasicPreloader
+});
 shoe3d.screen.transition = {};
 shoe3d.screen.transition.Transition = function() {
 };
@@ -5221,7 +5310,7 @@ tests.Main.main = function() {
 	tests.Main.trace2(runner.result);
 	shoe3d.System.init();
 	shoe3d.System.showFPSMeter();
-	shoe3d.System.loadFolderFromAssets("biba",function(pc) {
+	shoe3d.screen.BasicPreloader.loadFolderFromAssets("biba",function(pc) {
 		window.console.log("COMPLETE");
 		tests.Main.pack = pc;
 		tests.Main.pack.defineAtlas("main","sprites","sprites.txt");
@@ -5289,16 +5378,16 @@ tests.TestScreen = function() {
 	});
 	var addL = function(e1,name) {
 		e1.get_pointerUp().connect(function(e2) {
-			haxe.Log.trace("UP " + name,{ fileName : "TestScreen.hx", lineNumber : 188, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("UP " + name,{ fileName : "TestScreen.hx", lineNumber : 189, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerIn().connect(function(e3) {
-			haxe.Log.trace("IN " + name,{ fileName : "TestScreen.hx", lineNumber : 189, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("IN " + name,{ fileName : "TestScreen.hx", lineNumber : 190, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerOut().connect(function(e4) {
-			haxe.Log.trace("OUT " + name,{ fileName : "TestScreen.hx", lineNumber : 190, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("OUT " + name,{ fileName : "TestScreen.hx", lineNumber : 191, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerDown().connect(function(e5) {
-			haxe.Log.trace("DOWN " + name,{ fileName : "TestScreen.hx", lineNumber : 191, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("DOWN " + name,{ fileName : "TestScreen.hx", lineNumber : 192, className : "tests.TestScreen", methodName : "new"});
 		});
 	};
 	var _g11 = 0;
@@ -5307,22 +5396,22 @@ tests.TestScreen = function() {
 		var i2 = [_g11++];
 		a[i2[0]].get_pointerUp().connect((function(i2) {
 			return function(e6) {
-				haxe.Log.trace("UP" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 197, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("UP" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 198, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerIn().connect((function(i2) {
 			return function(e7) {
-				haxe.Log.trace("IN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 202, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("IN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 203, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerOut().connect((function(i2) {
 			return function(e8) {
-				haxe.Log.trace("OUT" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 203, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("OUT" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 204, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerDown().connect((function(i2) {
 			return function(e9) {
-				haxe.Log.trace("DOWN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 204, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("DOWN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 205, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 	}
@@ -5335,6 +5424,9 @@ tests.TestScreen = function() {
 	shoe3d.System._loop._frame.connect(function(d) {
 		progress.set_progress(0.01);
 	});
+	var fss = new shoe3d.component.FillSprite(300,100,16711935);
+	this.layer2d.addChild(new shoe3d.core.game.GameObject().add(fss));
+	fss.owner.transform.position.set(300,300,0);
 	tests.Main.pack.getSound("music").play();
 	var ir = new THREE.ImmediateRenderObject();
 	var b = "precision mediump float;\nprecision mediump int;\n";
