@@ -10,6 +10,9 @@ import shoe3d.asset.AssetPack;
 import shoe3d.component.S3Mesh;
 import shoe3d.core.game.GameObject;
 import shoe3d.System;
+import shoe3d.util.Log;
+import shoe3d.util.Tools;
+import soundjs.SoundManager;
 import three.AmbientLight;
 import three.BoxGeometry;
 import three.DirectionalLight;
@@ -49,24 +52,24 @@ class Main
 		//System.window.mode = Default;
 		//System.window.setSize( 600, 600 );
 		
-		
+
 		System.loadFolderFromAssets( 'biba', function(pc) 
 		{
+			Browser.window.console.log("COMPLETE");
 			Main.pack = pc;
 			Main.pack.defineAtlas( 'main', 'sprites', 'sprites.txt' );
 			Main.pack.defineGeomDef( 'mesh', 'model1', 'logo');
 			Main.pack.defineGeomDef( 'cube', 'cube', 'main_pattern', true);
+			System.renderer.showStats();		
+			System.screen.addScreen( "game", TestScreen );
+			System.screen.addScreen( "game2", TestScreen2 );
 			System.screen.show( "game" );
 			System.start();			
 		});
 		
-		System.renderer.showStats();		
-		System.screen.addScreen( "game", TestScreen );
-		System.screen.addScreen( "game2", TestScreen2 );
 		
+		Log.printSys();
 		
-		
-		System.start();
 	}
 	
 	static function createConsole() {

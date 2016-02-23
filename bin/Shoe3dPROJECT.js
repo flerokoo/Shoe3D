@@ -1939,7 +1939,7 @@ shoe3d.core.WindowManager.init = function() {
 	window.addEventListener("resize",function(_1) {
 		shoe3d.core.WindowManager.callLater(shoe3d.core.WindowManager.onResize);
 	});
-	var api = shoe3d.util.HtmlUtils.loadExtension("hidden",window);
+	var api = shoe3d.util.HtmlUtils.loadExtension("hidden",window.document);
 	if(api.value != null) {
 		var onVisibilityChange = function(e) {
 			shoe3d.core.WindowManager.hidden.set__(Reflect.field(window.document,api.field));
@@ -1955,6 +1955,9 @@ shoe3d.core.WindowManager.init = function() {
 		window.addEventListener("pagehide",onPageTransition,false);
 		shoe3d.util.Log.sys("No Visibility API. Using pageshow/pagehide fallback");
 	}
+	shoe3d.core.WindowManager.hidden.change.connect(function(a,b) {
+		createjs.Sound.muted = shoe3d.core.WindowManager.hidden.get__();
+	});
 	shoe3d.core.WindowManager.updateOrientation();
 };
 shoe3d.core.WindowManager.onResize = function() {
@@ -2113,6 +2116,7 @@ shoe3d.System.loadFolderFromAssets = function(folder,onSuccess,onProgress,regist
 	ldr.add("sprites.txt","assets/sprites.txt",0);
 	ldr.add("anim","assets/test_anim.geom",0);
 	ldr.add("anim2","assets/test_anim2.geom",0);
+	ldr.add("music","assets/music.ogg",0);
 	var promise = ldr.start(onSuccess,onProgress);
 	promise.success.connect(function(pack) {
 		shoe3d.asset.Res.registerPack(pack,registerThisPackWithName);
@@ -2424,7 +2428,7 @@ shoe3d.asset.AssetPackLoader.prototype = {
 	}
 	,load: function() {
 		var _g3 = this;
-		createjs.Sound.alternateExtensions = ["aac"];
+		createjs.Sound.alternateExtensions = ["aac, mp3"];
 		this._manager = new THREE.LoadingManager($bind(this,this.onCompletePack),$bind(this,this.onProgress));
 		var _g = 0;
 		var _g1 = this._entriesToLoad;
@@ -2505,7 +2509,6 @@ shoe3d.asset.Atlas = function(image,json) {
 	var $it0 = this._texMap.keys();
 	while( $it0.hasNext() ) {
 		var i = $it0.next();
-		haxe.Log.trace("" + i + " => " + Std.string(this._texMap.get(i).uv),{ fileName : "Atlas.hx", lineNumber : 40, className : "shoe3d.asset.Atlas", methodName : "new"});
 	}
 };
 shoe3d.asset.Atlas.__name__ = ["shoe3d","asset","Atlas"];
@@ -2632,6 +2635,8 @@ shoe3d.asset.Res.getGeomDef = function(name) {
 	return null;
 };
 shoe3d.asset.SoundLoader = function(manager) {
+	this._listener = null;
+	this._loaded = false;
 	THREE.Loader.call(this);
 	this._manager = manager;
 };
@@ -2643,17 +2648,22 @@ shoe3d.asset.SoundLoader.prototype = $extend(THREE.Loader.prototype,{
 	,_url: null
 	,_pack: null
 	,_id: null
+	,_loaded: null
+	,_listener: null
 	,load: function(url,id,pack) {
 		this._pack = pack;
 		this._url = url;
 		this._manager.itemStart(this._url);
 		this._id = id;
-		createjs.Sound.on("fileload",$bind(this,this.onLoad));
+		this._listener = createjs.Sound.on("fileload",$bind(this,this.onLoad));
 		createjs.Sound.registerSound(url,id);
 	}
 	,onLoad: function(evt) {
-		this._pack._soundMap.set(this._id,this._url);
-		this._manager.itemEnd(this._url);
+		if(shoe3d.util.Tools.getFileNameWithoutExtension(evt.src) == this._id) {
+			this._pack._soundMap.set(this._id,this._url);
+			this._manager.itemEnd(this._url);
+			createjs.Sound.off("fileload",this._listener);
+		}
 	}
 	,__class__: shoe3d.asset.SoundLoader
 });
@@ -4921,6 +4931,18 @@ shoe3d.util.Tools.__name__ = ["shoe3d","util","Tools"];
 shoe3d.util.Tools.getRandomFromArray = function(a) {
 	return a[Math.floor(Math.random() * a.length)];
 };
+shoe3d.util.Tools.getFileNameWithoutExtension = function(str) {
+	var ret = str.substring(Math.max(str.lastIndexOf("/"),str.lastIndexOf("\\")) + 1);
+	if(ret.indexOf("?") >= 0) ret = ret.substring(0,ret.indexOf("?"));
+	if(ret.indexOf("*") >= 0) ret = ret.substring(0,ret.indexOf("*"));
+	if(ret.indexOf(":") >= 0) ret = ret.substring(0,ret.indexOf(":"));
+	if(ret.indexOf(">") >= 0) ret = ret.substring(0,ret.indexOf(">"));
+	if(ret.indexOf("<") >= 0) ret = ret.substring(0,ret.indexOf("<"));
+	if(ret.indexOf("|") >= 0) ret = ret.substring(0,ret.indexOf("|"));
+	if(ret.indexOf("*") >= 0) ret = ret.substring(0,ret.indexOf("*"));
+	if(ret.indexOf(".") >= 0) ret = ret.substring(0,ret.lastIndexOf("."));
+	return ret;
+};
 shoe3d.util.UVTools = function() { };
 shoe3d.util.UVTools.__name__ = ["shoe3d","util","UVTools"];
 shoe3d.util.UVTools.UVfromRectangle = function(rect,totalWidth,totalHeight) {
@@ -5200,17 +5222,18 @@ tests.Main.main = function() {
 	shoe3d.System.init();
 	shoe3d.System.showFPSMeter();
 	shoe3d.System.loadFolderFromAssets("biba",function(pc) {
+		window.console.log("COMPLETE");
 		tests.Main.pack = pc;
 		tests.Main.pack.defineAtlas("main","sprites","sprites.txt");
 		tests.Main.pack.defineGeomDef("mesh","model1","logo");
 		tests.Main.pack.defineGeomDef("cube","cube","main_pattern",true);
+		shoe3d.System.renderer.showStats();
+		shoe3d.System.screen.addScreen("game",tests.TestScreen);
+		shoe3d.System.screen.addScreen("game2",tests.TestScreen2);
 		shoe3d.System.screen.show("game");
 		shoe3d.System.start();
 	});
-	shoe3d.System.renderer.showStats();
-	shoe3d.System.screen.addScreen("game",tests.TestScreen);
-	shoe3d.System.screen.addScreen("game2",tests.TestScreen2);
-	shoe3d.System.start();
+	shoe3d.util.Log.printSys();
 };
 tests.Main.createConsole = function() {
 	var _this = window.document;
@@ -5266,16 +5289,16 @@ tests.TestScreen = function() {
 	});
 	var addL = function(e1,name) {
 		e1.get_pointerUp().connect(function(e2) {
-			haxe.Log.trace("UP " + name,{ fileName : "TestScreen.hx", lineNumber : 187, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("UP " + name,{ fileName : "TestScreen.hx", lineNumber : 188, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerIn().connect(function(e3) {
-			haxe.Log.trace("IN " + name,{ fileName : "TestScreen.hx", lineNumber : 188, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("IN " + name,{ fileName : "TestScreen.hx", lineNumber : 189, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerOut().connect(function(e4) {
-			haxe.Log.trace("OUT " + name,{ fileName : "TestScreen.hx", lineNumber : 189, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("OUT " + name,{ fileName : "TestScreen.hx", lineNumber : 190, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerDown().connect(function(e5) {
-			haxe.Log.trace("DOWN " + name,{ fileName : "TestScreen.hx", lineNumber : 190, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("DOWN " + name,{ fileName : "TestScreen.hx", lineNumber : 191, className : "tests.TestScreen", methodName : "new"});
 		});
 	};
 	var _g11 = 0;
@@ -5284,22 +5307,22 @@ tests.TestScreen = function() {
 		var i2 = [_g11++];
 		a[i2[0]].get_pointerUp().connect((function(i2) {
 			return function(e6) {
-				haxe.Log.trace("UP" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 196, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("UP" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 197, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerIn().connect((function(i2) {
 			return function(e7) {
-				haxe.Log.trace("IN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 199, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("IN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 202, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerOut().connect((function(i2) {
 			return function(e8) {
-				haxe.Log.trace("OUT" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 200, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("OUT" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 203, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerDown().connect((function(i2) {
 			return function(e9) {
-				haxe.Log.trace("DOWN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 201, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("DOWN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 204, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 	}
@@ -5312,6 +5335,7 @@ tests.TestScreen = function() {
 	shoe3d.System._loop._frame.connect(function(d) {
 		progress.set_progress(0.01);
 	});
+	tests.Main.pack.getSound("music").play();
 	var ir = new THREE.ImmediateRenderObject();
 	var b = "precision mediump float;\nprecision mediump int;\n";
 	var mat = new THREE.RawShaderMaterial({ uniforms : { map : { type : "t", value : a}}, vertexShader : b + "\tuniform mat4 modelViewMatrix;\tuniform mat4 projectionMatrix;\tattribute vec2 position;\tattribute vec4 color;\tattribute vec2 uv;\tvarying vec4 vColor;\tvarying vec2 vUv;\tvoid main() {\t\tvColor = color;\t\tvUv = uv;\t\tgl_Position = projectionMatrix * modelViewMatrix * vec4(position, 0.0, 1.0);\t}", fragmentShader : b + "\tvarying vec4 vColor; varying vec2 vUv; uniform sampler2D map;\t\tvoid main() {\t\tgl_FragColor = vColor * texture2D(map, vUv);\t}", depthTest : false, depthWrite : false, transparent : true, side : THREE.DoubleSide});

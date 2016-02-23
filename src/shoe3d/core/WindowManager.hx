@@ -7,6 +7,7 @@ import shoe3d.util.signal.ZeroSignal;
 import js.Browser;
 import js.html.CanvasElement;
 import shoe3d.util.Value;
+import soundjs.SoundManager;
 
 /**
  * ...
@@ -37,7 +38,7 @@ class WindowManager
 		
 		
 		// HIDDEN API
-		var api = HtmlUtils.loadExtension("hidden", Browser.window );
+		var api = HtmlUtils.loadExtension("hidden", Browser.document );
 		
 		if ( api.value != null ) {
 			var onVisibilityChange = function(e) {
@@ -59,6 +60,9 @@ class WindowManager
 		}
 		
 
+		hidden.change.connect( function( a, b ) {
+			SoundManager.muted = hidden._ ;
+		} );
 		
 		updateOrientation();	
 		

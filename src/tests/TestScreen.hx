@@ -22,6 +22,7 @@ import shoe3d.core.input.PointerEvent;
 import shoe3d.core.Layer;
 import shoe3d.core.Layer2D;
 import shoe3d.screen.GameScreen;
+import shoe3d.sound.Sound;
 import shoe3d.System;
 import shoe3d.util.Tools;
 import soundjs.SoundManager;
@@ -193,7 +194,9 @@ class TestScreen extends GameScreen
 		for ( i in 0...a.length ) 
 		{
 			a[i].pointerUp.connect( function(e:PointerEvent) {
-				trace("UP" + i) ;			
+				trace("UP" + i) ;
+				//SoundManager.muted = ! SoundManager.muted ;
+				
 			} );
 			
 			a[i].pointerIn.connect( function(e:PointerEvent) trace("IN" + i)  );
@@ -235,7 +238,7 @@ class TestScreen extends GameScreen
 		//cc.updateMatrix();
 		//cc.updateProjectionMatrix();
 		//Main.pack.getSound("tnt").play();		
-		
+		Main.pack.getSound("music").play() ;
 		
 		var ir = new ImmediateRenderObject();
 		var b = "precision mediump float;\nprecision mediump int;\n";		

@@ -37,7 +37,7 @@ class Atlas
 		
 		for ( i in _texMap.keys() )
 		{
-			trace( '$i => ${_texMap.get(i).uv}' );
+			//trace( '$i => ${_texMap.get(i).uv}' );
 		}
 	}
 	

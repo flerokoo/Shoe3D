@@ -215,7 +215,7 @@ class AssetPackLoader
 	
 	private function load() 
 	{
-		untyped __js__('createjs.Sound.alternateExtensions = ["aac"]');
+		untyped __js__('createjs.Sound.alternateExtensions = ["aac, mp3"]');
 		_manager = new LoadingManager( onCompletePack, onProgress );
 		for ( e in _entriesToLoad ) {
 			switch( e.format ) {

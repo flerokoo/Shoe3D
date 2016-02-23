@@ -126,6 +126,7 @@ class System
 		ldr.add( 'sprites.txt', 'assets/sprites.txt', 0 );
 		ldr.add( 'anim', 'assets/test_anim.geom', 0 );
 		ldr.add( 'anim2', 'assets/test_anim2.geom', 0 );
+		ldr.add( 'music', 'assets/music.ogg', 0 );
 		
 		var promise = ldr.start( onSuccess, onProgress );
 		
