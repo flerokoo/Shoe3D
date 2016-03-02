@@ -47,11 +47,11 @@ class TestScreen2 extends GameScreen
 		var geom = new BoxGeometry( 2, 1, 0.5 );
 		UVTools.setGeometryUVFromTexDef( geom, texDef);	
 
-		var platformGeomDef:GeomDef = {
-			geom: geom,
-			texDef: texDef,
-			material: new MeshPhongMaterial( { map:texDef.texture } )
-		}
+		var platformGeomDef:GeomDef = new GeomDef(
+			geom,
+			texDef,
+			new MeshPhongMaterial( { map:texDef.texture } )
+		);
 		
 		var layer1 = newLayer("platforms");		
 		//var layer2 = newLayer("hero");

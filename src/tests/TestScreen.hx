@@ -36,8 +36,10 @@ import three.Geometry;
 import three.ImageLoader;
 import three.ImmediateRenderObject;
 import three.LoadingManager;
+import three.Mesh;
 import three.MeshBasicMaterial;
 import three.MeshPhongMaterial;
+import three.MeshPhongMaterialParameters;
 import three.OrthographicCamera;
 import three.PerspectiveCamera;
 import three.RawShaderMaterial;
@@ -99,11 +101,14 @@ class TestScreen extends GameScreen
 		
 		
 		//System.renderer.renderer.sortObjects = false;
-		var gd = Main.pack.getGeomDef("cube");
+		var gd = Main.pack.getGeomDef("boy");
 		//gd.material.depthTest = false;
 		//gd.material.depthWrite = false;
 		//gd.material.transparent = false;
 		//layer.overrideMaterial = new MeshPhongMaterial( { transparent: false, depthWrite: true, depthTest: false, color: 0x6C0000 } );
+		gd.material = new MeshPhongMaterial( { map: gd.texDef.texture } );
+		trace( cast(gd.material, MeshPhongMaterial).shininess = 20 );
+		trace( cast(gd.material, MeshPhongMaterial).reflectivity = 1000  );
 		
 		for ( i in 0...10 ) {
 			var go = new GameObject("GO" + i)
@@ -119,6 +124,8 @@ class TestScreen extends GameScreen
 				go.transform.renderOrder = 100000000
 			else
 				go.transform.renderOrder = 1;*/
+				
+			//go.transform.add( new Mesh( Main.pack.getGeometry("boy"), new MeshPhongMaterial( { color:0x449E18 } ) ) );	
 				
 			//go.transform.renderOrder = i * 10;
 			layer.addChild( go );
@@ -242,7 +249,7 @@ class TestScreen extends GameScreen
 		//cc.updateMatrix();
 		//cc.updateProjectionMatrix();
 		//Main.pack.getSound("tnt").play();		
-		Main.pack.getSound("music").play() ;
+		//Main.pack.getSound("music").play() ;
 		
 		var ir = new ImmediateRenderObject();
 		var b = "precision mediump float;\nprecision mediump int;\n";		

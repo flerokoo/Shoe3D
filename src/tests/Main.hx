@@ -59,9 +59,10 @@ class Main
 		{
 			Browser.window.console.log("COMPLETE");
 			Main.pack = pc;
-			Main.pack.defineAtlas( 'main', 'sprites', 'sprites.txt' );
-			Main.pack.defineGeomDef( 'mesh', 'model1', 'logo');
-			Main.pack.defineGeomDef( 'cube', 'cube', 'main_pattern', true);
+			Main.pack.createAtlas( 'main', 'sprites', 'sprites.txt' );
+			Main.pack.createGeomDef( 'mesh', 'model1', 'logo');
+			Main.pack.createGeomDef( 'cube', 'cube', 'main_pattern').setTransparent();
+			Main.pack.createGeomDef( 'boy', 'boy', 'boy_tex').setTransparent();
 			System.renderer.showStats();		
 			System.screen.addScreen( "game", TestScreen );
 			System.screen.addScreen( "game2", TestScreen2 );

@@ -2112,7 +2112,9 @@ shoe3d.System.loadFolderFromAssets = function(folder,onSuccess,onProgress,regist
 	ldr.add("tnt","assets/tnt.ogg",0);
 	ldr.add("model1","assets/model1.geom",0);
 	ldr.add("cube","assets/cube.geom",0);
+	ldr.add("boy","assets/boy.geom",0);
 	ldr.add("sprites","assets/sprites.png",0);
+	ldr.add("boy_tex","assets/boy_tex.png",0);
 	ldr.add("sprites.txt","assets/sprites.txt",0);
 	ldr.add("anim","assets/test_anim.geom",0);
 	ldr.add("anim2","assets/test_anim2.geom",0);
@@ -2205,22 +2207,22 @@ shoe3d.asset.AssetPack.prototype = {
 		if(!this._atlasMap.exists(name)) throw "No atlas with name=" + name;
 		return this._atlasMap.get(name);
 	}
-	,defineAtlas: function(name,texName,jsonName) {
+	,createAtlas: function(name,texName,jsonName) {
 		if(!this._texMap.exists(texName) || !this._fileMap.exists(jsonName)) throw "No image or json from atlas " + name;
 		var atlas = new shoe3d.asset.Atlas(this.getTexDef(texName).texture,this.getFile(jsonName).content);
 		this._atlasMap.set(name,atlas);
 		return atlas;
 	}
-	,defineGeomDef: function(name,geomName,texDefName,isTransparent) {
-		if(isTransparent == null) isTransparent = false;
+	,createGeomDef: function(name,geomName,texDefName) {
 		if(!this._geomMap.exists(geomName)) throw "No geometry with name=" + geomName;
 		if(this.getTexDef(texDefName,false) == null) throw "No texDef with name=" + texDefName;
 		var texd = this.getTexDef(texDefName);
 		var geom = this.getGeometry(geomName);
 		var newGeom = geom.clone();
 		shoe3d.util.UVTools.setGeometryUV(newGeom,texd.uv);
-		var geomDef = { geom : newGeom, texDef : texd, originalUV : geom.faceVertexUvs, material : new THREE.MeshPhongMaterial({ map : texd.texture, transparent : isTransparent})};
+		var geomDef = new shoe3d.asset.GeomDef(geom,texd,null,geom.faceVertexUvs);
 		this._geomDefMap.set(name,geomDef);
+		return geomDef;
 	}
 	,getGeomDef: function(name,required) {
 		if(required == null) required = true;
@@ -2262,6 +2264,38 @@ shoe3d.asset.AssetPack.prototype = {
 	,createGeometryFromFile: function(filename,geometryname) {
 	}
 	,__class__: shoe3d.asset.AssetPack
+};
+shoe3d.asset.GeomDef = function(geom,texDef,material,originalUV) {
+	this.geom = geom;
+	this.texDef = texDef;
+	this.originalUV = originalUV;
+	if(material != null) this.material = material; else this.material = new THREE.MeshPhongMaterial({ map : texDef.texture});
+};
+shoe3d.asset.GeomDef.__name__ = ["shoe3d","asset","GeomDef"];
+shoe3d.asset.GeomDef.prototype = {
+	material: null
+	,texDef: null
+	,geom: null
+	,originalUV: null
+	,setTransparent: function(v) {
+		if(v == null) v = true;
+		this.material.transparent = v;
+		return this;
+	}
+	,setShine: function(v) {
+		if(v == null) v = 30;
+		this.setMaterialParam("shininess",v);
+		return this;
+	}
+	,setMaterialParam: function(param,val) {
+		shoe3d.util.Assert.that(this.material != null,"Material is null");
+		if(Object.prototype.hasOwnProperty.call(this.material,param)) {
+			Reflect.setProperty(this.material,param,val);
+			return true;
+		}
+		return false;
+	}
+	,__class__: shoe3d.asset.GeomDef
 };
 shoe3d.asset.AssetPackLoader = function() {
 	this._loading = false;
@@ -2817,7 +2851,7 @@ shoe3d.component.CameraHolder.prototype = $extend(shoe3d.core.game.Component.pro
 	}
 	,onUpdate: function() {
 		if(this.owner.layer != null && this.owner.layer.camera != null) {
-			this.owner.layer.camera.position.set(Math.cos(shoe3d.core.Time.timeSinceGameStart * 0.2),Math.sin(shoe3d.core.Time.timeSinceGameStart * 0.2),0).multiplyScalar(20);
+			this.owner.layer.camera.position.set(Math.cos(shoe3d.core.Time.timeSinceGameStart * 0.2),Math.sin(shoe3d.core.Time.timeSinceGameStart * 0.2),0).multiplyScalar(40);
 			this.owner.layer.camera.lookAt(new THREE.Vector3(0,0,0));
 		}
 	}
@@ -4845,11 +4879,16 @@ shoe3d.screen.BasicPreloader.init = function() {
 	if(shoe3d.screen.BasicPreloader.progress == null) shoe3d.screen.BasicPreloader.progress = new shoe3d.util.Value(0.0);
 };
 shoe3d.screen.BasicPreloader.loadFolderFromAssets = function(folder,onSuccess,registerThisPackWithName) {
+	if(shoe3d.screen.BasicPreloader.loading) throw "Can not load more that one asset pack at time";
 	shoe3d.System.screen.addScreen("basic_preloader",shoe3d.screen.BasicPreloader);
 	shoe3d.System.screen.show("basic_preloader");
 	shoe3d.screen.BasicPreloader.init();
 	shoe3d.screen.BasicPreloader.progress.set__(0);
-	return shoe3d.System.loadFolderFromAssets(folder,onSuccess,function(p) {
+	shoe3d.screen.BasicPreloader.loading = true;
+	return shoe3d.System.loadFolderFromAssets(folder,function(a) {
+		shoe3d.screen.BasicPreloader.loading = false;
+		onSuccess(a);
+	},function(p) {
 		shoe3d.screen.BasicPreloader.progress.set__(p);
 	},registerThisPackWithName);
 };
@@ -5313,9 +5352,10 @@ tests.Main.main = function() {
 	shoe3d.screen.BasicPreloader.loadFolderFromAssets("biba",function(pc) {
 		window.console.log("COMPLETE");
 		tests.Main.pack = pc;
-		tests.Main.pack.defineAtlas("main","sprites","sprites.txt");
-		tests.Main.pack.defineGeomDef("mesh","model1","logo");
-		tests.Main.pack.defineGeomDef("cube","cube","main_pattern",true);
+		tests.Main.pack.createAtlas("main","sprites","sprites.txt");
+		tests.Main.pack.createGeomDef("mesh","model1","logo");
+		tests.Main.pack.createGeomDef("cube","cube","main_pattern").setTransparent();
+		tests.Main.pack.createGeomDef("boy","boy","boy_tex").setTransparent();
 		shoe3d.System.renderer.showStats();
 		shoe3d.System.screen.addScreen("game",tests.TestScreen);
 		shoe3d.System.screen.addScreen("game2",tests.TestScreen2);
@@ -5337,7 +5377,10 @@ tests.TestScreen = function() {
 	shoe3d.screen.GameScreen.call(this);
 	var layer = new shoe3d.core.Layer("layer");
 	this.addLayer(layer);
-	var gd = tests.Main.pack.getGeomDef("cube");
+	var gd = tests.Main.pack.getGeomDef("boy");
+	gd.material = new THREE.MeshPhongMaterial({ map : gd.texDef.texture});
+	haxe.Log.trace((js.Boot.__cast(gd.material , THREE.MeshPhongMaterial)).shininess = 20,{ fileName : "TestScreen.hx", lineNumber : 110, className : "tests.TestScreen", methodName : "new"});
+	haxe.Log.trace((js.Boot.__cast(gd.material , THREE.MeshPhongMaterial)).reflectivity = 1000,{ fileName : "TestScreen.hx", lineNumber : 111, className : "tests.TestScreen", methodName : "new"});
 	var _g = 0;
 	while(_g < 10) {
 		var i = _g++;
@@ -5378,16 +5421,16 @@ tests.TestScreen = function() {
 	});
 	var addL = function(e1,name) {
 		e1.get_pointerUp().connect(function(e2) {
-			haxe.Log.trace("UP " + name,{ fileName : "TestScreen.hx", lineNumber : 189, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("UP " + name,{ fileName : "TestScreen.hx", lineNumber : 196, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerIn().connect(function(e3) {
-			haxe.Log.trace("IN " + name,{ fileName : "TestScreen.hx", lineNumber : 190, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("IN " + name,{ fileName : "TestScreen.hx", lineNumber : 197, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerOut().connect(function(e4) {
-			haxe.Log.trace("OUT " + name,{ fileName : "TestScreen.hx", lineNumber : 191, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("OUT " + name,{ fileName : "TestScreen.hx", lineNumber : 198, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerDown().connect(function(e5) {
-			haxe.Log.trace("DOWN " + name,{ fileName : "TestScreen.hx", lineNumber : 192, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("DOWN " + name,{ fileName : "TestScreen.hx", lineNumber : 199, className : "tests.TestScreen", methodName : "new"});
 		});
 	};
 	var _g11 = 0;
@@ -5396,22 +5439,22 @@ tests.TestScreen = function() {
 		var i2 = [_g11++];
 		a[i2[0]].get_pointerUp().connect((function(i2) {
 			return function(e6) {
-				haxe.Log.trace("UP" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 198, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("UP" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 205, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerIn().connect((function(i2) {
 			return function(e7) {
-				haxe.Log.trace("IN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 203, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("IN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 210, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerOut().connect((function(i2) {
 			return function(e8) {
-				haxe.Log.trace("OUT" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 204, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("OUT" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 211, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerDown().connect((function(i2) {
 			return function(e9) {
-				haxe.Log.trace("DOWN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 205, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("DOWN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 212, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 	}
@@ -5427,7 +5470,6 @@ tests.TestScreen = function() {
 	var fss = new shoe3d.component.FillSprite(300,100,16711935);
 	this.layer2d.addChild(new shoe3d.core.game.GameObject().add(fss));
 	fss.owner.transform.position.set(300,300,0);
-	tests.Main.pack.getSound("music").play();
 	var ir = new THREE.ImmediateRenderObject();
 	var b = "precision mediump float;\nprecision mediump int;\n";
 	var mat = new THREE.RawShaderMaterial({ uniforms : { map : { type : "t", value : a}}, vertexShader : b + "\tuniform mat4 modelViewMatrix;\tuniform mat4 projectionMatrix;\tattribute vec2 position;\tattribute vec4 color;\tattribute vec2 uv;\tvarying vec4 vColor;\tvarying vec2 vUv;\tvoid main() {\t\tvColor = color;\t\tvUv = uv;\t\tgl_Position = projectionMatrix * modelViewMatrix * vec4(position, 0.0, 1.0);\t}", fragmentShader : b + "\tvarying vec4 vColor; varying vec2 vUv; uniform sampler2D map;\t\tvoid main() {\t\tgl_FragColor = vColor * texture2D(map, vUv);\t}", depthTest : false, depthWrite : false, transparent : true, side : THREE.DoubleSide});
@@ -5472,7 +5514,7 @@ tests.TestScreen2 = function() {
 	var texDef = shoe3d.asset.Res.getTexDef("main_pattern");
 	var geom = new THREE.BoxGeometry(2,1,0.5);
 	shoe3d.util.UVTools.setGeometryUVFromTexDef(geom,texDef);
-	var platformGeomDef = { geom : geom, texDef : texDef, material : new THREE.MeshPhongMaterial({ map : texDef.texture})};
+	var platformGeomDef = new shoe3d.asset.GeomDef(geom,texDef,new THREE.MeshPhongMaterial({ map : texDef.texture}));
 	var layer1 = this.newLayer("platforms");
 	var _g1 = 0;
 	while(_g1 < 10) {
@@ -5733,6 +5775,7 @@ shoe3d.core.input.MouseManager.MIDDLE = 1;
 shoe3d.core.input.MouseManager.RIGHT = 2;
 shoe3d.core.input.PointerManager._sharedEvent = new shoe3d.core.input.PointerEvent();
 shoe3d.core.input.PointerManager._scratchPoint = new THREE.Vector2();
+shoe3d.screen.BasicPreloader.loading = false;
 shoe3d.util.HtmlUtils.HIDE_MOBILE_BROWSER = window.top == window && new EReg("Mobile(/.*)? Safari","").match(window.navigator.userAgent);
 shoe3d.util.HtmlUtils.VENDOR_PREFIXES = ["webkit","moz","ms","o","khtml"];
 shoe3d.util.Log._sys = [];

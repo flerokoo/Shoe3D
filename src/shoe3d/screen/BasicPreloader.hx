@@ -55,7 +55,7 @@ class BasicPreloader extends GameScreen
 			function(a:AssetPack) {
 				loading = false;
 				onSuccess(a);
-			}
+			},
 			function( p:Float ) progress._ = p , 
 			registerThisPackWithName);
 		

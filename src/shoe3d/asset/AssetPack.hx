@@ -1,10 +1,13 @@
 package shoe3d.asset;
+import shoe3d.util.Assert;
 import shoe3d.util.UVTools;
 import soundjs.SoundManager;
 import three.Geometry;
 import three.GeometryLoader;
 import three.GeometryUtils;
 import three.Material;
+import three.MeshLambertMaterial;
+import three.MeshLambertMaterialParameters;
 import three.MeshPhongMaterial;
 import three.Texture;
 import shoe3d.util.UVTools.UV;
@@ -40,7 +43,7 @@ class AssetPack
 		return _atlasMap.get( name );
 	}
 	
-	public function defineAtlas( name:String, texName:String, jsonName:String ):Atlas
+	public function createAtlas( name:String, texName:String, jsonName:String ):Atlas
 	{
 		if ( ! _texMap.exists( texName ) || ! _fileMap.exists(jsonName ) ) throw 'No image or json from atlas $name';
 		var atlas = new Atlas( getTexDef(texName).texture, getFile(jsonName).content );
@@ -48,7 +51,7 @@ class AssetPack
 		return atlas;
 	}
 	
-	public function defineGeomDef( name:String, geomName:String, texDefName:String, isTransparent:Bool = false )
+	public function createGeomDef( name:String, geomName:String, texDefName:String )
 	{
 		if ( ! _geomMap.exists( geomName ) ) throw 'No geometry with name=$geomName';
 		if ( getTexDef( texDefName, false) == null) throw 'No texDef with name=$texDefName';
@@ -58,14 +61,18 @@ class AssetPack
 		
 		var newGeom = geom.clone();
 		UVTools.setGeometryUV( newGeom, texd.uv );
-		var geomDef:GeomDef = {
+		/*var geomDef:GeomDef = {
 			geom: newGeom,
 			texDef:texd,
 			originalUV: geom.faceVertexUvs,
 			material: new MeshPhongMaterial( {map: texd.texture, transparent: isTransparent} )
-		};
+		};*/
+		
+		var geomDef = new GeomDef( geom, texd, geom.faceVertexUvs );
 		
 		_geomDefMap.set( name, geomDef );
+		
+		return geomDef;
 	}
 	
 	public function getGeomDef( name:String, required:Bool = true ) 
@@ -125,10 +132,41 @@ typedef TexDef =
 	height:Int
 }
 
-typedef GeomDef = 
+class GeomDef 
 {
-	?material:Material,
-	texDef:TexDef,
-	geom:Geometry,
-	?originalUV:Array<Array<Array<Vector2>>>
+	public var material:Material;
+	public var texDef:TexDef;
+	public var geom:Geometry;
+	public var originalUV:Array<Array<Array<Vector2>>>;
+	
+	public function new( geom:Geometry, texDef:TexDef, ?material:Material, ?originalUV:Array<Array<Array<Vector2>>> )
+	{
+		this.geom = geom;
+		this.texDef = texDef;
+		this.originalUV = originalUV;
+		this.material = material != null ? material : new MeshPhongMaterial( {map: texDef.texture} );
+	}
+	
+	public function setTransparent( v:Bool = true )
+	{
+		material.transparent = v;
+		return this;
+	}
+	
+	public function setShine( v:Float = 30 )
+	{
+		setMaterialParam( "shininess", v );
+		return this;
+	}
+	
+	function setMaterialParam( param:String, val:Dynamic ):Bool
+	{
+		Assert.that(material != null, "Material is null");
+		if ( Reflect.hasField( material, param ) )
+		{
+			Reflect.setProperty( material, param, val );
+			return true;
+		}
+		return false;
+	}
 }

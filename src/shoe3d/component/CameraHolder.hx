@@ -27,7 +27,7 @@ class CameraHolder extends Component
 	override public function onUpdate()
 	{
 		if( owner.layer != null && owner.layer.camera != null ) {
-			owner.layer.camera.position.set( Math.cos(Time.timeSinceGameStart * 0.2 ), Math.sin( Time.timeSinceGameStart * 0.2 ) , 0 ).multiplyScalar( 20 );
+			owner.layer.camera.position.set( Math.cos(Time.timeSinceGameStart * 0.2 ), Math.sin( Time.timeSinceGameStart * 0.2 ) , 0 ).multiplyScalar( 40 );
 			owner.layer.camera.lookAt( new Vector3( 0, 0, 0 ) );
 		}
 	}
