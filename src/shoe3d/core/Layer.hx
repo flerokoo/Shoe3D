@@ -47,6 +47,7 @@ class Layer
 				cam.top = 0;
 				cam.left = System.window.height;
 				cam.updateProjectionMatrix();
+				
 			}
 		}
 	}
@@ -70,7 +71,7 @@ class Layer
 	public function setCamera( cam:Camera )
 	{
 		camera = cam;
-		if( camera != null ) camera.up = new Vector3( 0, 0, 1);
+		if( camera != null ) camera.up = new Vector3( 0, 1, 0);
 		reconfigureCamera();
 		return this;
 	}

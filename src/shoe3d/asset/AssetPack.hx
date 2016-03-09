@@ -150,6 +150,7 @@ class GeomDef
 	public function setTransparent( v:Bool = true )
 	{
 		material.transparent = v;
+		material.needsUpdate = true;
 		return this;
 	}
 	
@@ -159,12 +160,13 @@ class GeomDef
 		return this;
 	}
 	
-	function setMaterialParam( param:String, val:Dynamic ):Bool
+	public function setMaterialParam( param:String, val:Dynamic ):Bool
 	{
 		Assert.that(material != null, "Material is null");
 		if ( Reflect.hasField( material, param ) )
 		{
 			Reflect.setProperty( material, param, val );
+			material.needsUpdate = true;
 			return true;
 		}
 		return false;

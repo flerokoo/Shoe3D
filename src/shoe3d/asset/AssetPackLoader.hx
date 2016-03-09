@@ -14,6 +14,7 @@ import three.Loader;
 import three.LoadingManager;
 import three.ObjectLoader;
 import three.Texture;
+import three.TextureFilter;
 import three.TextureLoader;
 import three.XHRLoader;
 
@@ -52,6 +53,9 @@ class AssetPackLoader
 	
 	function getFormat( url:String ):AssetFormat
 	{
+		//Blender don't want to save just *.geom. It wants *.geom.json. So, shortcut:
+		if ( url.toLowerCase().indexOf( '.geom.json' ) >= 0 ) return GEOM;
+		
 		var extension = url.getUrlExtension();
         if (extension != null) {
             switch (extension.toLowerCase()) {
@@ -253,6 +257,8 @@ class AssetPackLoader
 	{
 		tex.minFilter = untyped __js__("THREE.LinearFilter");
 		tex.magFilter = untyped __js__("THREE.LinearFilter");
+		//tex.minFilter = untyped __js__("THREE.NearestFilter");
+		//tex.magFilter = untyped __js__("THREE.NearestFilter");
 		_pack._texMap.set( e.name, 
 		{
 			texture: tex, 

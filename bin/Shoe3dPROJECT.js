@@ -1,4 +1,5 @@
-(function () { "use strict";
+(function ($hx_exports) { "use strict";
+$hx_exports.tests = $hx_exports.tests || {};
 var $estr = function() { return js.Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
@@ -118,13 +119,6 @@ Reflect.field = function(o,field) {
 	} catch( e ) {
 		return null;
 	}
-};
-Reflect.setField = function(o,field,value) {
-	o[field] = value;
-};
-Reflect.getProperty = function(o,field) {
-	var tmp;
-	if(o == null) return null; else if(o.__properties__ && (tmp = o.__properties__["get_" + field])) return o[tmp](); else return o[field];
 };
 Reflect.setProperty = function(o,field,value) {
 	var tmp;
@@ -284,22 +278,6 @@ haxe.Log.__name__ = ["haxe","Log"];
 haxe.Log.trace = function(v,infos) {
 	js.Boot.__trace(v,infos);
 };
-haxe.Timer = function(time_ms) {
-	var me = this;
-	this.id = setInterval(function() {
-		me.run();
-	},time_ms);
-};
-haxe.Timer.__name__ = ["haxe","Timer"];
-haxe.Timer.stamp = function() {
-	return new Date().getTime() / 1000;
-};
-haxe.Timer.prototype = {
-	id: null
-	,run: function() {
-	}
-	,__class__: haxe.Timer
-};
 haxe.ds = {};
 haxe.ds.IntMap = function() {
 	this.h = { };
@@ -330,49 +308,6 @@ haxe.ds.IntMap.prototype = {
 		return HxOverrides.iter(a);
 	}
 	,__class__: haxe.ds.IntMap
-};
-haxe.ds.ObjectMap = function() {
-	this.h = { };
-	this.h.__keys__ = { };
-};
-haxe.ds.ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
-haxe.ds.ObjectMap.__interfaces__ = [IMap];
-haxe.ds.ObjectMap.prototype = {
-	h: null
-	,set: function(key,value) {
-		var id = key.__id__ || (key.__id__ = ++haxe.ds.ObjectMap.count);
-		this.h[id] = value;
-		this.h.__keys__[id] = key;
-	}
-	,get: function(key) {
-		return this.h[key.__id__];
-	}
-	,exists: function(key) {
-		return this.h.__keys__[key.__id__] != null;
-	}
-	,remove: function(key) {
-		var id = key.__id__;
-		if(this.h.__keys__[id] == null) return false;
-		delete(this.h[id]);
-		delete(this.h.__keys__[id]);
-		return true;
-	}
-	,keys: function() {
-		var a = [];
-		for( var key in this.h.__keys__ ) {
-		if(this.h.hasOwnProperty(key)) a.push(this.h.__keys__[key]);
-		}
-		return HxOverrides.iter(a);
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref[i.__id__];
-		}};
-	}
-	,__class__: haxe.ds.ObjectMap
 };
 haxe.ds.StringMap = function() {
 	this.h = { };
@@ -739,948 +674,6 @@ js.Boot.__instanceof = function(o,cl) {
 };
 js.Boot.__cast = function(o,t) {
 	if(js.Boot.__instanceof(o,t)) return o; else throw "Cannot cast " + Std.string(o) + " to " + Std.string(t);
-};
-var motion = {};
-motion.actuators = {};
-motion.actuators.IGenericActuator = function() { };
-motion.actuators.IGenericActuator.__name__ = ["motion","actuators","IGenericActuator"];
-motion.actuators.IGenericActuator.prototype = {
-	autoVisible: null
-	,delay: null
-	,ease: null
-	,onComplete: null
-	,onRepeat: null
-	,onUpdate: null
-	,reflect: null
-	,repeat: null
-	,reverse: null
-	,smartRotation: null
-	,snapping: null
-	,__class__: motion.actuators.IGenericActuator
-};
-motion.actuators.GenericActuator = function(target,duration,properties) {
-	this._autoVisible = true;
-	this._delay = 0;
-	this._reflect = false;
-	this._repeat = 0;
-	this._reverse = false;
-	this._smartRotation = false;
-	this._snapping = false;
-	this.special = false;
-	this.target = target;
-	this.properties = properties;
-	this.duration = duration;
-	this._ease = motion.Actuate.defaultEase;
-};
-motion.actuators.GenericActuator.__name__ = ["motion","actuators","GenericActuator"];
-motion.actuators.GenericActuator.__interfaces__ = [motion.actuators.IGenericActuator];
-motion.actuators.GenericActuator.prototype = {
-	duration: null
-	,id: null
-	,properties: null
-	,target: null
-	,_autoVisible: null
-	,_delay: null
-	,_ease: null
-	,_onComplete: null
-	,_onCompleteParams: null
-	,_onRepeat: null
-	,_onRepeatParams: null
-	,_onUpdate: null
-	,_onUpdateParams: null
-	,_reflect: null
-	,_repeat: null
-	,_reverse: null
-	,_smartRotation: null
-	,_snapping: null
-	,special: null
-	,apply: function() {
-		var _g = 0;
-		var _g1 = Reflect.fields(this.properties);
-		while(_g < _g1.length) {
-			var i = _g1[_g];
-			++_g;
-			if(Object.prototype.hasOwnProperty.call(this.target,i)) Reflect.setField(this.target,i,Reflect.field(this.properties,i)); else Reflect.setProperty(this.target,i,Reflect.field(this.properties,i));
-		}
-	}
-	,autoVisible: function(value) {
-		if(value == null) value = true;
-		this._autoVisible = value;
-		return this;
-	}
-	,callMethod: function(method,params) {
-		if(params == null) params = [];
-		return method.apply(method,params);
-	}
-	,change: function() {
-		if(this._onUpdate != null) this.callMethod(this._onUpdate,this._onUpdateParams);
-	}
-	,complete: function(sendEvent) {
-		if(sendEvent == null) sendEvent = true;
-		if(sendEvent) {
-			this.change();
-			if(this._onComplete != null) this.callMethod(this._onComplete,this._onCompleteParams);
-		}
-		motion.Actuate.unload(this);
-	}
-	,delay: function(duration) {
-		this._delay = duration;
-		return this;
-	}
-	,ease: function(easing) {
-		this._ease = easing;
-		return this;
-	}
-	,move: function() {
-	}
-	,onComplete: function(handler,parameters) {
-		this._onComplete = handler;
-		if(parameters == null) this._onCompleteParams = []; else this._onCompleteParams = parameters;
-		if(this.duration == 0) this.complete();
-		return this;
-	}
-	,onRepeat: function(handler,parameters) {
-		this._onRepeat = handler;
-		if(parameters == null) this._onRepeatParams = []; else this._onRepeatParams = parameters;
-		return this;
-	}
-	,onUpdate: function(handler,parameters) {
-		this._onUpdate = handler;
-		if(parameters == null) this._onUpdateParams = []; else this._onUpdateParams = parameters;
-		return this;
-	}
-	,pause: function() {
-	}
-	,reflect: function(value) {
-		if(value == null) value = true;
-		this._reflect = value;
-		this.special = true;
-		return this;
-	}
-	,repeat: function(times) {
-		if(times == null) times = -1;
-		this._repeat = times;
-		return this;
-	}
-	,resume: function() {
-	}
-	,reverse: function(value) {
-		if(value == null) value = true;
-		this._reverse = value;
-		this.special = true;
-		return this;
-	}
-	,smartRotation: function(value) {
-		if(value == null) value = true;
-		this._smartRotation = value;
-		this.special = true;
-		return this;
-	}
-	,snapping: function(value) {
-		if(value == null) value = true;
-		this._snapping = value;
-		this.special = true;
-		return this;
-	}
-	,stop: function(properties,complete,sendEvent) {
-	}
-	,__class__: motion.actuators.GenericActuator
-};
-motion.actuators.SimpleActuator = function(target,duration,properties) {
-	this.active = true;
-	this.propertyDetails = new Array();
-	this.sendChange = false;
-	this.paused = false;
-	this.cacheVisible = false;
-	this.initialized = false;
-	this.setVisible = false;
-	this.toggleVisible = false;
-	this.startTime = haxe.Timer.stamp();
-	motion.actuators.GenericActuator.call(this,target,duration,properties);
-	if(!motion.actuators.SimpleActuator.addedEvent) {
-		motion.actuators.SimpleActuator.addedEvent = true;
-		motion.actuators.SimpleActuator.timer = new haxe.Timer(33);
-		motion.actuators.SimpleActuator.timer.run = motion.actuators.SimpleActuator.stage_onEnterFrame;
-	}
-};
-motion.actuators.SimpleActuator.__name__ = ["motion","actuators","SimpleActuator"];
-motion.actuators.SimpleActuator.stage_onEnterFrame = function() {
-	var currentTime = haxe.Timer.stamp();
-	var actuator;
-	var j = 0;
-	var cleanup = false;
-	var _g1 = 0;
-	var _g = motion.actuators.SimpleActuator.actuatorsLength;
-	while(_g1 < _g) {
-		var i = _g1++;
-		actuator = motion.actuators.SimpleActuator.actuators[j];
-		if(actuator != null && actuator.active) {
-			if(currentTime > actuator.timeOffset) actuator.update(currentTime);
-			j++;
-		} else {
-			motion.actuators.SimpleActuator.actuators.splice(j,1);
-			--motion.actuators.SimpleActuator.actuatorsLength;
-		}
-	}
-};
-motion.actuators.SimpleActuator.__super__ = motion.actuators.GenericActuator;
-motion.actuators.SimpleActuator.prototype = $extend(motion.actuators.GenericActuator.prototype,{
-	timeOffset: null
-	,active: null
-	,cacheVisible: null
-	,detailsLength: null
-	,initialized: null
-	,paused: null
-	,pauseTime: null
-	,propertyDetails: null
-	,sendChange: null
-	,setVisible: null
-	,startTime: null
-	,toggleVisible: null
-	,autoVisible: function(value) {
-		if(value == null) value = true;
-		this._autoVisible = value;
-		if(!value) {
-			this.toggleVisible = false;
-			if(this.setVisible) this.setField(this.target,"visible",this.cacheVisible);
-		}
-		return this;
-	}
-	,delay: function(duration) {
-		this._delay = duration;
-		this.timeOffset = this.startTime + duration;
-		return this;
-	}
-	,getField: function(target,propertyName) {
-		var value = null;
-		if(Object.prototype.hasOwnProperty.call(target,propertyName)) value = Reflect.field(target,propertyName); else value = Reflect.getProperty(target,propertyName);
-		return value;
-	}
-	,initialize: function() {
-		var details;
-		var start;
-		var _g = 0;
-		var _g1 = Reflect.fields(this.properties);
-		while(_g < _g1.length) {
-			var i = _g1[_g];
-			++_g;
-			var isField = true;
-			if(Object.prototype.hasOwnProperty.call(this.target,i)) start = Reflect.field(this.target,i); else {
-				isField = false;
-				start = Reflect.getProperty(this.target,i);
-			}
-			if(typeof(start) == "number") {
-				details = new motion.actuators.PropertyDetails(this.target,i,start,this.getField(this.properties,i) - start,isField);
-				this.propertyDetails.push(details);
-			}
-		}
-		this.detailsLength = this.propertyDetails.length;
-		this.initialized = true;
-	}
-	,move: function() {
-		this.toggleVisible = Object.prototype.hasOwnProperty.call(this.properties,"alpha") && Object.prototype.hasOwnProperty.call(this.properties,"visible");
-		if(this.toggleVisible && this.properties.alpha != 0 && !this.getField(this.target,"visible")) {
-			this.setVisible = true;
-			this.cacheVisible = this.getField(this.target,"visible");
-			this.setField(this.target,"visible",true);
-		}
-		this.timeOffset = this.startTime;
-		motion.actuators.SimpleActuator.actuators.push(this);
-		++motion.actuators.SimpleActuator.actuatorsLength;
-	}
-	,onUpdate: function(handler,parameters) {
-		this._onUpdate = handler;
-		if(parameters == null) this._onUpdateParams = []; else this._onUpdateParams = parameters;
-		this.sendChange = true;
-		return this;
-	}
-	,pause: function() {
-		this.paused = true;
-		this.pauseTime = haxe.Timer.stamp();
-	}
-	,resume: function() {
-		if(this.paused) {
-			this.paused = false;
-			this.timeOffset += (haxe.Timer.stamp() - this.pauseTime) / 1000;
-		}
-	}
-	,setField: function(target,propertyName,value) {
-		if(Object.prototype.hasOwnProperty.call(target,propertyName)) target[propertyName] = value; else Reflect.setProperty(target,propertyName,value);
-	}
-	,setProperty: function(details,value) {
-		if(details.isField) details.target[details.propertyName] = value; else Reflect.setProperty(details.target,details.propertyName,value);
-	}
-	,stop: function(properties,complete,sendEvent) {
-		if(this.active) {
-			if(properties == null) {
-				this.active = false;
-				if(complete) this.apply();
-				this.complete(sendEvent);
-				return;
-			}
-			var _g = 0;
-			var _g1 = Reflect.fields(properties);
-			while(_g < _g1.length) {
-				var i = _g1[_g];
-				++_g;
-				if(Object.prototype.hasOwnProperty.call(this.properties,i)) {
-					this.active = false;
-					if(complete) this.apply();
-					this.complete(sendEvent);
-					return;
-				}
-			}
-		}
-	}
-	,update: function(currentTime) {
-		if(!this.paused) {
-			var details;
-			var easing;
-			var i;
-			var tweenPosition = (currentTime - this.timeOffset) / this.duration;
-			if(tweenPosition > 1) tweenPosition = 1;
-			if(!this.initialized) this.initialize();
-			if(!this.special) {
-				easing = this._ease.calculate(tweenPosition);
-				var _g1 = 0;
-				var _g = this.detailsLength;
-				while(_g1 < _g) {
-					var i1 = _g1++;
-					details = this.propertyDetails[i1];
-					this.setProperty(details,details.start + details.change * easing);
-				}
-			} else {
-				if(!this._reverse) easing = this._ease.calculate(tweenPosition); else easing = this._ease.calculate(1 - tweenPosition);
-				var endValue;
-				var _g11 = 0;
-				var _g2 = this.detailsLength;
-				while(_g11 < _g2) {
-					var i2 = _g11++;
-					details = this.propertyDetails[i2];
-					if(this._smartRotation && (details.propertyName == "rotation" || details.propertyName == "rotationX" || details.propertyName == "rotationY" || details.propertyName == "rotationZ")) {
-						var rotation = details.change % 360;
-						if(rotation > 180) rotation -= 360; else if(rotation < -180) rotation += 360;
-						endValue = details.start + rotation * easing;
-					} else endValue = details.start + details.change * easing;
-					if(!this._snapping) {
-						if(details.isField) details.target[details.propertyName] = endValue; else Reflect.setProperty(details.target,details.propertyName,endValue);
-					} else this.setProperty(details,Math.round(endValue));
-				}
-			}
-			if(tweenPosition == 1) {
-				if(this._repeat == 0) {
-					this.active = false;
-					if(this.toggleVisible && this.getField(this.target,"alpha") == 0) this.setField(this.target,"visible",false);
-					this.complete(true);
-					return;
-				} else {
-					if(this._onRepeat != null) this.callMethod(this._onRepeat,this._onRepeatParams);
-					if(this._reflect) this._reverse = !this._reverse;
-					this.startTime = currentTime;
-					this.timeOffset = this.startTime + this._delay;
-					if(this._repeat > 0) this._repeat--;
-				}
-			}
-			if(this.sendChange) this.change();
-		}
-	}
-	,__class__: motion.actuators.SimpleActuator
-});
-motion.easing = {};
-motion.easing.Expo = function() { };
-motion.easing.Expo.__name__ = ["motion","easing","Expo"];
-motion.easing.Expo.__properties__ = {get_easeOut:"get_easeOut",get_easeInOut:"get_easeInOut",get_easeIn:"get_easeIn"}
-motion.easing.Expo.get_easeIn = function() {
-	return new motion.easing.ExpoEaseIn();
-};
-motion.easing.Expo.get_easeInOut = function() {
-	return new motion.easing.ExpoEaseInOut();
-};
-motion.easing.Expo.get_easeOut = function() {
-	return new motion.easing.ExpoEaseOut();
-};
-motion.easing.IEasing = function() { };
-motion.easing.IEasing.__name__ = ["motion","easing","IEasing"];
-motion.easing.IEasing.prototype = {
-	calculate: null
-	,ease: null
-	,__class__: motion.easing.IEasing
-};
-motion.easing.ExpoEaseOut = function() {
-};
-motion.easing.ExpoEaseOut.__name__ = ["motion","easing","ExpoEaseOut"];
-motion.easing.ExpoEaseOut.__interfaces__ = [motion.easing.IEasing];
-motion.easing.ExpoEaseOut.prototype = {
-	calculate: function(k) {
-		if(k == 1) return 1; else return 1 - Math.pow(2,-10 * k);
-	}
-	,ease: function(t,b,c,d) {
-		if(t == d) return b + c; else return c * (1 - Math.pow(2,-10 * t / d)) + b;
-	}
-	,__class__: motion.easing.ExpoEaseOut
-};
-motion.Actuate = function() { };
-motion.Actuate.__name__ = ["motion","Actuate"];
-motion.Actuate.apply = function(target,properties,customActuator) {
-	motion.Actuate.stop(target,properties);
-	if(customActuator == null) customActuator = motion.Actuate.defaultActuator;
-	var actuator = Type.createInstance(customActuator,[target,0,properties]);
-	actuator.apply();
-	return actuator;
-};
-motion.Actuate.getLibrary = function(target,allowCreation) {
-	if(allowCreation == null) allowCreation = true;
-	if(!motion.Actuate.targetLibraries.exists(target) && allowCreation) motion.Actuate.targetLibraries.set(target,new Array());
-	return motion.Actuate.targetLibraries.get(target);
-};
-motion.Actuate.motionPath = function(target,duration,properties,overwrite) {
-	if(overwrite == null) overwrite = true;
-	return motion.Actuate.tween(target,duration,properties,overwrite,motion.actuators.MotionPathActuator);
-};
-motion.Actuate.pause = function(target) {
-	if(js.Boot.__instanceof(target,motion.actuators.GenericActuator)) (js.Boot.__cast(target , motion.actuators.GenericActuator)).pause(); else {
-		var library = motion.Actuate.getLibrary(target,false);
-		if(library != null) {
-			var _g = 0;
-			while(_g < library.length) {
-				var actuator = library[_g];
-				++_g;
-				actuator.pause();
-			}
-		}
-	}
-};
-motion.Actuate.pauseAll = function() {
-	var $it0 = motion.Actuate.targetLibraries.iterator();
-	while( $it0.hasNext() ) {
-		var library = $it0.next();
-		var _g = 0;
-		while(_g < library.length) {
-			var actuator = library[_g];
-			++_g;
-			actuator.pause();
-		}
-	}
-};
-motion.Actuate.reset = function() {
-	var $it0 = motion.Actuate.targetLibraries.iterator();
-	while( $it0.hasNext() ) {
-		var library = $it0.next();
-		var i = library.length - 1;
-		while(i >= 0) {
-			library[i].stop(null,false,false);
-			i--;
-		}
-	}
-	motion.Actuate.targetLibraries = new haxe.ds.ObjectMap();
-};
-motion.Actuate.resume = function(target) {
-	if(js.Boot.__instanceof(target,motion.actuators.GenericActuator)) (js.Boot.__cast(target , motion.actuators.GenericActuator)).resume(); else {
-		var library = motion.Actuate.getLibrary(target,false);
-		if(library != null) {
-			var _g = 0;
-			while(_g < library.length) {
-				var actuator = library[_g];
-				++_g;
-				actuator.resume();
-			}
-		}
-	}
-};
-motion.Actuate.resumeAll = function() {
-	var $it0 = motion.Actuate.targetLibraries.iterator();
-	while( $it0.hasNext() ) {
-		var library = $it0.next();
-		var _g = 0;
-		while(_g < library.length) {
-			var actuator = library[_g];
-			++_g;
-			actuator.resume();
-		}
-	}
-};
-motion.Actuate.stop = function(target,properties,complete,sendEvent) {
-	if(sendEvent == null) sendEvent = true;
-	if(complete == null) complete = false;
-	if(target != null) {
-		if(js.Boot.__instanceof(target,motion.actuators.GenericActuator)) (js.Boot.__cast(target , motion.actuators.GenericActuator)).stop(null,complete,sendEvent); else {
-			var library = motion.Actuate.getLibrary(target,false);
-			if(library != null) {
-				if(typeof(properties) == "string") {
-					var temp = { };
-					Reflect.setField(temp,properties,null);
-					properties = temp;
-				} else if((properties instanceof Array) && properties.__enum__ == null) {
-					var temp1 = { };
-					var _g = 0;
-					var _g1;
-					_g1 = js.Boot.__cast(properties , Array);
-					while(_g < _g1.length) {
-						var property = _g1[_g];
-						++_g;
-						Reflect.setField(temp1,property,null);
-					}
-					properties = temp1;
-				}
-				var i = library.length - 1;
-				while(i >= 0) {
-					library[i].stop(properties,complete,sendEvent);
-					i--;
-				}
-			}
-		}
-	}
-};
-motion.Actuate.timer = function(duration,customActuator) {
-	return motion.Actuate.tween(new motion._Actuate.TweenTimer(0),duration,new motion._Actuate.TweenTimer(1),false,customActuator);
-};
-motion.Actuate.tween = function(target,duration,properties,overwrite,customActuator) {
-	if(overwrite == null) overwrite = true;
-	if(target != null) {
-		if(duration > 0) {
-			if(customActuator == null) customActuator = motion.Actuate.defaultActuator;
-			var actuator = Type.createInstance(customActuator,[target,duration,properties]);
-			var library = motion.Actuate.getLibrary(actuator.target);
-			if(overwrite) {
-				var i = library.length - 1;
-				while(i >= 0) {
-					library[i].stop(actuator.properties,false,false);
-					i--;
-				}
-				library = motion.Actuate.getLibrary(actuator.target);
-			}
-			library.push(actuator);
-			actuator.move();
-			return actuator;
-		} else return motion.Actuate.apply(target,properties,customActuator);
-	}
-	return null;
-};
-motion.Actuate.unload = function(actuator) {
-	var target = actuator.target;
-	if(motion.Actuate.targetLibraries.h.__keys__[target.__id__] != null) {
-		HxOverrides.remove(motion.Actuate.targetLibraries.h[target.__id__],actuator);
-		if(motion.Actuate.targetLibraries.h[target.__id__].length == 0) motion.Actuate.targetLibraries.remove(target);
-	}
-};
-motion.Actuate.update = function(target,duration,start,end,overwrite) {
-	if(overwrite == null) overwrite = true;
-	var properties = { start : start, end : end};
-	return motion.Actuate.tween(target,duration,properties,overwrite,motion.actuators.MethodActuator);
-};
-motion._Actuate = {};
-motion._Actuate.TweenTimer = function(progress) {
-	this.progress = progress;
-};
-motion._Actuate.TweenTimer.__name__ = ["motion","_Actuate","TweenTimer"];
-motion._Actuate.TweenTimer.prototype = {
-	progress: null
-	,__class__: motion._Actuate.TweenTimer
-};
-motion.MotionPath = function() {
-	this._x = new motion.ComponentPath();
-	this._y = new motion.ComponentPath();
-	this._rotation = null;
-};
-motion.MotionPath.__name__ = ["motion","MotionPath"];
-motion.MotionPath.prototype = {
-	rotation: null
-	,x: null
-	,y: null
-	,_rotation: null
-	,_x: null
-	,_y: null
-	,bezier: function(x,y,controlX,controlY,strength) {
-		if(strength == null) strength = 1;
-		this._x.addPath(new motion.BezierPath(x,controlX,strength));
-		this._y.addPath(new motion.BezierPath(y,controlY,strength));
-		return this;
-	}
-	,line: function(x,y,strength) {
-		if(strength == null) strength = 1;
-		this._x.addPath(new motion.LinearPath(x,strength));
-		this._y.addPath(new motion.LinearPath(y,strength));
-		return this;
-	}
-	,get_rotation: function() {
-		if(this._rotation == null) this._rotation = new motion.RotationPath(this._x,this._y);
-		return this._rotation;
-	}
-	,get_x: function() {
-		return this._x;
-	}
-	,get_y: function() {
-		return this._y;
-	}
-	,__class__: motion.MotionPath
-	,__properties__: {get_y:"get_y",get_x:"get_x",get_rotation:"get_rotation"}
-};
-motion.IComponentPath = function() { };
-motion.IComponentPath.__name__ = ["motion","IComponentPath"];
-motion.IComponentPath.prototype = {
-	end: null
-	,start: null
-	,calculate: null
-	,__class__: motion.IComponentPath
-};
-motion.ComponentPath = function() {
-	this.paths = new Array();
-	this.start = 0;
-	this.totalStrength = 0;
-};
-motion.ComponentPath.__name__ = ["motion","ComponentPath"];
-motion.ComponentPath.__interfaces__ = [motion.IComponentPath];
-motion.ComponentPath.prototype = {
-	start: null
-	,end: null
-	,paths: null
-	,totalStrength: null
-	,addPath: function(path) {
-		this.paths.push(path);
-		this.totalStrength += path.strength;
-	}
-	,calculate: function(k) {
-		if(this.paths.length == 1) return this.paths[0].calculate(this.start,k); else {
-			var ratio = k * this.totalStrength;
-			var lastEnd = this.start;
-			var _g = 0;
-			var _g1 = this.paths;
-			while(_g < _g1.length) {
-				var path = _g1[_g];
-				++_g;
-				if(ratio > path.strength) {
-					ratio -= path.strength;
-					lastEnd = path.end;
-				} else return path.calculate(lastEnd,ratio / path.strength);
-			}
-		}
-		return 0;
-	}
-	,get_end: function() {
-		if(this.paths.length > 0) {
-			var path = this.paths[this.paths.length - 1];
-			return path.end;
-		} else return this.start;
-	}
-	,__class__: motion.ComponentPath
-	,__properties__: {get_end:"get_end"}
-};
-motion.BezierPath = function(end,control,strength) {
-	this.end = end;
-	this.control = control;
-	this.strength = strength;
-};
-motion.BezierPath.__name__ = ["motion","BezierPath"];
-motion.BezierPath.prototype = {
-	control: null
-	,end: null
-	,strength: null
-	,calculate: function(start,k) {
-		return (1 - k) * (1 - k) * start + 2 * (1 - k) * k * this.control + k * k * this.end;
-	}
-	,__class__: motion.BezierPath
-};
-motion.LinearPath = function(end,strength) {
-	motion.BezierPath.call(this,end,0,strength);
-};
-motion.LinearPath.__name__ = ["motion","LinearPath"];
-motion.LinearPath.__super__ = motion.BezierPath;
-motion.LinearPath.prototype = $extend(motion.BezierPath.prototype,{
-	calculate: function(start,k) {
-		return start + k * (this.end - start);
-	}
-	,__class__: motion.LinearPath
-});
-motion.RotationPath = function(x,y) {
-	this.step = 0.01;
-	this._x = x;
-	this._y = y;
-	this.offset = 0;
-	this.start = this.calculate(0.0);
-};
-motion.RotationPath.__name__ = ["motion","RotationPath"];
-motion.RotationPath.__interfaces__ = [motion.IComponentPath];
-motion.RotationPath.prototype = {
-	end: null
-	,offset: null
-	,start: null
-	,step: null
-	,_x: null
-	,_y: null
-	,calculate: function(k) {
-		var dX = this._x.calculate(k) - this._x.calculate(k + this.step);
-		var dY = this._y.calculate(k) - this._y.calculate(k + this.step);
-		var angle = Math.atan2(dY,dX) * (180 / Math.PI);
-		angle = (angle + this.offset) % 360;
-		return angle;
-	}
-	,get_end: function() {
-		return this.calculate(1.0);
-	}
-	,__class__: motion.RotationPath
-	,__properties__: {get_end:"get_end"}
-};
-motion.actuators.MethodActuator = function(target,duration,properties) {
-	this.currentParameters = new Array();
-	this.tweenProperties = { };
-	motion.actuators.SimpleActuator.call(this,target,duration,properties);
-	if(!Object.prototype.hasOwnProperty.call(properties,"start")) this.properties.start = new Array();
-	if(!Object.prototype.hasOwnProperty.call(properties,"end")) this.properties.end = this.properties.start;
-	var _g1 = 0;
-	var _g = this.properties.start.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		this.currentParameters.push(null);
-	}
-};
-motion.actuators.MethodActuator.__name__ = ["motion","actuators","MethodActuator"];
-motion.actuators.MethodActuator.__super__ = motion.actuators.SimpleActuator;
-motion.actuators.MethodActuator.prototype = $extend(motion.actuators.SimpleActuator.prototype,{
-	currentParameters: null
-	,tweenProperties: null
-	,apply: function() {
-		this.callMethod(this.target,this.properties.end);
-	}
-	,complete: function(sendEvent) {
-		if(sendEvent == null) sendEvent = true;
-		var _g1 = 0;
-		var _g = this.properties.start.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			this.currentParameters[i] = Reflect.field(this.tweenProperties,"param" + i);
-		}
-		this.callMethod(this.target,this.currentParameters);
-		motion.actuators.SimpleActuator.prototype.complete.call(this,sendEvent);
-	}
-	,initialize: function() {
-		var details;
-		var propertyName;
-		var start;
-		var _g1 = 0;
-		var _g = this.properties.start.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			propertyName = "param" + i;
-			start = this.properties.start[i];
-			this.tweenProperties[propertyName] = start;
-			if(typeof(start) == "number" || ((start | 0) === start)) {
-				details = new motion.actuators.PropertyDetails(this.tweenProperties,propertyName,start,this.properties.end[i] - start);
-				this.propertyDetails.push(details);
-			}
-		}
-		this.detailsLength = this.propertyDetails.length;
-		this.initialized = true;
-	}
-	,update: function(currentTime) {
-		motion.actuators.SimpleActuator.prototype.update.call(this,currentTime);
-		if(this.active) {
-			var _g1 = 0;
-			var _g = this.properties.start.length;
-			while(_g1 < _g) {
-				var i = _g1++;
-				this.currentParameters[i] = Reflect.field(this.tweenProperties,"param" + i);
-			}
-			this.callMethod(this.target,this.currentParameters);
-		}
-	}
-	,__class__: motion.actuators.MethodActuator
-});
-motion.actuators.MotionPathActuator = function(target,duration,properties) {
-	motion.actuators.SimpleActuator.call(this,target,duration,properties);
-};
-motion.actuators.MotionPathActuator.__name__ = ["motion","actuators","MotionPathActuator"];
-motion.actuators.MotionPathActuator.__super__ = motion.actuators.SimpleActuator;
-motion.actuators.MotionPathActuator.prototype = $extend(motion.actuators.SimpleActuator.prototype,{
-	apply: function() {
-		var _g = 0;
-		var _g1 = Reflect.fields(this.properties);
-		while(_g < _g1.length) {
-			var propertyName = _g1[_g];
-			++_g;
-			if(Object.prototype.hasOwnProperty.call(this.target,propertyName)) Reflect.setField(this.target,propertyName,(js.Boot.__cast(Reflect.field(this.properties,propertyName) , motion.IComponentPath)).get_end()); else Reflect.setProperty(this.target,propertyName,(js.Boot.__cast(Reflect.field(this.properties,propertyName) , motion.IComponentPath)).get_end());
-		}
-	}
-	,initialize: function() {
-		var details;
-		var path;
-		var _g = 0;
-		var _g1 = Reflect.fields(this.properties);
-		while(_g < _g1.length) {
-			var propertyName = _g1[_g];
-			++_g;
-			path = js.Boot.__cast(Reflect.field(this.properties,propertyName) , motion.IComponentPath);
-			if(path != null) {
-				var isField = true;
-				if(Object.prototype.hasOwnProperty.call(this.target,propertyName)) path.start = Reflect.field(this.target,propertyName); else {
-					isField = false;
-					path.start = Reflect.getProperty(this.target,propertyName);
-				}
-				details = new motion.actuators.PropertyPathDetails(this.target,propertyName,path,isField);
-				this.propertyDetails.push(details);
-			}
-		}
-		this.detailsLength = this.propertyDetails.length;
-		this.initialized = true;
-	}
-	,update: function(currentTime) {
-		if(!this.paused) {
-			var details;
-			var easing;
-			var tweenPosition = (currentTime - this.timeOffset) / this.duration;
-			if(tweenPosition > 1) tweenPosition = 1;
-			if(!this.initialized) this.initialize();
-			if(!this.special) {
-				easing = this._ease.calculate(tweenPosition);
-				var _g = 0;
-				var _g1 = this.propertyDetails;
-				while(_g < _g1.length) {
-					var details1 = _g1[_g];
-					++_g;
-					if(details1.isField) Reflect.setField(details1.target,details1.propertyName,(js.Boot.__cast(details1 , motion.actuators.PropertyPathDetails)).path.calculate(easing)); else Reflect.setProperty(details1.target,details1.propertyName,(js.Boot.__cast(details1 , motion.actuators.PropertyPathDetails)).path.calculate(easing));
-				}
-			} else {
-				if(!this._reverse) easing = this._ease.calculate(tweenPosition); else easing = this._ease.calculate(1 - tweenPosition);
-				var endValue;
-				var _g2 = 0;
-				var _g11 = this.propertyDetails;
-				while(_g2 < _g11.length) {
-					var details2 = _g11[_g2];
-					++_g2;
-					if(!this._snapping) {
-						if(details2.isField) Reflect.setField(details2.target,details2.propertyName,(js.Boot.__cast(details2 , motion.actuators.PropertyPathDetails)).path.calculate(easing)); else Reflect.setProperty(details2.target,details2.propertyName,(js.Boot.__cast(details2 , motion.actuators.PropertyPathDetails)).path.calculate(easing));
-					} else if(details2.isField) Reflect.setField(details2.target,details2.propertyName,Math.round((js.Boot.__cast(details2 , motion.actuators.PropertyPathDetails)).path.calculate(easing))); else Reflect.setProperty(details2.target,details2.propertyName,Math.round((js.Boot.__cast(details2 , motion.actuators.PropertyPathDetails)).path.calculate(easing)));
-				}
-			}
-			if(tweenPosition == 1) {
-				if(this._repeat == 0) {
-					this.active = false;
-					if(this.toggleVisible && this.getField(this.target,"alpha") == 0) this.setField(this.target,"visible",false);
-					this.complete(true);
-					return;
-				} else {
-					if(this._reflect) this._reverse = !this._reverse;
-					this.startTime = currentTime;
-					this.timeOffset = this.startTime + this._delay;
-					if(this._repeat > 0) this._repeat--;
-				}
-			}
-			if(this.sendChange) this.change();
-		}
-	}
-	,__class__: motion.actuators.MotionPathActuator
-});
-motion.actuators.PropertyDetails = function(target,propertyName,start,change,isField) {
-	if(isField == null) isField = true;
-	this.target = target;
-	this.propertyName = propertyName;
-	this.start = start;
-	this.change = change;
-	this.isField = isField;
-};
-motion.actuators.PropertyDetails.__name__ = ["motion","actuators","PropertyDetails"];
-motion.actuators.PropertyDetails.prototype = {
-	change: null
-	,isField: null
-	,propertyName: null
-	,start: null
-	,target: null
-	,__class__: motion.actuators.PropertyDetails
-};
-motion.actuators.PropertyPathDetails = function(target,propertyName,path,isField) {
-	if(isField == null) isField = true;
-	motion.actuators.PropertyDetails.call(this,target,propertyName,0,0,isField);
-	this.path = path;
-};
-motion.actuators.PropertyPathDetails.__name__ = ["motion","actuators","PropertyPathDetails"];
-motion.actuators.PropertyPathDetails.__super__ = motion.actuators.PropertyDetails;
-motion.actuators.PropertyPathDetails.prototype = $extend(motion.actuators.PropertyDetails.prototype,{
-	path: null
-	,__class__: motion.actuators.PropertyPathDetails
-});
-motion.easing.ExpoEaseIn = function() {
-};
-motion.easing.ExpoEaseIn.__name__ = ["motion","easing","ExpoEaseIn"];
-motion.easing.ExpoEaseIn.__interfaces__ = [motion.easing.IEasing];
-motion.easing.ExpoEaseIn.prototype = {
-	calculate: function(k) {
-		if(k == 0) return 0; else return Math.pow(2,10 * (k - 1));
-	}
-	,ease: function(t,b,c,d) {
-		if(t == 0) return b; else return c * Math.pow(2,10 * (t / d - 1)) + b;
-	}
-	,__class__: motion.easing.ExpoEaseIn
-};
-motion.easing.ExpoEaseInOut = function() {
-};
-motion.easing.ExpoEaseInOut.__name__ = ["motion","easing","ExpoEaseInOut"];
-motion.easing.ExpoEaseInOut.__interfaces__ = [motion.easing.IEasing];
-motion.easing.ExpoEaseInOut.prototype = {
-	calculate: function(k) {
-		if(k == 0) return 0;
-		if(k == 1) return 1;
-		if((k /= 0.5) < 1.0) return 0.5 * Math.pow(2,10 * (k - 1));
-		return 0.5 * (2 - Math.pow(2,-10 * --k));
-	}
-	,ease: function(t,b,c,d) {
-		if(t == 0) return b;
-		if(t == d) return b + c;
-		if((t /= d / 2.0) < 1.0) return c / 2 * Math.pow(2,10 * (t - 1)) + b;
-		return c / 2 * (2 - Math.pow(2,-10 * --t)) + b;
-	}
-	,__class__: motion.easing.ExpoEaseInOut
-};
-motion.easing.Quad = function() { };
-motion.easing.Quad.__name__ = ["motion","easing","Quad"];
-motion.easing.Quad.__properties__ = {get_easeOut:"get_easeOut",get_easeInOut:"get_easeInOut",get_easeIn:"get_easeIn"}
-motion.easing.Quad.get_easeIn = function() {
-	return new motion.easing.QuadEaseIn();
-};
-motion.easing.Quad.get_easeInOut = function() {
-	return new motion.easing.QuadEaseInOut();
-};
-motion.easing.Quad.get_easeOut = function() {
-	return new motion.easing.QuadEaseOut();
-};
-motion.easing.QuadEaseIn = function() {
-};
-motion.easing.QuadEaseIn.__name__ = ["motion","easing","QuadEaseIn"];
-motion.easing.QuadEaseIn.__interfaces__ = [motion.easing.IEasing];
-motion.easing.QuadEaseIn.prototype = {
-	calculate: function(k) {
-		return k * k;
-	}
-	,ease: function(t,b,c,d) {
-		return c * (t /= d) * t + b;
-	}
-	,__class__: motion.easing.QuadEaseIn
-};
-motion.easing.QuadEaseInOut = function() {
-};
-motion.easing.QuadEaseInOut.__name__ = ["motion","easing","QuadEaseInOut"];
-motion.easing.QuadEaseInOut.__interfaces__ = [motion.easing.IEasing];
-motion.easing.QuadEaseInOut.prototype = {
-	calculate: function(k) {
-		if((k *= 2) < 1) return 0.5 * k * k;
-		return -0.5 * ((k - 1) * (k - 3) - 1);
-	}
-	,ease: function(t,b,c,d) {
-		if((t /= d / 2) < 1) return c / 2 * t * t + b;
-		return -c / 2 * ((t - 1) * (t - 3) - 1) + b;
-	}
-	,__class__: motion.easing.QuadEaseInOut
-};
-motion.easing.QuadEaseOut = function() {
-};
-motion.easing.QuadEaseOut.__name__ = ["motion","easing","QuadEaseOut"];
-motion.easing.QuadEaseOut.__interfaces__ = [motion.easing.IEasing];
-motion.easing.QuadEaseOut.prototype = {
-	calculate: function(k) {
-		return -k * (k - 2);
-	}
-	,ease: function(t,b,c,d) {
-		return -c * (t /= d) * (t - 2) + b;
-	}
-	,__class__: motion.easing.QuadEaseOut
 };
 var shoe3d = {};
 shoe3d.core = {};
@@ -2115,6 +1108,7 @@ shoe3d.System.loadFolderFromAssets = function(folder,onSuccess,onProgress,regist
 	ldr.add("boy","assets/boy.geom",0);
 	ldr.add("sprites","assets/sprites.png",0);
 	ldr.add("boy_tex","assets/boy_tex.png",0);
+	ldr.add("boy_norm","assets/boy_norm.png",0);
 	ldr.add("sprites.txt","assets/sprites.txt",0);
 	ldr.add("anim","assets/test_anim.geom",0);
 	ldr.add("anim2","assets/test_anim2.geom",0);
@@ -2280,6 +1274,7 @@ shoe3d.asset.GeomDef.prototype = {
 	,setTransparent: function(v) {
 		if(v == null) v = true;
 		this.material.transparent = v;
+		this.material.needsUpdate = true;
 		return this;
 	}
 	,setShine: function(v) {
@@ -2291,6 +1286,7 @@ shoe3d.asset.GeomDef.prototype = {
 		shoe3d.util.Assert.that(this.material != null,"Material is null");
 		if(Object.prototype.hasOwnProperty.call(this.material,param)) {
 			Reflect.setProperty(this.material,param,val);
+			this.material.needsUpdate = true;
 			return true;
 		}
 		return false;
@@ -2396,6 +1392,7 @@ shoe3d.asset.AssetPackLoader.prototype = {
 		this._entries.push(new shoe3d.asset.AssetEntry(name,url,format,bytes));
 	}
 	,getFormat: function(url) {
+		if(url.toLowerCase().indexOf(".geom.json") >= 0) return shoe3d.asset.AssetFormat.GEOM;
 		var extension = shoe3d.util.StringHelp.getUrlExtension(url);
 		if(extension != null) {
 			var _g = extension.toLowerCase();
@@ -2513,8 +1510,8 @@ shoe3d.asset.AssetPackLoader.prototype = {
 		if(tex.image.height != null) tex.naturalHeight = tex.image.height; else tex.naturalHeight = tex.image.naturalHeight;
 	}
 	,onLoadSound: function(data,e) {
-		haxe.Log.trace(data,{ fileName : "AssetPackLoader.hx", lineNumber : 274, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
-		haxe.Log.trace("SND LOAD",{ fileName : "AssetPackLoader.hx", lineNumber : 276, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
+		haxe.Log.trace(data,{ fileName : "AssetPackLoader.hx", lineNumber : 277, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
+		haxe.Log.trace("SND LOAD",{ fileName : "AssetPackLoader.hx", lineNumber : 279, className : "shoe3d.asset.AssetPackLoader", methodName : "onLoadSound"});
 	}
 	,onLoadGeometry: function(data,e) {
 		var parser = new THREE.JSONLoader();
@@ -3359,7 +2356,7 @@ shoe3d.core.Layer.prototype = {
 	}
 	,setCamera: function(cam) {
 		this.camera = cam;
-		if(this.camera != null) this.camera.up = new THREE.Vector3(0,0,1);
+		if(this.camera != null) this.camera.up = new THREE.Vector3(0,1,0);
 		this.reconfigureCamera();
 		return this;
 	}
@@ -3403,6 +2400,7 @@ shoe3d.core.Layer2D.prototype = $extend(shoe3d.core.Layer.prototype,{
 			cam.far = 10000;
 			cam.near = 0.1;
 			cam.position.set(0,0,8000);
+			cam.up = new THREE.Vector3(0,1,0);
 			cam.lookAt(new THREE.Vector3(0,0,0));
 			cam.updateMatrix();
 			cam.updateProjectionMatrix();
@@ -4846,6 +3844,16 @@ shoe3d.screen.GameScreen.prototype = {
 		this.layers.push(lr);
 		return this;
 	}
+	,getLayer: function(name) {
+		var _g = 0;
+		var _g1 = this.layers;
+		while(_g < _g1.length) {
+			var i = _g1[_g];
+			++_g;
+			if(i.name == name) return i;
+		}
+		return null;
+	}
 	,newLayer: function(name) {
 		var layer = new shoe3d.core.Layer(name);
 		layer.addPerspectiveCamera();
@@ -5338,7 +4346,7 @@ tests.GeneralTest.__super__ = haxe.unit.TestCase;
 tests.GeneralTest.prototype = $extend(haxe.unit.TestCase.prototype,{
 	__class__: tests.GeneralTest
 });
-tests.Main = function() { };
+tests.Main = $hx_exports.tests.Main = function() { };
 tests.Main.__name__ = ["tests","Main"];
 tests.Main.main = function() {
 	tests.Main.createConsole();
@@ -5355,7 +4363,13 @@ tests.Main.main = function() {
 		tests.Main.pack.createAtlas("main","sprites","sprites.txt");
 		tests.Main.pack.createGeomDef("mesh","model1","logo");
 		tests.Main.pack.createGeomDef("cube","cube","main_pattern").setTransparent();
-		tests.Main.pack.createGeomDef("boy","boy","boy_tex").setTransparent();
+		var mat;
+		mat = js.Boot.__cast(tests.Main.pack.createGeomDef("boy","boy","boy_tex").setTransparent().material , THREE.MeshPhongMaterial);
+		shoe3d.System.input.pointer.up.connect(function(e) {
+			if(mat.shininess == 0) mat.shininess = 100; else mat.shininess = 0;
+			mat.needsUpdate = true;
+			haxe.Log.trace(mat.normalMap != null,{ fileName : "Main.hx", lineNumber : 74, className : "tests.Main", methodName : "main"});
+		});
 		shoe3d.System.renderer.showStats();
 		shoe3d.System.screen.addScreen("game",tests.TestScreen);
 		shoe3d.System.screen.addScreen("game2",tests.TestScreen2);
@@ -5377,10 +4391,11 @@ tests.TestScreen = function() {
 	shoe3d.screen.GameScreen.call(this);
 	var layer = new shoe3d.core.Layer("layer");
 	this.addLayer(layer);
+	layer.scene.castShadow = true;
+	layer.scene.receiveShadow = true;
 	var gd = tests.Main.pack.getGeomDef("boy");
 	gd.material = new THREE.MeshPhongMaterial({ map : gd.texDef.texture});
-	haxe.Log.trace((js.Boot.__cast(gd.material , THREE.MeshPhongMaterial)).shininess = 20,{ fileName : "TestScreen.hx", lineNumber : 110, className : "tests.TestScreen", methodName : "new"});
-	haxe.Log.trace((js.Boot.__cast(gd.material , THREE.MeshPhongMaterial)).reflectivity = 1000,{ fileName : "TestScreen.hx", lineNumber : 111, className : "tests.TestScreen", methodName : "new"});
+	haxe.Log.trace((js.Boot.__cast(gd.material , THREE.MeshPhongMaterial)).reflectivity = 1000,{ fileName : "TestScreen.hx", lineNumber : 113, className : "tests.TestScreen", methodName : "new"});
 	var _g = 0;
 	while(_g < 10) {
 		var i = _g++;
@@ -5393,10 +4408,13 @@ tests.TestScreen = function() {
 		go.transform.rotateZ(Math.random() * 3.14);
 		layer.addChild(go);
 	}
-	var dl = new THREE.DirectionalLight(9366269,0.7);
+	var dl = new THREE.SpotLight(16777215,0.5,10000,40);
+	dl.target.position.set(0,0,0);
+	dl.position.set(30,30,30);
 	dl.rotateX(0.9);
 	dl.rotateY(0.5);
 	dl.rotateZ(0.2);
+	dl.castShadow = true;
 	layer.scene.add(dl);
 	layer.scene.add(new THREE.AmbientLight(16777215));
 	layer.addChild(new shoe3d.core.game.GameObject().add(new shoe3d.component.CameraHolder()));
@@ -5421,16 +4439,16 @@ tests.TestScreen = function() {
 	});
 	var addL = function(e1,name) {
 		e1.get_pointerUp().connect(function(e2) {
-			haxe.Log.trace("UP " + name,{ fileName : "TestScreen.hx", lineNumber : 196, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("UP " + name,{ fileName : "TestScreen.hx", lineNumber : 204, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerIn().connect(function(e3) {
-			haxe.Log.trace("IN " + name,{ fileName : "TestScreen.hx", lineNumber : 197, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("IN " + name,{ fileName : "TestScreen.hx", lineNumber : 205, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerOut().connect(function(e4) {
-			haxe.Log.trace("OUT " + name,{ fileName : "TestScreen.hx", lineNumber : 198, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("OUT " + name,{ fileName : "TestScreen.hx", lineNumber : 206, className : "tests.TestScreen", methodName : "new"});
 		});
 		e1.get_pointerDown().connect(function(e5) {
-			haxe.Log.trace("DOWN " + name,{ fileName : "TestScreen.hx", lineNumber : 199, className : "tests.TestScreen", methodName : "new"});
+			haxe.Log.trace("DOWN " + name,{ fileName : "TestScreen.hx", lineNumber : 207, className : "tests.TestScreen", methodName : "new"});
 		});
 	};
 	var _g11 = 0;
@@ -5439,22 +4457,22 @@ tests.TestScreen = function() {
 		var i2 = [_g11++];
 		a[i2[0]].get_pointerUp().connect((function(i2) {
 			return function(e6) {
-				haxe.Log.trace("UP" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 205, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("UP" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 213, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerIn().connect((function(i2) {
 			return function(e7) {
-				haxe.Log.trace("IN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 210, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("IN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 218, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerOut().connect((function(i2) {
 			return function(e8) {
-				haxe.Log.trace("OUT" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 211, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("OUT" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 219, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 		a[i2[0]].get_pointerDown().connect((function(i2) {
 			return function(e9) {
-				haxe.Log.trace("DOWN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 212, className : "tests.TestScreen", methodName : "new"});
+				haxe.Log.trace("DOWN" + i2[0],{ fileName : "TestScreen.hx", lineNumber : 220, className : "tests.TestScreen", methodName : "new"});
 			};
 		})(i2));
 	}
@@ -5641,13 +4659,6 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-haxe.ds.ObjectMap.count = 0;
-motion.actuators.SimpleActuator.actuators = new Array();
-motion.actuators.SimpleActuator.actuatorsLength = 0;
-motion.actuators.SimpleActuator.addedEvent = false;
-motion.Actuate.defaultActuator = motion.actuators.SimpleActuator;
-motion.Actuate.defaultEase = motion.easing.Expo.get_easeOut();
-motion.Actuate.targetLibraries = new haxe.ds.ObjectMap();
 shoe3d.core.InputManager._lastTouchTime = 0;
 shoe3d.core.RenderManager.clearColor = 4009518;
 shoe3d.screen.ScreenManager._currentScreenName = "";
@@ -5791,6 +4802,6 @@ shoe3d.util.signal.Signal.DUMMY = new shoe3d.util.signal.Sentinel(null,null);
 three._AnimationMixer.AnimationEventType_Impl_.Finished = "finished";
 three._AnimationMixer.AnimationEventType_Impl_.Loop = "loop";
 tests.Main.main();
-})();
+})(typeof window != "undefined" ? window : exports);
 
 //# sourceMappingURL=Shoe3dPROJECT.js.map

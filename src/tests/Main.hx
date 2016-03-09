@@ -26,6 +26,7 @@ import three.WebGLRenderer;
  * ...
  * @author as
  */
+@:expose
 class Main 
 {
 	static public var pack:AssetPack;
@@ -62,7 +63,17 @@ class Main
 			Main.pack.createAtlas( 'main', 'sprites', 'sprites.txt' );
 			Main.pack.createGeomDef( 'mesh', 'model1', 'logo');
 			Main.pack.createGeomDef( 'cube', 'cube', 'main_pattern').setTransparent();
-			Main.pack.createGeomDef( 'boy', 'boy', 'boy_tex').setTransparent();
+			var mat = cast( Main.pack.createGeomDef( 'boy', 'boy', 'boy_tex').setTransparent().material, MeshPhongMaterial);
+			
+			System.input.pointer.up.connect( function(e) {
+				//mat.normalMap = Main.pack.getTexDef('boy_norm').texture;			
+				//mat.normalScale.x == 1 ? mat.normalScale.set(10, 10) : mat.normalScale.set(1, 1);
+				mat.shininess = mat.shininess == 0 ? 100: 0;
+				mat.needsUpdate = true;
+				
+				trace(mat.normalMap != null );
+			});
+			
 			System.renderer.showStats();		
 			System.screen.addScreen( "game", TestScreen );
 			System.screen.addScreen( "game2", TestScreen2 );

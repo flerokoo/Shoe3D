@@ -40,6 +40,7 @@ class Layer2D extends Layer
 			cam.near = 0.1;
 			
 			cam.position.set( 0, 0, 8000 );
+			cam.up = new Vector3( 0, 1, 0 );
 			cam.lookAt( new Vector3(0, 0, 0) );
 			
 			cam.updateMatrix();

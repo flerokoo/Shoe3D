@@ -125,6 +125,7 @@ class System
 		ldr.add( 'boy', 'assets/boy.geom', 0 );
 		ldr.add( 'sprites', 'assets/sprites.png', 0 );
 		ldr.add( 'boy_tex', 'assets/boy_tex.png', 0 );
+		ldr.add( 'boy_norm', 'assets/boy_norm.png', 0 );
 		ldr.add( 'sprites.txt', 'assets/sprites.txt', 0 );
 		ldr.add( 'anim', 'assets/test_anim.geom', 0 );
 		ldr.add( 'anim2', 'assets/test_anim2.geom', 0 );

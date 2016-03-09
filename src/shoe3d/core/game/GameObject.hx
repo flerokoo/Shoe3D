@@ -1,5 +1,6 @@
 package shoe3d.core.game;
 import shoe3d.core.game.Component;
+import three.Euler;
 import three.Object3D;
 
 /**
@@ -16,6 +17,10 @@ class GameObject implements ComponentContainer
 	public var name:String;
 	public var layer:Layer;
 	public var parent:GameObject;
+	
+	public static function with ( comp:Component ) {
+		return new GameObject().add( comp );
+	}
 	
 	public function new( ?name:String ) 
 	{
@@ -104,7 +109,66 @@ class GameObject implements ComponentContainer
 		for ( i in children )
 			i.setLayerReferenceRecursive( l );
 	}
+	
+	public function setPos( x:Float, y:Float, z:Float ) 
+	{
+		transform.position.set(x, y, z);
+		return this;
+	}
+	
+	public function setX( x:Float )
+	{
+		transform.position.x = x;
+		return this;
+	}
+	
+	public function setY( y:Float )
+	{
+		transform.position.y = y;
+		return this;
+	}
+	
+	public function setZ( x:Float )
+	{
+		transform.position.z = x;
+		return this;
+	}
+	
+	public function setScale( x:Float = 1 )
+	{
+		transform.scale.set(x, x, x);
+		return this;
+	}
+	
+	public function setScaleXYZ( x:Float = 1, y:Float = 1, z:Float = 1 )
+	{
+		transform.scale.set(x, y, z);
+		return this;
+	}	
 
+	public function setRotation( x:Float = 0, y:Float = 0, z:Float = 0 )
+	{
+		transform.setRotationFromEuler( new Euler( x, y, z ) );
+		return this;
+	}
+	
+	public function rotateX( a:Float )
+	{
+		transform.rotateX( a );
+		return this;
+	}
+	
+	public function rotateY( a:Float )
+	{
+		transform.rotateY( a );
+		return this;
+	}
+	
+	public function rotateZ( a:Float )
+	{
+		transform.rotateZ( a );
+		return this;
+	}
 	
 	public var numComponents(get, null):Int;	function get_numComponents() return components.length;
 	

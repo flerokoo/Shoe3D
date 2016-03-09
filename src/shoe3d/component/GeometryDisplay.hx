@@ -4,6 +4,7 @@ import shoe3d.core.game.Component;
 import three.Mesh;
 import three.MeshPhongMaterial;
 import three.Object3D;
+import three.Shading;
 
 /**
  * ...
@@ -21,6 +22,8 @@ class GeometryDisplay extends Component
 			geom.geom, 
 			geom.material != null ? geom.material : new MeshPhongMaterial( { map:geom.texDef.texture, transparent:true } ) 
 			);
+			
+
 	}
 	
 	override public function onAdded() 

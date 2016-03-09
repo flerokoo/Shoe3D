@@ -1,7 +1,5 @@
 package shoe3d.component;
 import js.html.Element;
-import motion.Actuate;
-import motion.easing.Quad;
 import shoe3d.core.game.Component;
 import shoe3d.core.input.PointerEvent;
 import shoe3d.util.SMath;

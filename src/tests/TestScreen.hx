@@ -3,7 +3,6 @@ import js.Browser;
 import js.html.ArrayBuffer;
 import js.html.Float32Array;
 import js.html.ImageElement;
-import motion.Actuate;
 import shoe3d.asset.Res;
 import shoe3d.component.AutoPosition;
 import shoe3d.component.CameraHolder;
@@ -43,8 +42,10 @@ import three.MeshPhongMaterialParameters;
 import three.OrthographicCamera;
 import three.PerspectiveCamera;
 import three.RawShaderMaterial;
+import three.Shading;
 import three.Side;
 import three.SphereGeometry;
+import three.SpotLight;
 import three.Sprite;
 import three.SpriteMaterial;
 import three.Texture;
@@ -98,8 +99,9 @@ class TestScreen extends GameScreen
 		*/
 		var layer = new Layer( "layer" );
 		addLayer( layer );
-		
-		
+		layer.scene.castShadow = true;
+		layer.scene.receiveShadow = true;
+		//layer.scene.overrideMaterial = new MeshPhongMaterial({color:0xCAB435});
 		//System.renderer.renderer.sortObjects = false;
 		var gd = Main.pack.getGeomDef("boy");
 		//gd.material.depthTest = false;
@@ -107,7 +109,7 @@ class TestScreen extends GameScreen
 		//gd.material.transparent = false;
 		//layer.overrideMaterial = new MeshPhongMaterial( { transparent: false, depthWrite: true, depthTest: false, color: 0x6C0000 } );
 		gd.material = new MeshPhongMaterial( { map: gd.texDef.texture } );
-		trace( cast(gd.material, MeshPhongMaterial).shininess = 20 );
+		//trace( cast(gd.material, MeshPhongMaterial).);
 		trace( cast(gd.material, MeshPhongMaterial).reflectivity = 1000  );
 		
 		for ( i in 0...10 ) {
@@ -120,6 +122,7 @@ class TestScreen extends GameScreen
 			go.transform.rotateX( Math.random() * 3.14 );
 			go.transform.rotateY( Math.random() * 3.14 );
 			go.transform.rotateZ( Math.random() * 3.14 );
+			
 			/*if ( Math.random() < 0.5 )
 				go.transform.renderOrder = 100000000
 			else
@@ -131,10 +134,15 @@ class TestScreen extends GameScreen
 			layer.addChild( go );
 		}
 		
-		var dl = new DirectionalLight( 0x8EEAFD, 0.7 );
+		//var dl = new DirectionalLight( 0x8EEAFD, 0.7 );
+		var dl = new SpotLight(0xFFFFFF, 0.5, 10000, 40 );
+		dl.target.position.set(0, 0, 0);
+		dl.position.set( 30, 30, 30 );
 		dl.rotateX( 0.9 );
 		dl.rotateY( 0.5 );
 		dl.rotateZ( 0.2);
+		dl.castShadow = true;
+	
 		layer.scene.add( dl );
 		layer.scene.add( new AmbientLight( 0xffffff ) );
 		

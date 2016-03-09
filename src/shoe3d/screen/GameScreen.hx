@@ -48,6 +48,14 @@ class GameScreen
 		return this;
 	}
 	
+	public function getLayer( name:String ):Layer
+	{
+		for ( i in layers ) 
+			if ( i.name == name )
+				return i;
+		return null;
+	}
+	
 	public function newLayer( ?name:String ):Layer
 	{
 		var layer = new Layer( name );
