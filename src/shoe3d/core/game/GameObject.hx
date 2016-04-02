@@ -18,11 +18,11 @@ class GameObject implements ComponentContainer
 	public var layer:Layer;
 	public var parent:GameObject;
 	
-	public static function with ( comp:Component ) {
-		return new GameObject().add( comp );
+	public static function with ( comp:Component, name:String = '') {
+		return new GameObject(name).add( comp );
 	}
 	
-	public function new( ?name:String ) 
+	public function new( name:String = '' ) 
 	{
 		this.name = name;
 		components = [];

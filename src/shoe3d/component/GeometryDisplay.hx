@@ -15,13 +15,20 @@ class GeometryDisplay extends Component
 
 	var mesh:Mesh;
 	
-	public function new( geom:GeomDef ) 
+	public function new( geom:Dynamic ) 
 	{
 		super();
-		mesh = new Mesh( 
-			geom.geom, 
-			geom.material != null ? geom.material : new MeshPhongMaterial( { map:geom.texDef.texture, transparent:true } ) 
-			);
+		
+		if( Std.is( geom, GeomDef ) ) {
+			mesh = new Mesh( 
+				geom.geom, 
+				geom.material != null ? geom.material : new MeshPhongMaterial( { map:geom.texDef.texture, transparent:true } ) 
+				);
+		} else if ( Std.is( geom, Mesh ) ) {
+			mesh = geom;
+		} else {
+			throw 'Error';
+		}
 			
 
 	}

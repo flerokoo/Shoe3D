@@ -11,10 +11,10 @@ class LightDirectional extends Component
 {
 	var light:DirectionalLight;
 	
-	public function new( ?hex:Int ) 
+	public function new( ?hex:Int, ?intensity:Float ) 
 	{
 		super();
-		light = new DirectionalLight( hex );
+		light = new DirectionalLight( hex, intensity );
 	}
 	
 	override public function onAdded() 

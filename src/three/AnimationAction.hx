@@ -16,7 +16,7 @@ extern class AnimationAction
 	public var enabled:Bool;
 	
 	
-	public function new( clip:AnimationClip, ?startTime:Float, ?timeScale:Float, ?weight:Float, ?loop:Float );
+	public function new( clip:AnimationClip, ?startTime:Float, ?timeScale:Float, ?weight:Float, ?loop:AnimationLoopType );
 	public function syncWith( action:AnimationAction ):AnimationAction;
 	public function warpToDuration( duration:Float):AnimationAction;
 	public function update( dt:Float ):Dynamic;
