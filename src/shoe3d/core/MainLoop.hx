@@ -28,6 +28,7 @@ class MainLoop
 	public var frameTime(default, null):Float;
 	public var updateTime(default, null):Float;
 	public var renderTime(default, null):Float;
+	public var fpsHistory:Array<Float> = [];
 	public var FPS(default, null):Float;
 	public var averageFPS(default, null):Float = -1000;
 	
@@ -107,7 +108,14 @@ class MainLoop
 		renderTime = Time.now() - middleTime;
 		frameTime = Time.now() - startTime;
 		_totalUpdateTime += frameTime;		
-		FPS = 1 / frameTime;		
+		fpsHistory.push( 1 / frameTime );
+		if ( fpsHistory.length > 20 ) fpsHistory.shift();
+		if ( fpsHistory.length == 20 ) {	
+			FPS = 0;
+			for ( i in fpsHistory )
+				FPS += i;
+			FPS /= 10;
+		}
 		// TODO Fix average FPS measurement
 		averageFPS = 1 / (_totalUpdateTime/(_frames-1));
 		
@@ -129,17 +137,19 @@ class MainLoop
 	
 	function getFPSString():String
 	{
-		return "FPS: A" + round(averageFPS, 10, 5) + " C" + round( FPS, 10 ,5 );
+		return "FPS: " + round( FPS, 1 );
 	}
 	
 	function round( f:Float, m:Int = 100, l:Int = 4 ) 
 	{
 		var ret = Math.round( f * m ) / m;
 		var str = Std.string(ret);
+		
+				
 		if ( str.indexOf('.') >= 0 )
 			while ( str.length <  l )
 				str += '0';
-		else
+		else if( l > 0 )
 		{
 			str += '.';
 			while (str.length <  l )

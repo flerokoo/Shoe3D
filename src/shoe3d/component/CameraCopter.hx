@@ -27,34 +27,22 @@ class CameraCopter extends Component
 	override public function onUpdate() 
 	{
 		if ( System.input.keyboard.isDown( Numpad4 ) )
-			camera.translateOnAxis(
-				untyped new Vector3().setFromMatrixColumn( 0, camera.matrixWorld ).normalize(),
-				0.1 * speedMultiplier);
+			camera.translateX( -0.1 * speedMultiplier );
 				
 		if ( System.input.keyboard.isDown( Numpad6 ) )
-			camera.translateOnAxis(
-				untyped new Vector3().setFromMatrixColumn( 0, camera.matrixWorld ).normalize(),
-				-0.1 * speedMultiplier );
+			camera.translateX( 0.1 * speedMultiplier );
 				
 		if ( System.input.keyboard.isDown( Numpad8 ) )
-			camera.translateOnAxis(
-				untyped new Vector3().setFromMatrixColumn( 2, camera.matrixWorld ).normalize(),
-				0.1 * speedMultiplier );
+			camera.translateZ( -0.1 * speedMultiplier );
 				
 		if ( System.input.keyboard.isDown( Numpad5 ) )
-			camera.translateOnAxis(
-				untyped new Vector3().setFromMatrixColumn( 2, camera.matrixWorld ).normalize(),
-				-0.1 * speedMultiplier );
+			camera.translateZ( 0.1 * speedMultiplier );
 				
 		if ( System.input.keyboard.isDown( NumpadAdd ) )
-			camera.translateOnAxis(
-				untyped new Vector3().setFromMatrixColumn( 1, camera.matrixWorld ).normalize(),
-				0.1 * speedMultiplier );
+			camera.translateY( -0.1 * speedMultiplier );
 				
 		if ( System.input.keyboard.isDown( NumpadSubtract ) )
-			camera.translateOnAxis(
-				untyped new Vector3().setFromMatrixColumn( 1, camera.matrixWorld ).normalize(),
-				-0.1 * speedMultiplier );
+			camera.translateY( 0.1 * speedMultiplier );
 				
 		if ( System.input.keyboard.isDown( Numpad7 ) )
 			camera.rotateY( Math.PI * 0.01 );

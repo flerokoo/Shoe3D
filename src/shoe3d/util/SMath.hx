@@ -78,4 +78,11 @@ class SMath
 		
 		return P * (y * fabs(y) - y) + y;
 	}
+	
+	public static inline function sign( v:Float ):Int
+	{
+		return v >= 0 ? 1 : -1;
+	}
+	
+	
 }

@@ -11,6 +11,7 @@ import shoe3d.core.RenderManager;
 import shoe3d.core.Time;
 import shoe3d.core.WindowManager;
 import shoe3d.screen.ScreenManager;
+import shoe3d.util.GameConsole;
 import shoe3d.util.promise.Promise;
 import shoe3d.util.StringHelp;
 import shoe3d.util.Value;
@@ -42,6 +43,7 @@ class System
 	public static function init( originalWidth:Int = 640, originalHeight = 800) 
 	{
 		//_baseScene = new Scene();
+		GameConsole;
 		WindowManager.init();
 		RenderManager.init();
 		ScreenManager.init();

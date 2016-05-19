@@ -9,7 +9,13 @@ import three.Object3D;
  */
 @:final
 @:allow(shoe3d)
-class GameObject implements ComponentContainer
+
+//typedef Transform = Object3D;
+
+@:access(shoe3d)
+@:keep
+@:final
+class GameObject implements ComponentContainer implements GameObjectContainer
 {
 	public var components(default,null):Array<Component>;
 	public var children(default,null):Array<GameObject>;
@@ -20,6 +26,18 @@ class GameObject implements ComponentContainer
 	
 	public static function with ( comp:Component, name:String = '') {
 		return new GameObject(name).add( comp );
+	}
+	
+	public static function find( name:String, maxDepth:Int = -1 ) {
+		if ( System.screen._currentScreen != null ) {
+			for ( i in System.screen._currentScreen.layers )
+			{
+				var t = i.find( name, maxDepth );
+				if ( t != null ) return t;
+			}
+		}
+		
+		return null;
 	}
 	
 	public function new( name:String = '' ) 
@@ -70,7 +88,6 @@ class GameObject implements ComponentContainer
 		children.push( child );
 		child.parent = this;
 		child.setLayerReferenceRecursive( layer );
-		
 		transform.add( child.transform );
 	}
 	
