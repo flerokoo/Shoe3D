@@ -3,6 +3,8 @@ import haxe.macro.Context;
 import haxe.macro.Expr;
 import js.Browser;
 import shoe3d.core.game.GameObject;
+import shoe3d.core.input.Key;
+import shoe3d.core.input.KeyboardEvent;
 
 /**
  * ...
@@ -13,7 +15,7 @@ import shoe3d.core.game.GameObject;
 class GameConsole
 {
 	public static var last:Dynamic;
-	
+	static var commands:Map<String,Function>;
 	
 	/*public var a = 1;
 	
@@ -49,6 +51,24 @@ class GameConsole
 		
 	}*/
 	
+	public static function registerCommand( name:String, fn:Dynamic, ?hotkey:Key ):Class<GameConsole> {
+		commands.set( name, fn );
+		if ( hotkey != null ) {
+			System.input.keyboard.up.connect( function( e:KeyboardEvent ) {
+				if ( e.key == hotkey ) fn();
+			});
+		}
+		return GameConsole;
+	}
+	
+	static function exec( name:String, ?args:Array<Dynamic>):Class<GameConsole> {
+		var c = commands.get(name);
+		if ( c != null ) Reflect.callMethod(null, c, args);
+		else Browser.window.console.log("No command with name=" + name );
+		return GameConsole;
+	}
+	
+	
 	static public function help() {
 		Browser.window.console.log(".find(name) Find game object with specified name and sets pointer to it");
 		Browser.window.console.log(".move(name) Sets pointer to current object's field name");
@@ -56,6 +76,8 @@ class GameConsole
 		Browser.window.console.log(".set(name, value) Sets specified property of current object");
 		Browser.window.console.log(".list(?showContent) Shows all methods and fields of current object");
 		Browser.window.console.log(".call(funcName, ?args) Calls specified method of current object");
+		Browser.window.console.log(".traverseScene() Prints current scenes tree view of GameObjects");
+		Browser.window.console.log(".exec(name, ?args) Executes registered command with name");
 		Browser.window.console.log(".print() Prints current object");
 	}
 	
@@ -150,6 +172,11 @@ class GameConsole
 		
 		
 		return GameConsole;
+	}
+	
+	static public function init() 
+	{
+		commands = new Map();
 	}
 	
 }

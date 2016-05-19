@@ -43,7 +43,7 @@ class System
 	public static function init( originalWidth:Int = 640, originalHeight = 800) 
 	{
 		//_baseScene = new Scene();
-		GameConsole;
+		GameConsole.init();
 		WindowManager.init();
 		RenderManager.init();
 		ScreenManager.init();
