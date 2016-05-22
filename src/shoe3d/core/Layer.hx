@@ -78,7 +78,7 @@ class Layer implements GameObjectContainer
 	
 	public function addPerspectiveCamera():PerspectiveCamera
 	{
-		var pc = new PerspectiveCamera( 70, 1, 0.1, 1000 );
+		var pc = new PerspectiveCamera( 70, 1, .5, 100 );
 		setCamera( pc );
 		return pc;
 	}

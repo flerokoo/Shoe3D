@@ -1,5 +1,6 @@
 package shoe3d.asset;
 import shoe3d.util.Assert;
+import shoe3d.util.Log;
 import shoe3d.util.UVTools;
 import soundjs.SoundManager;
 import three.Geometry;
@@ -26,6 +27,7 @@ class AssetPack
 	private var _soundMap:Map<String,String>; // map just to check if sound belongs to this asset pack
 	private var _atlasMap:Map<String,Atlas>;
 	private var _geomDefMap:Map<String,GeomDef>;
+	private var _fontMap:Map<String,Font>;
 	
 	public function new(  ) 
 	{
@@ -49,6 +51,21 @@ class AssetPack
 		var atlas = new Atlas( getTexDef(texName).texture, getFile(jsonName).content );
 		_atlasMap.set( name, atlas );
 		return atlas;
+	}
+	
+	public function createFont( name:String ):Font
+	{
+		if ( _fontMap == null ) _fontMap = new Map();
+		if ( ! _fileMap.exists(name) ) throw 'No file $name';
+		var font = new Font( name, this  );
+		_fontMap.set( name, font );
+		return font;
+	}
+	
+	public function getFont( name:String ):Font
+	{
+		if ( _fontMap == null || ! _fontMap.exists( name ) ) throw 'No font $name in this pack';
+		return _fontMap.get(name);
 	}
 	
 	public function createGeomDef( name:String, geomName:String, texDefName:String )
@@ -160,15 +177,16 @@ class GeomDef
 		return this;
 	}
 	
-	public function setMaterialParam( param:String, val:Dynamic ):Bool
+	public function setMaterialParam( param:String, val:Dynamic ):Dynamic
 	{
 		Assert.that(material != null, "Material is null");
 		if ( Reflect.hasField( material, param ) )
 		{
 			Reflect.setProperty( material, param, val );
 			material.needsUpdate = true;
-			return true;
+		} else {
+			Log.warn('No field $param in this material');
 		}
-		return false;
+		return this;
 	}
 }

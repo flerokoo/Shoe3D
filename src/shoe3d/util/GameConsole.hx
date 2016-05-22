@@ -5,6 +5,7 @@ import js.Browser;
 import shoe3d.core.game.GameObject;
 import shoe3d.core.input.Key;
 import shoe3d.core.input.KeyboardEvent;
+import shoe3d.core.Time;
 
 /**
  * ...
@@ -51,6 +52,20 @@ class GameConsole
 		
 	}*/
 	
+	public static function setCurrent( o:Dynamic ):Class<GameConsole> {
+		last = o;
+		return GameConsole;
+	}
+	
+	public static function setTimeAcc( o:Float ):Class<GameConsole> {
+		if ( o < 0 ) {
+			trace("Time multiplier can't be below zero");
+			return GameConsole;
+		}
+		throw 'Not implemented';
+		return GameConsole;
+	}
+	
 	public static function registerCommand( name:String, fn:Dynamic, ?hotkey:Key ):Class<GameConsole> {
 		commands.set( name, fn );
 		if ( hotkey != null ) {
@@ -78,6 +93,7 @@ class GameConsole
 		Browser.window.console.log(".call(funcName, ?args) Calls specified method of current object");
 		Browser.window.console.log(".traverseScene() Prints current scenes tree view of GameObjects");
 		Browser.window.console.log(".exec(name, ?args) Executes registered command with name");
+		Browser.window.console.log(".setCurrent(obj) Sets pointer to obj");
 		Browser.window.console.log(".print() Prints current object");
 	}
 	
