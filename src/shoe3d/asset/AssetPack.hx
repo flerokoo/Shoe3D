@@ -10,6 +10,7 @@ import three.Material;
 import three.MeshLambertMaterial;
 import three.MeshLambertMaterialParameters;
 import three.MeshPhongMaterial;
+import three.Object3D;
 import three.Texture;
 import shoe3d.util.UVTools.UV;
 import three.Vector2;
@@ -28,6 +29,7 @@ class AssetPack
 	private var _atlasMap:Map<String,Atlas>;
 	private var _geomDefMap:Map<String,GeomDef>;
 	private var _fontMap:Map<String,Font>;
+	private var _sceneMap:Map<String,Object3D>;
 	
 	public function new(  ) 
 	{
@@ -37,6 +39,7 @@ class AssetPack
 		_geomMap = new Map();
 		_atlasMap = new Map();
 		_geomDefMap = new Map();
+		_sceneMap = new Map();
 	}
 	
 	public function getAtlas( name:String )

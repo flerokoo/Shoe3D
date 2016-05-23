@@ -16,6 +16,9 @@ enum AssetFormat
 	//geometry
 	GEOM;
 	
+	//scene
+	SCENE;
+	
 	//raw data
 	RAW;
 }

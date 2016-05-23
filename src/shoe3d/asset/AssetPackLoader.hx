@@ -12,6 +12,7 @@ import three.GeometryLoader;
 import three.JSONLoader;
 import three.Loader;
 import three.LoadingManager;
+import three.Object3D;
 import three.ObjectLoader;
 import three.Texture;
 import three.TextureFilter;
@@ -53,8 +54,10 @@ class AssetPackLoader
 	
 	function getFormat( url:String ):AssetFormat
 	{
+		trace( url, url.indexOf( '.scene.json' ) );
 		//Blender don't want to save just *.geom. It wants *.geom.json. So, shortcut:
 		if ( url.toLowerCase().indexOf( '.geom.json' ) >= 0 ) return GEOM;
+		if ( url.toLowerCase().indexOf( '.scene.json' ) >= 0 ) return SCENE;
 		
 		var extension = url.getUrlExtension();
         if (extension != null) {
@@ -70,6 +73,8 @@ class AssetPackLoader
                 case "aac": return AAC;
 				
 				case 'geom': return GEOM;
+				case 'scene': return SCENE;
+				
             }
         } else {
             throw 'No asset format: $url';
@@ -195,7 +200,7 @@ class AssetPackLoader
 	{
 		if ( _supportedFormats == null )
 			detectImageFormats( function ( imgFormats:Array<AssetFormat> ) {
-				_supportedFormats = imgFormats.concat( detectAudioFormats() ).concat( [ RAW, GEOM ] );
+				_supportedFormats = imgFormats.concat( detectAudioFormats() ).concat( [ RAW, GEOM, SCENE ] );
 				fn( _supportedFormats );
 			} )
 		else
@@ -207,11 +212,12 @@ class AssetPackLoader
 		getSupportedFormatsAsync(
 			function( formats:Array<AssetFormat> ) {
 				for ( format in formats) 
-					for( entry in entries )
+					for ( entry in entries ) {
 						if ( entry.format == format ) {
 							handler( entry );
 							return;
 						}				
+					}
 				handler(null);
 			}		
 		);
@@ -234,11 +240,18 @@ class AssetPackLoader
 					new SoundLoader(_manager).load( e.url, e.name, _pack );
 				case GEOM:
 					new XHRLoader(_manager).load( e.url, function( data ) onLoadGeometry( data, e ) );
+				case SCENE:
+					new ObjectLoader(_manager).load( e.url, function (data) onLoadScene( data, e ) );
 				default:
 					new XHRLoader( _manager ).load( e.url, function (data) onLoadData( data, e ) );
 				
 			}
 		}
+	}
+	
+	function onLoadScene(object:Object3D, e:AssetEntry) 
+	{
+		_pack._sceneMap.set( e.name, object );
 	}
 		
 	function onProgress( nm:String, a:Float, b:Float ) 
