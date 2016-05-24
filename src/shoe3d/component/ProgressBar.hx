@@ -8,7 +8,7 @@ import three.Vector3;
  * ...
  * @author as
  */
-class ProgressBar extends Sprite2D
+class ProgressBar extends ImageSprite
 {
 	public var progressChange(get, null):DoubleSignal<Float,Float>;	
 	

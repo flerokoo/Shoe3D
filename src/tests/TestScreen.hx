@@ -15,7 +15,7 @@ import shoe3d.component.RandomRotator;
 import shoe3d.component.S3Mesh;
 import shoe3d.component.S3Mesh;
 import shoe3d.component.ScaleButton;
-import shoe3d.component.Sprite2D;
+import shoe3d.component.ImageSprite;
 import shoe3d.core.game.GameObject;
 import shoe3d.core.input.MouseEvent;
 import shoe3d.core.input.PointerEvent;
@@ -158,7 +158,7 @@ class TestScreen extends GameScreen
 		
 		var ui = layer2d = newLayer2D("UILAYER", true);		
 		var g2d = new GameObject("SPRITETEST");		
-		var spr = new Sprite2D( 'logo' );
+		var spr = new ImageSprite( 'logo' );
 		//spr.setScale( 0.5 );
 		//spr.setAnchor( 0, 0 );
 		//spr.setTexture( Res.getTexDef( 'button_gameplay_level_menu' ) );
@@ -179,7 +179,7 @@ class TestScreen extends GameScreen
 		
 		var cc = cast(ui.camera, OrthographicCamera );
 		
-		var a:Array<Sprite2D> = [];
+		var a:Array<ImageSprite> = [];
 		var cont = new GameObject().add( new AutoPosition().setAsOnScreenContainer() );
 		layer2d.addChild( cont );
 		for ( i in 0...3 )
@@ -311,7 +311,7 @@ class TestScreen extends GameScreen
 		
 		var tn = name == '' ? Tools.getRandomFromArray( ['button_play' ] ) : name;
 		var go = new GameObject()
-			.add( new Sprite2D( tn ) );
+			.add( new ImageSprite( tn ) );
 			//.add( new ScaleButton( function(e:PointerEvent) e.hit.owner.transform.rotateZ( 0.2 ) ) );
 		go.transform.position.set( last * 250 + 300  , 250 * last + 300 , go.transform.position.z );
 		//go.transform.position.multiplyScalar( 0 );
@@ -332,7 +332,7 @@ class TestScreen extends GameScreen
 		
 		if ( owner != null )
 			owner.addChild( go );
-		return go.get(Sprite2D);
+		return go.get(ImageSprite);
 	}
 	
 }

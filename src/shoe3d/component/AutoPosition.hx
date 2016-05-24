@@ -65,6 +65,14 @@ class AutoPosition extends Component
 		return this;
 	}
 	
+	public function setOffsetScaleRatio( x:Float, y:Float ) 
+	{
+		scaleOffsetXRatio = x;
+		scaleOffsetYRatio = y;
+		reoverlay();
+		return this;
+	}
+	
 	public function setOffsets(x:Float, y:Float )
 	{
 		xOffset = x;
@@ -72,6 +80,7 @@ class AutoPosition extends Component
 		reoverlay();
 		return this;
 	}
+	
 	
 	public function left()
 	{

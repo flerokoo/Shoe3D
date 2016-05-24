@@ -1,17 +1,19 @@
 package shoe3d.component;
 import shoe3d.core.game.Component;
+import shoe3d.util.SMath;
 import three.Color;
 import three.Geometry;
 import three.Mesh;
 import three.MeshBasicMaterial;
 import three.PlaneGeometry;
 import three.Side;
+import three.Vector3;
 
 /**
  * ...
  * @author as
  */
-class FillSprite extends Component
+class FillSprite extends Element2D
 {
 	var mesh:Mesh;
 	var geom:Geometry;
@@ -23,7 +25,6 @@ class FillSprite extends Component
 	public function new( width:Float, height:Float, ?color:UInt ) 
 	{
 		super();
-		
 		geom = new PlaneGeometry(width, height, 1, 1);
 		material = new MeshBasicMaterial( { transparent: false, side: Side.DoubleSide } );	
 		mesh = new Mesh( geom, material );	
@@ -31,6 +32,16 @@ class FillSprite extends Component
 		this.width = width;
 		this.height = height;
 		this.color = color == null ? 0xffff00 : color;
+	}
+	
+	public override function contains( x:Float, y:Float ):Bool
+	{
+		y = System.window.height - y;
+		var v = mesh.worldToLocal( new Vector3( x, y, 0 ) );
+		x = v.x;
+		y = v.y;		
+		return ( 	width * 0.5 >= SMath.fabs(x) &&
+					height * 0.5 >= SMath.fabs(y) );
 	}
 	
 	function redefineSprite()

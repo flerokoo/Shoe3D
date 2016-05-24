@@ -143,7 +143,7 @@ class PointerManager
 		
 		submitMove( viewX, viewY, source );
 		_isDown = false;
-
+		
 		
 		var result = getHitAndChain( viewX, viewY );		
 		

@@ -53,6 +53,7 @@ class Layer2D extends Layer
 	{
 		if ( camera == null ) return;
 		renderer.sortObjects = false;
+		renderer.clearDepth();
 		renderer.render( scene, camera );
 	}
 	
