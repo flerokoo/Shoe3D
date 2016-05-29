@@ -1,34 +1,50 @@
 package shoe3d.core.game;
-import shoe3d.core.game.Component;
+#if macro
+import haxe.macro.Context;
+import haxe.macro.Expr;
+import haxe.macro.Type.ClassType;
+using haxe.macro.ExprTools;
+#else
 import three.Euler;
 import three.Object3D;
+#end
 
+import shoe3d.core.game.Component;
 /**
  * ...
  * @author as
  */
-@:final
-@:allow(shoe3d)
 
 //typedef Transform = Object3D;
 
-@:access(shoe3d)
+@:allow(shoe3d)
+#if debug
 @:keep
+#end
 @:final
 class GameObject implements ComponentContainer implements GameObjectContainer
 {
+	
 	public var components(default,null):Array<Component>;
 	public var children(default,null):Array<GameObject>;
-	public var transform(default, null):Object3D;
 	public var name:String;
+	#if !macro
+	public var transform(default, null):Object3D;	
 	public var layer:Layer;
+	#else
+	public var transform:Dynamic;
+	public var layer:Dynamic;
+	#end
 	public var parent:GameObject;
+	private var _compMap:Map<String,Component>;
 	
 	public static function with ( comp:Component, name:String = '') {
 		return new GameObject(name).add( comp );
 	}
 	
+	
 	public static function find( name:String, maxDepth:Int = -1 ) {
+		#if !macro
 		if ( System.screen._currentScreen != null ) {
 			for ( i in System.screen._currentScreen.layers )
 			{
@@ -38,51 +54,155 @@ class GameObject implements ComponentContainer implements GameObjectContainer
 		}
 		
 		return null;
+		#end
 	}
+	
 	
 	public function new( name:String = '' ) 
 	{
 		this.name = name;
 		components = [];
 		children = [];
+		_compMap = new Map();
+		#if !macro
 		transform = new Object3D();
+		#end
 		
 	}	
-	
-	public function add( component:Component ):GameObject
-	{
-		components.push( component );
-		component.owner = this;
-		component.onAdded();		
-		return this;
-	}
-	
-	public function has<T>( cl:Class<T> ):Bool
-	{
-		for ( i in components )
-			if ( Std.is( i, cl ) ) return true;
-		return false;
-	}
-	
-	public function remove( component:Component ):GameObject
-	{
+
+	public function add (component :Component) :GameObject
+    {
+        if (component.owner != null) {
+            component.owner.remove(component);
+        }
+
+        var name = component.name;
+        var prev = getComponent(name);
+        if (prev != null) {
+            remove(prev);
+        }
+		
+        untyped _compMap[name] = component;
+
+        components.push( component );
+
+        component.owner = this;
+        component.onAdded();
+
+        return this;
+    }
+
+
+#if (display || dox)
+    public function has<A:Component> (componentClass :Class<A>) :Bool return false;
+#else
+    macro public function has<A> (self :Expr, componentClass :ExprOf<Class<A>>) :ExprOf<Bool>
+    {
+        return macro $self.get($componentClass) != null;
+    }
+#end
+
+    public function remove (component :Component) :Bool
+    {
+		
 		var i = components.indexOf( component );
 		if ( i >= 0 ) {
 			components.splice( i , 1 );
+			if ( component._started ) {
+				component.onStop();
+				component._started = false;
+			}
 			component.onRemoved();
 			component.owner = null;
+			
+#if flash
+                //untyped __delete__(_compMap, p.name);
+#elseif js
+                //untyped __js__("delete")(_compMap[p.name]);
+				_compMap.remove(component.name);
+#end
+			
+			return true;
 		}		
-		return this;	
+		return false; 
+    }
+
+#if (display || dox)
+	public function get<T:Component>(componentClass:Class<T>):T return null;
+#else
+   /* macro public function get<A:Component> (self :Expr, componentClass :ExprOf<Class<A>>) :ExprOf<A>
+    {
+        var type = requireComponentType(componentClass);
+        var name = macro $componentClass.NAME;
+        return needSafeCast(type)
+            ? macro Std.instance($self.getComponent($name), $componentClass)
+            : macro $self._internal_unsafeCast($self.getComponent($name), $componentClass);
+    }*/
+	public function get<T:Component>(componentClass:Class<T>):T {
+		
+		for ( tt in _compMap ) 
+			if ( Std.is( tt, componentClass ) )
+				return cast tt;
+		return null;
 	}
-	
-	public function get<T>( cl:Class<T> ):T
+#end
+
+    inline public function getComponent (name :String) :Component
+    {
+        return untyped _compMap[name];
+    }
+
+#if !display
+    @:extern // Inline even in debug builds
+    inline public function _internal_unsafeCast<A:Component> (component :Component, cl :Class<A>) :A
+    {
+        return cast component;
+    }
+ 
+#end
+
+#if macro
+	private static function requireComponentClass( componentClass:Expr ):ClassType
 	{
-		var ret:T = null;
-		for ( i in components )
-			if ( Std.is( i, cl) ) ret = cast i;
-		return ret;
+		var path = getClassName(componentClass);
+        if (path != null) {
+            var type = Context.getType(path.join("."));
+            switch (type) {
+            case TInst(ref,_):
+                var cl = ref.get();
+                if (Context.unify(type, Context.getType("flambe.Component")) && cl.superClass != null) {
+                    return cl;
+                }
+            default:
+            }
+        }
+
+        Context.error("Expected a class that extends Component, got " + componentClass.toString(),
+            componentClass.pos);
+        return null;
 	}
 	
+    private static function getClassName<A> (componentClass :Expr) :Array<String>
+    {
+        switch (componentClass.expr) {
+        case EConst(CIdent(name)):
+            return [name];
+        case EField(expr, name):
+            var path = getClassName(expr);
+            if (path != null) {
+                path.push(name);
+            }
+            return path;
+        default:
+            return null;
+        }
+    }
+	
+    private static function needSafeCast (componentClass :ClassType) :Bool
+    {
+        return !componentClass.superClass.t.get().meta.has(":componentBase");
+    }
+#end
 	public function addChild( child:GameObject ) 
 	{
 		children.push( child );
@@ -120,7 +240,11 @@ class GameObject implements ComponentContainer implements GameObjectContainer
 		//for ( i in _children ) i.onRemoved();
 	}
 	
+	#if !macro
 	private function setLayerReferenceRecursive( l:Layer ) 
+	#else	
+	private function setLayerReferenceRecursive( l:Dynamic ) 
+	#end
 	{
 		layer = l;
 		for ( i in children )

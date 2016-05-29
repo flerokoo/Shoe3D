@@ -36,12 +36,12 @@ class FillSprite extends Element2D
 	
 	public override function contains( x:Float, y:Float ):Bool
 	{
-		y = System.window.height - y;
+		//y = System.window.height - y;
 		var v = mesh.worldToLocal( new Vector3( x, y, 0 ) );
 		x = v.x;
 		y = v.y;		
-		return ( 	width * 0.5 >= SMath.fabs(x) &&
-					height * 0.5 >= SMath.fabs(y) );
+		return ( 	x > 0 && x < width 
+				 && y > 0 && y < height );
 	}
 	
 	function redefineSprite()
@@ -53,11 +53,16 @@ class FillSprite extends Element2D
 		//geom.uvsNeedUpdate = true;	
 		geom.verticesNeedUpdate = true;
 
-		geom.vertices[0].set( -w / 2, h / 2, 0 );
+		/*geom.vertices[0].set( -w / 2, h / 2, 0 );
 		geom.vertices[1].set( w / 2, h / 2, 0 );
 		geom.vertices[2].set( -w / 2, -h / 2, 0 );
-		geom.vertices[3].set( w / 2, -h / 2, 0 );
+		geom.vertices[3].set( w / 2, -h / 2, 0 );*/
 		
+		// new flipped and top left angle anchored
+		geom.vertices[0].set( 0, 0, 0 );
+		geom.vertices[1].set( w, 0, 0 );
+		geom.vertices[2].set( 0, h, 0 );
+		geom.vertices[3].set( w, h, 0 );
 
 		/*uvs[0][0].set( 0, 1 );
 		uvs[0][1].set(0, 0 );
@@ -67,6 +72,19 @@ class FillSprite extends Element2D
 		uvs[1][1].set( 1, 0 );
 		uvs[1][2].set( 1, 1 );*/
 		
+	}
+	
+	override function updateAnchor() 
+	{
+		mesh.position.x = -anchorX;
+		mesh.position.y = -anchorY;
+	}
+	
+	override public function centerAnchor() 
+	{
+		mesh.position.x = -width/2;
+		mesh.position.y = -height/2;
+		return this;
 	}
 	
 	override public function onAdded()

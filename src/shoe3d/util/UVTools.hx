@@ -22,11 +22,18 @@ class UVTools
 	public static function UVfromRectangle( rect:Rectangle, totalWidth:Float, totalHeight:Float ):UV
 	{
 		Assert.that( rect != null );
-		return {
+		/*return {
 			umin: rect.x / totalWidth,
 			vmin: (totalHeight - rect.y - rect.height) / totalHeight,
 			umax: (rect.x + rect.width) / totalWidth,
 			vmax: (totalHeight - rect.y) / totalHeight			
+		}*/
+		
+		return {
+			umin: rect.x / totalWidth,
+			vmin: rect.y / totalHeight,
+			umax: (rect.x + rect.width) / totalWidth,
+			vmax: (rect.y + rect.height) / totalHeight			
 		}
 	}
 	

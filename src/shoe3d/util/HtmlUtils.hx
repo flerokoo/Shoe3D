@@ -1,5 +1,7 @@
 package shoe3d.util;
+#if !macro
 import js.Browser;
+#end
 
 /**
  * ...

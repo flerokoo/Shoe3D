@@ -9,5 +9,11 @@ extern class ImmediateRenderObject extends Object3D
 	
 	function new() : Void;
 
-	function render(renderCallback:Dynamic) : Void;
+	dynamic function render(renderCallback:Dynamic) : Void;
+	
+	public var positionArray:Float32Array;
+	public var uvArray:Float32Array;
+	public var hasPositions:Bool;
+	public var hasUvs:Float32Array;
+	public var count:Int;
 }

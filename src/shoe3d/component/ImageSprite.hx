@@ -8,6 +8,7 @@ import shoe3d.core.game.Component;
 import shoe3d.util.Assert;
 import shoe3d.util.math.Rectangle;
 import shoe3d.util.SMath;
+import shoe3d.util.UVTools;
 import tests.Main;
 import three.AmbientLight;
 import three.BufferAttribute;
@@ -40,8 +41,7 @@ class ImageSprite extends Element2D
 	var geom:Geometry;
 	var texDef:TexDef;
 	var material:MeshBasicMaterial;
-	public var anchorX(default, set):Float = 0;
-	public var anchorY(default, set):Float = 0;
+
 
 	public function new( textureName:String ) 
 	{
@@ -67,31 +67,33 @@ class ImageSprite extends Element2D
 		geom.uvsNeedUpdate = true;	
 		geom.verticesNeedUpdate = true;
 		
-		/*geom.vertices = [
-			new Vector3( -w/2, h/2 ),
-			new Vector3( w/2, h/2 ),
-			new Vector3( -w/2, -h/2 ),
-			new Vector3( w/2, -h/2 )
-		];
-		
-		geom.faceVertexUvs = [[
-			[
-				new Vector2( uv.umin, uv.vmax ),
-				new Vector2( uv.umin, uv.vmin ),
-				new Vector2( uv.umax, uv.vmax )
-			],
-			[
-				new Vector2( uv.umin, uv.vmin ),
-				new Vector2( uv.umax, uv.vmin ),
-				new Vector2( uv.umax, uv.vmax )
-			]
-		]];		*/
-		
-		geom.vertices[0].set( -w / 2, h / 2, 0 );
+		/*geom.vertices[0].set( -w / 2, h / 2, 0 );
 		geom.vertices[1].set( w / 2, h / 2, 0 );
 		geom.vertices[2].set( -w / 2, -h / 2, 0 );
 		geom.vertices[3].set( w / 2, -h / 2, 0 );
 		
+		var uvs = geom.faceVertexUvs[0];
+		uvs[0][0].set( uv.umin, uv.vmax );
+		uvs[0][1].set( uv.umin, uv.vmin );
+		uvs[0][2].set( uv.umax, uv.vmax );
+		
+		uvs[1][0].set( uv.umin, uv.vmin );
+		uvs[1][1].set( uv.umax, uv.vmin );
+		uvs[1][2].set( uv.umax, uv.vmax );*/
+		
+		// flipped
+		
+		geom.vertices[0].set( 0, 0, 0 );
+		geom.vertices[1].set( w, 0, 0 );
+		geom.vertices[2].set( 0, h, 0 );
+		geom.vertices[3].set( w, h, 0 );
+		
+		// scheme
+		// | 2   3 |
+		// |   \   |
+		// | 0   1 |
+		// faces 0-2-1  2-3-1
+
 		var uvs = geom.faceVertexUvs[0];
 		uvs[0][0].set( uv.umin, uv.vmax );
 		uvs[0][1].set( uv.umin, uv.vmin );
@@ -105,12 +107,6 @@ class ImageSprite extends Element2D
 		material.map = texDef.texture;
 	}
 	
-	public function setAnchor( x:Float = 0, y:Float = 0 )
-	{
-		anchorX = x;
-		anchorY = y;
-	}
-	
 	public function setTexture( tex:TexDef ) 
 	{
 		Assert.that(tex != null, "Texture is null" );
@@ -118,10 +114,17 @@ class ImageSprite extends Element2D
 		redefineSprite();
 	}
 	
-	function updateAnchor()
+	override function updateAnchor() 
 	{
 		mesh.position.x = -anchorX;
 		mesh.position.y = -anchorY;
+	}
+	
+	override public function centerAnchor() 
+	{
+		mesh.position.x = -texDef.width/2;
+		mesh.position.y = -texDef.height/2;
+		return this;
 	}
 	
 	override public function onAdded()
@@ -134,42 +137,18 @@ class ImageSprite extends Element2D
 		owner.transform.remove( mesh );
 	}
 	
-	function set_anchorY(value:Float):Float 
-	{
-		anchorY = value;
-		updateAnchor();
-		return anchorY;
-	}
-	
-	function set_anchorX(value:Float):Float 
-	{
-		anchorX = value;
-		updateAnchor();
-		return anchorX;
-	}
-	
-	public function setScale( s:Float ) 
-	{
-		//mesh.scale.set( s, s, 1);
-		owner.transform.scale.set( s, s, 1 );
-	}
-		
 	
 	public override function contains( x:Float, y:Float ):Bool
 	{
 		if ( texDef == null ) return false;
-		y = System.window.height - y;
+		//y = System.window.height - y;
 		var v = mesh.worldToLocal( new Vector3( x, y, 0 ) );
 		x = v.x;
 		y = v.y;		
-		return ( 	texDef.width * 0.5 >= SMath.fabs(x) &&
-					texDef.height * 0.5 >= SMath.fabs(y) );
-	}
-	
-	public function setScaleXY( sx:Float, sy:Float ) 
-	{
-		//mesh.scale.set( sx, sy, 1);
-		owner.transform.scale.set( sx, sy, 1);
+		/*return ( 	texDef.width * 0.5 >= SMath.fabs(x) &&
+					texDef.height * 0.5 >= SMath.fabs(y) );*/
+		return ( 	x > 0 && x < texDef.width 
+				 && y > 0 && y < texDef.height );
 	}
 	
 	override function setLevel( level:Float ):Element2D

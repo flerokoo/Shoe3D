@@ -24,6 +24,9 @@ class Element2D extends Component
 	public var pointerMove(get, null):SingleSignal<PointerEvent>;
 	public var pointerIn(get, null):SingleSignal<PointerEvent>;
 	public var pointerOut(get, null):SingleSignal<PointerEvent>;
+	public var anchorX(default, set):Float = 0;
+	public var anchorY(default, set):Float = 0;
+	
 	
 	public var _pointerUp:SingleSignal<PointerEvent>;
 	public var _pointerDown:SingleSignal<PointerEvent>;
@@ -48,6 +51,36 @@ class Element2D extends Component
 	public function contains( x:Float, y:Float ):Bool
 	{
 		return false;
+	}
+	
+	public function setAnchor( x:Float = 0, y:Float = 0 )
+	{
+		anchorX = x;
+		anchorY = y;
+		return this;
+	}
+	
+	function set_anchorY(value:Float):Float 
+	{
+		anchorY = value;
+		updateAnchor();
+		return anchorY;
+	}
+	
+	function set_anchorX(value:Float):Float 
+	{
+		anchorX = value;
+		updateAnchor();
+		return anchorX;
+	}
+	
+	function updateAnchor()
+	{
+	}
+	
+	public function centerAnchor() 
+	{
+		return this;
 	}
 	
 	public function setAlpha( a:Float ):Element2D

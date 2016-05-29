@@ -77,6 +77,7 @@ class MainLoop
 		System.time.update();
 		middleTime = startTime = Time.now();		
 		_frames++;
+		// TODO make Element2D.lastLevel update only from signal preUpdate:SingleSignal, not in this code
 		Element2D.lastLevel = 0;
 		if ( ScreenManager._currentScreen != null ) 
 		{

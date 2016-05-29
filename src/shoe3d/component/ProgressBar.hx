@@ -59,11 +59,12 @@ class ProgressBar extends ImageSprite
 			]
 		]];		*/
 		
-		geom.vertices[0].set( -w / 2, h / 2, 0 );
-		geom.vertices[1].set( SMath.lerp( progress, -w / 2, w / 2), h / 2, 0 );
-		geom.vertices[2].set( -w / 2, -h / 2, 0 );
-		geom.vertices[3].set( SMath.lerp( progress, -w / 2, w / 2), -h / 2, 0 );
-
+		geom.vertices[0].set( 0, 0, 0 );
+		geom.vertices[1].set( progress * w, 0, 0 );
+		geom.vertices[2].set( 0, h, 0 );
+		geom.vertices[3].set( progress * w, h, 0 );
+		
+		
 		var uvs = geom.faceVertexUvs[0];
 		uvs[0][0].set( uv.umin, uv.vmax );
 		uvs[0][1].set( uv.umin, uv.vmin );
@@ -73,8 +74,20 @@ class ProgressBar extends ImageSprite
 		uvs[1][1].set( SMath.lerp( progress, uv.umin, uv.umax), uv.vmin );
 		uvs[1][2].set( SMath.lerp( progress, uv.umin, uv.umax), uv.vmax );
 		
-		
 		material.map = texDef.texture;
+	}
+	
+	override function updateAnchor() 
+	{
+		mesh.position.x = -anchorX;
+		mesh.position.y = -anchorY;
+	}
+	
+	override public function centerAnchor() 
+	{
+		mesh.position.x = -texDef.width/2;
+		mesh.position.y = -texDef.height/2;
+		return this;
 	}
 	
 	function set_progress(value:Float):Float 
@@ -103,8 +116,10 @@ class ProgressBar extends ImageSprite
 		var v = mesh.worldToLocal( new Vector3( x, y, 0 ) );
 		x = v.x;
 		y = v.y;		
-		return ( 	x > -texDef.width / 2 && 
+		/*return ( 	x > -texDef.width / 2 && 
 					x < SMath.lerp( progress, -texDef.width/2, texDef.width/2 ) &&
-					texDef.height * 0.5 >= SMath.fabs(y) );
+					texDef.height * 0.5 >= SMath.fabs(y) );*/
+		return ( 	x > 0 && x < texDef.width*progress 
+				 && y > 0 && y < texDef.height );
 	}
 }

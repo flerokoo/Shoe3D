@@ -1,5 +1,6 @@
 package shoe3d.core;
-import shoe3d.component.CameraHolder;
+
+
 import shoe3d.core.game.GameObject;
 import three.Camera;
 import three.OrthographicCamera;

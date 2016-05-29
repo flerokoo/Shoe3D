@@ -44,6 +44,11 @@ class Component
 		
 	}
 	
+	public function onStop() 
+	{
+		
+	}
+	
     private function get_name () :String
     {
         return null; // see ComponentBuilder

@@ -1,5 +1,7 @@
 package shoe3d.asset;
 import shoe3d.asset.AssetPack.TexDef;
+import shoe3d.util.math.Rectangle;
+import shoe3d.util.UVTools;
 import shoe3d.util.UVTools.UV;
 
 /**
@@ -119,6 +121,9 @@ class Font
 			i.calcUV();
 	}
 	
+	public function getGlyph( code:Int ):Glyph {
+		return _glyphs[code];
+	}
 }
 
 class Glyph
@@ -147,12 +152,14 @@ class Glyph
 
 	public function calcUV() {
 		if ( page == null ) return;
-		uv = {
+		/*uv = {
 			umin: x / page.width,
 			umax: (x + width) / page.width,
 			vmin: y / page.height,
 			vmax: (y + height) / page.height
-		};
+		};*/
+		uv = UVTools.UVfromRectangle( new Rectangle(x, y, width, height), page.width, page.height);
+		trace("ADD SUPPORT FOR TEXDEF");
 	}
 	
     @:allow(shoe3d) function setKerning (nextCharCode :Int, amount :Int)    {
@@ -235,7 +242,7 @@ private class ConfigPair
 
 }
 
-enum TexAlign 
+enum TextAlign 
 {
 	Left;
 	Right;
