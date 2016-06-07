@@ -50,7 +50,6 @@ class Atlas
 	function UVfromRectangle( rect:Rectangle ):UV
 	{
 		if ( image == null ) throw "Image is null";
-		trace(image.naturalWidth, image.naturalHeight);
 		return {
 			umin: rect.x / image.naturalWidth,
 			vmin: (image.naturalHeight - rect.y - rect.height) / image.naturalHeight,

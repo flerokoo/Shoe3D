@@ -129,6 +129,7 @@ class Font
 class Glyph
 {
 	public var charCode (default, null) :Int;
+	public var char(default, null):String;
 
     // Location and dimensions of this glyph on the sprite sheet
     public var x :Int = 0;
@@ -137,6 +138,7 @@ class Glyph
     public var height :Int = 0;
 	public var uv:UV = null;
     public var page:TexDef = null;
+	
     public var xOffset :Int = 0;
     public var yOffset :Int = 0;
     public var xAdvance :Int = 0;
@@ -144,20 +146,27 @@ class Glyph
 	
     @:allow(shoe3d) function new (charCode :Int)    {
         this.charCode = charCode;
+		this.char = String.fromCharCode( charCode );
     }
 
     public function getKerning (nextCharCode :Int) :Int    {
         return (_kernings != null) ? Std.int(_kernings.get(nextCharCode)) : 0;
     }
-
+	
+	
 	public function calcUV() {
 		if ( page == null ) return;
-		/*uv = {
+		uv = {
 			umin: x / page.width,
 			umax: (x + width) / page.width,
 			vmin: y / page.height,
 			vmax: (y + height) / page.height
-		};*/
+		};
+		
+		if ( "M".fastCodeAt(0) == charCode ) {
+			trace( x, y, width, height );
+		}
+		
 		uv = UVTools.UVfromRectangle( new Rectangle(x, y, width, height), page.width, page.height);
 		trace("ADD SUPPORT FOR TEXDEF");
 	}
