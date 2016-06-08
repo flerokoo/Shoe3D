@@ -43,10 +43,13 @@ class TextSprite extends Element2D
 	var _letterSpacing:Float;
 	var _wrapWidth:Float;
 	var _bounds:Rectangle;
+	var _maxLineWidth:Float = 0;
 	
 	public var align(get, set):TextAlign;
 	public var text(get, set):String;
 	public var wrapWidth(get, set):Float;
+	public var letterSpacing(get, set):Float;
+	public var lineSpacing(get, set):Float;
 
 
 	
@@ -66,9 +69,11 @@ class TextSprite extends Element2D
 	
 	var ir:ImmediateRenderObject;	
 	public function updateText() {
+		trace("UPD");
 		_glyphs = [];		
 		var line:Line = { width: 0, text: '', num: 0 };
 		_lines = [line];
+		_maxLineWidth = 0;
 		var len = text.length;
 		for ( gi in 0...len ) {
 			var glyph = _font.getGlyph( _text.fastCodeAt(gi) );
@@ -89,11 +94,11 @@ class TextSprite extends Element2D
 					if( nextgl != null )
 						line.width += glyph.getKerning( nextgl.charCode );					
 				}
+				_maxLineWidth = Math.max( _maxLineWidth, line.width );
 			} else {
 				Log.warn('No character in font: ${_text.charCodeAt(gi)}' );
 			}				
 		}
-		Log.log( _lines );
 		// EXP START
 		// extract required glyphs and calculating lines
 		/*var len = _text.length, gi = 0;
@@ -191,6 +196,9 @@ class TextSprite extends Element2D
 		
 		// EXP END
 		// create mesh-material pairs (+vertices, uvs, faces)
+		if ( owner != null ) 
+			for ( i in _pairs ) 
+				owner.transform.remove( i.mesh );
 		var lastPairIndex:Int = 0;
 		var pair:Pair = null;
 		var lastUUID:String = null;
@@ -202,8 +210,7 @@ class TextSprite extends Element2D
 			
 			//select next pair(mesh-material) in array or create new 
 			if ( lastUUID == null || lastUUID != gl.page.texture.uuid ) {
-				
-
+				//if ( pair != null ) trace(pair.mesh.name, pair.num);
 				if ( lastPairIndex >= _pairs.length ) {
 					var mat = new MeshBasicMaterial( { map: gl.page.texture, transparent: true, side: Side.DoubleSide, wireframe: false  } );
 					pair = { 
@@ -212,9 +219,7 @@ class TextSprite extends Element2D
 						num: 0
 						};
 					pair.mesh.name = "PAIR" + lastPairIndex;
-					if ( owner != null ) {
-						owner.transform.add( pair.mesh );
-					}
+					
 					_pairs.push( pair );
 					lastPairIndex ++; //for removing extra meshes after this loop
 				} else {
@@ -222,13 +227,17 @@ class TextSprite extends Element2D
 					pair.mat.map = gl.page.texture;
 				}
 				pair.num = 0;
+				pair.mesh.geometry = new Geometry();
 				var geom = pair.mesh.geometry;
 				geom.vertices = [];
 				geom.faceVertexUvs = [[]];
 				geom.faces = [];
 				lastUUID = gl.page.texture.uuid;
-				geom.verticesNeedUpdate = geom.uvsNeedUpdate = true;
+				geom.verticesNeedUpdate = true;
 				vi = 0;
+				if ( owner != null ) {
+					owner.transform.add( pair.mesh );
+				}
 			}
 				
 			var geom = pair.mesh.geometry;
@@ -246,13 +255,13 @@ class TextSprite extends Element2D
 			
 			// 4 new vertices
 			for ( i in 0...4 ) geom.vertices.push( new Vector3() );
-			
 			// create two faces according to the scheme
 			geom.faces.push( new Face3(4*vi, 4*vi + 1, 4*vi + 2, new Vector3(0, 0, 1)) );
 			geom.faces.push( new Face3(4*vi + 1, 4*vi + 3, 4*vi + 2, new Vector3(0, 0, 1)));
 			
 			// push two uv sets for two faces
 			var guv = _glyphs[gi].uv;
+			//guv = { umin: 0, umax: 1, vmin: 0, vmax: 1 };
 			geom.faceVertexUvs[0].push([
 						new Vector2(guv.umin, guv.vmin),
 						new Vector2(guv.umax, guv.vmin),
@@ -269,14 +278,16 @@ class TextSprite extends Element2D
 			vi++;
 		}
 		
-		
-		
-		// remove extra meshes
-		if( owner != null ) {
-			lastPairIndex++;
-			for ( i in lastPairIndex..._pairs.length )
-				owner.transform.remove( _pairs[i].mesh );
-		}		
+		// handle the last one
+		/*pair.mesh.geometry.verticesNeedUpdate = true;
+		pair.mesh.geometry.uvsNeedUpdate = true;
+		pair.mesh.geometry.elementsNeedUpdate = true;
+		for ( t in _pairs ) {
+			t.mesh.geometry.verticesNeedUpdate =
+			t.mesh.geometry.buffersNeedUpdate = 
+			t.mesh.geometry.uvsNeedUpdate = 
+			t.mesh.geometry.elementsNeedUpdate = true;
+		}*/
 		
 		_textDirty = false;
 		_layoutDirty = true;
@@ -439,7 +450,7 @@ class TextSprite extends Element2D
 		}*/
 		
 		if ( _pairs == null || _pairs.length <= 0 ) return;
-		
+		trace("KIK");
 		var gi = 0;
 		var linei= 0;
 		var pairi = 0;
@@ -452,8 +463,17 @@ class TextSprite extends Element2D
 		var geom:Geometry = pair.mesh.geometry;
 		for ( line in _lines ) {
 			
+			var alignX = switch( align ) {
+					case Center:
+						(_maxLineWidth - line.width) / 2;
+					case Right:
+						_maxLineWidth - line.width;
+					case Left:
+						0;
+				}
 			
 			for ( i in 0...line.text.length ) {
+				
 				if ( _glyphs[gi] == newline || _glyphs[gi].width <= 0 ) {
 					gi++;
 					continue;
@@ -462,25 +482,19 @@ class TextSprite extends Element2D
 				var gl = _glyphs[gi];
 				
 				if ( pairn == 0 ) {
-					
-					for ( i in geom.vertices )
-						if ( i ==  untyped __js__("undefined") )
-							throw "BAD";
-					trace(geom.vertices.length);
+					geom.verticesNeedUpdate = true;
 					pairi++;
 					pair = _pairs[pairi];
 					pairn = pair.num ;
 					vi = 0;
 					geom = pair.mesh.geometry;
-					geom.verticesNeedUpdate = true;
+					
 				}
 				
-							
+				trace(gl.char, lastX, gl.xAdvance );	
 				var yy = linei * (_lineSpacing + _font.lineHeight ) + gl.yOffset;
-				var xx = lastX + gl.xOffset;
-				
-				trace( vi + "/" + geom.vertices.length/4, _glyphs[gi].char, "lastx" + lastX, "line" + linei, gl.width + 'x' + gl.height );
-				
+				var xx = lastX + gl.xOffset + alignX;
+								
 				
 				geom.vertices[4*vi].set( xx, gl.height + yy , 0 );
 				geom.vertices[4*vi + 1].set( xx + gl.width, gl.height + yy, 0 );
@@ -497,6 +511,8 @@ class TextSprite extends Element2D
 				gi++;
 				pairn--;
 			}
+			//handle the last one
+			geom.verticesNeedUpdate = true;
 			linei++;
 			lastX = 0;
 			
@@ -521,8 +537,20 @@ class TextSprite extends Element2D
 		return this;
 	}
 	
+	public function setLineSpacing( spacing:Float ) {
+		lineSpacing = spacing;
+		return this;
+	}
+	
+	public function setLetterSpacing( spacing:Float ) {
+		letterSpacing = spacing;
+		return this;
+	}
+	
 	override public function onAdded() {
 		//owner.transform.add( ir );
+		
+		// TODO fix: если задать текст, а потом задать другой текст короче (так, что не все пары от предыдущего будут использованы), и только потом добавить к овнеру, то добавятся все меши от первого текста (хотя надо только часть)
 		for ( i in _pairs ) {
 			owner.transform.add( i.mesh );
 		}
@@ -575,6 +603,24 @@ class TextSprite extends Element2D
 	function set_wrapWidth(value:Float):Float {
 		if ( _wrapWidth != value ) _layoutDirty = true;
 		return _wrapWidth = value;
+	}
+	
+	function get_letterSpacing():Float {
+		return _letterSpacing;
+	}
+	
+	function set_letterSpacing(value:Float):Float {
+		if ( _letterSpacing != value ) _layoutDirty = true;
+		return _letterSpacing = value;
+	}
+	
+	function get_lineSpacing():Float {
+		return _lineSpacing;
+	}
+	
+	function set_lineSpacing(value:Float):Float {
+		if ( _lineSpacing != value ) _layoutDirty = true;
+		return _lineSpacing = value;
 	}
 	
 }
