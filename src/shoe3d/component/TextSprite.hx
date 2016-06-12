@@ -227,6 +227,7 @@ class TextSprite extends Element2D
 					pair.mat.map = gl.page.texture;
 				}
 				pair.num = 0;
+				// TODO update vertices without creating new geometry
 				pair.mesh.geometry = new Geometry();
 				var geom = pair.mesh.geometry;
 				geom.vertices = [];
@@ -465,9 +466,9 @@ class TextSprite extends Element2D
 			
 			var alignX = switch( align ) {
 					case Center:
-						(_maxLineWidth - line.width) / 2;
+						-line.width / 2 ;
 					case Right:
-						_maxLineWidth - line.width;
+						-line.width ;
 					case Left:
 						0;
 				}

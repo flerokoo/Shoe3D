@@ -52,6 +52,11 @@ class GameConsole
 		
 	}*/
 	
+	public static function setTimeScale( f:Float ):Class<GameConsole> {
+		Time.timeScale = f;
+		return GameConsole;
+	}
+	
 	public static function setCurrent( o:Dynamic ):Class<GameConsole> {
 		last = o;
 		return GameConsole;
