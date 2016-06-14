@@ -79,14 +79,14 @@ class Layer implements GameObjectContainer
 	
 	public function addPerspectiveCamera():PerspectiveCamera
 	{
-		var pc = new PerspectiveCamera( 70, 1, .5, 100 );
+		var pc = new PerspectiveCamera( 70, 1, .5, 1000 );
 		setCamera( pc );
 		return pc;
 	}
 
 	public function addOrthoCamera():OrthographicCamera
 	{
-		var pc = new OrthographicCamera( 1, 1, 1, 1, 0.1, 1000 );
+		var pc = new OrthographicCamera( 1, 1, 1, 1, 0.1, 5000 );
 		setCamera( pc );
 		return pc;
 	}
@@ -105,10 +105,11 @@ class Layer implements GameObjectContainer
 	static function findInContainer( cont:GameObjectContainer, name:String, depth:Int = -1 ):GameObject {
 		
 		depth--;
-		
-		for ( i in cont.children ) 
-			if( i.name == name ) 
+		for ( i in cont.children ) {
+			if( i.name == name ) {
 				return i;
+			}
+		}
 				
 		if( depth != 0 )
 		for ( i in cont.children ) {

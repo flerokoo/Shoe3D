@@ -36,7 +36,7 @@ class Layer2D extends Layer
 			cam.bottom = 0;
 			cam.top = System.window.height;
 			
-			cam.far = 200;
+			cam.far = 2001;
 			cam.near = 0.5;
 			
 			
@@ -45,7 +45,7 @@ class Layer2D extends Layer
 			cam.top = 0;
 			
 			
-			cam.position.set( 0, 0, 100 );
+			cam.position.set( 0, 0, 2000 );
 			cam.up = new Vector3( 0, 1, 0 );
 			cam.lookAt( new Vector3(0, 0, 0) );
 			

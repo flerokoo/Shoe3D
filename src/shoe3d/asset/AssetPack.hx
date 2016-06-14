@@ -60,6 +60,7 @@ class AssetPack
 	{
 		if ( _fontMap == null ) _fontMap = new Map();
 		if ( ! _fileMap.exists(name) ) throw 'No file $name';
+		
 		var font = new Font( name, this  );
 		_fontMap.set( name, font );
 		return font;

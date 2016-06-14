@@ -21,8 +21,9 @@ class S3Mesh extends Component
 		super();
 		geometry = geom;
 		material = mat;
-		cast(material, MeshPhongMaterial);
+		//cast(material, MeshPhongMaterial);
 		mesh = new Mesh( geometry, material );
+		mesh.position.z += 100;
 		if ( owner != null ) owner.transform.add( mesh );
 	}
 	

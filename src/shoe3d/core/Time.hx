@@ -48,6 +48,7 @@ class Time
 		var cur = now();
 		
 		dt = cur - _lastUpdateTime;		
+		dt *= timeScale;
 		timeSinceGameStart = cur - _gameStartTime;		
 		timeSinceScreenShow = cur - _screenShowTime;		
 		if ( dt > 1 ) dt = 1;

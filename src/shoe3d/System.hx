@@ -53,6 +53,7 @@ class System
 		ScreenManager.setSize( originalWidth, originalHeight );
 		window.updateLayout();
 		
+		
 		_loop = new MainLoop();
 		_loop._frame.connect( clearInfoBox );
 		_loop.start();
@@ -118,20 +119,12 @@ class System
 	public static function loadFolderFromAssets( folder:String, ?onSuccess:AssetPack->Void, ?onProgress:Float->Void, ?registerThisPackWithName:String ):Promise<AssetPack>
 	{
 		var ldr = new AssetPackLoader();
-		ldr.add( 'button1', 'assets/button1.png', 0 );
-		ldr.add( 'button2', 'assets/button1.png', 0 );
-		ldr.add( 'index', 'index.html', 0 );
-		ldr.add( 'tnt', 'assets/tnt.ogg', 0 );
-		ldr.add( 'model1', 'assets/model1.geom', 0 );
-		ldr.add( 'cube', 'assets/cube.geom', 0 );
-		ldr.add( 'boy', 'assets/boy.geom', 0 );
-		ldr.add( 'sprites', 'assets/sprites.png', 0 );
-		ldr.add( 'boy_tex', 'assets/boy_tex.png', 0 );
-		ldr.add( 'boy_norm', 'assets/boy_norm.png', 0 );
-		ldr.add( 'sprites.txt', 'assets/sprites.txt', 0 );
-		ldr.add( 'anim', 'assets/test_anim.geom', 0 );
-		ldr.add( 'anim2', 'assets/test_anim2.geom', 0 );
-		ldr.add( 'music', 'assets/music.ogg', 0 );
+		
+		for ( i in AssetPackLoader.localPacks )
+			if ( i.pack == folder ) {
+				trace( i.name, i.path );
+				ldr.add( i.name, i.path, i.bytes );
+			}
 		
 		var promise = ldr.start( onSuccess, onProgress );
 		

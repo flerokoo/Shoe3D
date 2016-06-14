@@ -44,7 +44,7 @@ class GameObject implements ComponentContainer implements GameObjectContainer
 	
 	
 	public static function find( name:String, maxDepth:Int = -1 ) {
-		#if !macro
+		//#if !macro
 		if ( System.screen._currentScreen != null ) {
 			for ( i in System.screen._currentScreen.layers )
 			{
@@ -54,7 +54,7 @@ class GameObject implements ComponentContainer implements GameObjectContainer
 		}
 		
 		return null;
-		#end
+		//#end
 	}
 	
 	

@@ -61,15 +61,7 @@ class GameConsole
 		last = o;
 		return GameConsole;
 	}
-	
-	public static function setTimeAcc( o:Float ):Class<GameConsole> {
-		if ( o < 0 ) {
-			trace("Time multiplier can't be below zero");
-			return GameConsole;
-		}
-		throw 'Not implemented';
-		return GameConsole;
-	}
+
 	
 	public static function registerCommand( name:String, fn:Dynamic, ?hotkey:Key ):Class<GameConsole> {
 		commands.set( name, fn );

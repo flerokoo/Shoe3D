@@ -11,7 +11,7 @@ class Tools
 		return a[ Math.floor( Math.random() * a.length ) ];
 	}
 	
-	public static function getFileNameWithoutExtension( str:String )
+	public static function getFileNameWithoutExtensionAndPath( str:String )
 	{
 
 		var ret =  str.substring( cast Math.max( str.lastIndexOf('/'), str.lastIndexOf("\\") ) + 1 );		
@@ -28,4 +28,10 @@ class Tools
 		return ret;
 	}
 	
+	public static function getFileNameWithoutExtension( str:String )
+	{
+		if ( str.indexOf('.') >= 0 )
+			return str.substr( 0, str.lastIndexOf('.') );
+		return str;
+	}
 }

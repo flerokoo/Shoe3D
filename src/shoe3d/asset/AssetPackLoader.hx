@@ -7,6 +7,7 @@ import shoe3d.util.Assert;
 import shoe3d.util.Log;
 import shoe3d.util.promise.Promise;
 import shoe3d.util.StringHelp;
+import shoe3d.util.Tools;
 import shoe3d.util.Value;
 import three.GeometryLoader;
 import three.JSONLoader;
@@ -14,6 +15,7 @@ import three.Loader;
 import three.LoadingManager;
 import three.Object3D;
 import three.ObjectLoader;
+import three.Scene;
 import three.Texture;
 import three.TextureFilter;
 import three.TextureLoader;
@@ -26,6 +28,8 @@ import three.XHRLoader;
 using Lambda;
 using shoe3d.util.StringHelp;
  
+@:allow(shoe3d)
+@:build(shoe3d.asset.AssetProcessor.build())
 class AssetPackLoader
 {
 	private static var _supportedFormats:Array<AssetFormat>;
@@ -43,18 +47,23 @@ class AssetPackLoader
 	{
 		_pack = new AssetPack();
 		_entries = [];	
+		Log.log(AssetPackLoader.localPacks);
 	}
 	
 	public function add( name:String, url:String, bytes:Int, ?format:AssetFormat )
 	{
 		if ( format == null ) format = getFormat( url );
+		if ( getFormat( name ) != RAW ) name = Tools.getFileNameWithoutExtension( name );
+		var ext = name.getUrlExtension();
 		
+		// TODO Придумать какой-то другой способ отличать геометрию от сцены и от просто json
+		if ( ext != null &&( ext.toLowerCase() == 'geom' || ext.toLowerCase() == 'scene' ) ) name = Tools.getFileNameWithoutExtension( name );
 		_entries.push( new AssetEntry( name, url, format, bytes ) );
 	}
 	
 	function getFormat( url:String ):AssetFormat
 	{
-		trace( url, url.indexOf( '.scene.json' ) );
+		//trace( url, url.indexOf( '.scene.json' ) );
 		//Blender don't want to save just *.geom. It wants *.geom.json. So, shortcut:
 		if ( url.toLowerCase().indexOf( '.geom.json' ) >= 0 ) return GEOM;
 		if ( url.toLowerCase().indexOf( '.scene.json' ) >= 0 ) return SCENE;
@@ -228,6 +237,7 @@ class AssetPackLoader
 		untyped __js__('createjs.Sound.alternateExtensions = ["aac, mp3"]');
 		_manager = new LoadingManager( onCompletePack, onProgress );
 		for ( e in _entriesToLoad ) {
+			trace(e.name);
 			switch( e.format ) {
 				
 				case JPG, PNG, GIF:
@@ -241,7 +251,7 @@ class AssetPackLoader
 				case GEOM:
 					new XHRLoader(_manager).load( e.url, function( data ) onLoadGeometry( data, e ) );
 				case SCENE:
-					new ObjectLoader(_manager).load( e.url, function (data) onLoadScene( data, e ) );
+					new ObjectLoader(_manager).load( e.url, function (data) onLoadScene( untyped data, e ) );
 				default:
 					new XHRLoader( _manager ).load( e.url, function (data) onLoadData( data, e ) );
 				
@@ -249,7 +259,7 @@ class AssetPackLoader
 		}
 	}
 	
-	function onLoadScene(object:Object3D, e:AssetEntry) 
+	function onLoadScene(object:Scene, e:AssetEntry) 
 	{
 		_pack._sceneMap.set( e.name, object );
 	}
@@ -290,9 +300,9 @@ class AssetPackLoader
 	
 	function onLoadSound( data:ArrayBuffer, e:AssetEntry ) 
 	{
-		trace(data);
+		//trace(data);
 		
-		trace( "SND LOAD");
+		//trace( "SND LOAD");
 	}
 	
 	function onLoadGeometry( data:String, e:AssetEntry )

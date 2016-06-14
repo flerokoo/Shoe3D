@@ -84,5 +84,8 @@ class SMath
 		return v >= 0 ? 1 : -1;
 	}
 	
-	
+	public static inline function rand(a:Float, b:Float):Float 
+	{
+		return a + Math.random() * (b - a);
+	}
 }
