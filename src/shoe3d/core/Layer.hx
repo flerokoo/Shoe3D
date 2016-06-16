@@ -99,24 +99,8 @@ class Layer implements GameObjectContainer
 	}
 	
 	public function find( name:String, maxDepth = -1 ):GameObject {
-		return findInContainer( this, name, maxDepth );
+		return GameObject.findInContainer( this, name, maxDepth );
 	}
 	
-	static function findInContainer( cont:GameObjectContainer, name:String, depth:Int = -1 ):GameObject {
-		
-		depth--;
-		for ( i in cont.children ) {
-			if( i.name == name ) {
-				return i;
-			}
-		}
-				
-		if( depth != 0 )
-		for ( i in cont.children ) {
-			var ret = findInContainer( i, name, depth );
-			if ( ret != null) return ret;
-		}
-			
-		return null;
-	}
+
 }

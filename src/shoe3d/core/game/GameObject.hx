@@ -48,13 +48,35 @@ class GameObject implements ComponentContainer implements GameObjectContainer
 		if ( System.screen._currentScreen != null ) {
 			for ( i in System.screen._currentScreen.layers )
 			{
-				var t = i.find( name, maxDepth );
+				var t = findInContainer(i, name, maxDepth );
 				if ( t != null ) return t;
 			}
 		}
 		
 		return null;
 		//#end
+	}
+	
+	static function findInContainer( cont:GameObjectContainer, name:String, depth:Int = -1 ):GameObject {
+		
+		depth--;
+		for ( i in cont.children ) {
+			if( i.name == name ) {
+				return i;
+			}
+		}
+				
+		if( depth != 0 )
+		for ( i in cont.children ) {
+			var ret = findInContainer( i, name, depth );
+			if ( ret != null) return ret;
+		}
+			
+		return null;
+	}
+	
+	public function findChild( name:String, depth:Int = -1 ):GameObject {
+		return findInContainer( this, name, depth ); 
 	}
 	
 	

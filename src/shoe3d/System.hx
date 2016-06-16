@@ -8,6 +8,7 @@ import shoe3d.core.game.GameObject;
 import shoe3d.core.InputManager;
 import shoe3d.core.MainLoop;
 import shoe3d.core.RenderManager;
+import shoe3d.core.StorageSystem;
 import shoe3d.core.Time;
 import shoe3d.core.WindowManager;
 import shoe3d.screen.ScreenManager;
@@ -30,6 +31,7 @@ class System
 	public static var window(default, null) = WindowManager;
 	public static var renderer(default, null) = RenderManager;
 	public static var input(default, null) = InputManager;
+	public static var storage(default, null) = StorageSystem;
 	public static var updateInfoEveryNthFrame:Int = 6;
 	
 	private static var _infoFrameCounter:Int = 0;
@@ -49,6 +51,7 @@ class System
 		ScreenManager.init();
 		Time.init();		
 		InputManager.init();
+		StorageSystem.init();
 		
 		ScreenManager.setSize( originalWidth, originalHeight );
 		window.updateLayout();
@@ -122,7 +125,6 @@ class System
 		
 		for ( i in AssetPackLoader.localPacks )
 			if ( i.pack == folder ) {
-				trace( i.name, i.path );
 				ldr.add( i.name, i.path, i.bytes );
 			}
 		

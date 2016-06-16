@@ -47,7 +47,6 @@ class AssetPackLoader
 	{
 		_pack = new AssetPack();
 		_entries = [];	
-		Log.log(AssetPackLoader.localPacks);
 	}
 	
 	public function add( name:String, url:String, bytes:Int, ?format:AssetFormat )
@@ -237,7 +236,6 @@ class AssetPackLoader
 		untyped __js__('createjs.Sound.alternateExtensions = ["aac, mp3"]');
 		_manager = new LoadingManager( onCompletePack, onProgress );
 		for ( e in _entriesToLoad ) {
-			trace(e.name);
 			switch( e.format ) {
 				
 				case JPG, PNG, GIF:

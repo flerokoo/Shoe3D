@@ -1,6 +1,8 @@
 package shoe3d.asset;
 import haxe.macro.Context;
 import haxe.macro.Expr.Field;
+import haxe.Serializer;
+import haxe.Unserializer;
 import shoe3d.util.Tools;
 import sys.FileSystem;
 
@@ -17,11 +19,11 @@ class AssetProcessor
 
 	public static function build( localBase:String = "assets"):Array<Field> {
 		
+		var fields = Context.getBuildFields();
+		
 		if ( ! localBase.endsWith("/") && ! localBase.endsWith("\\") ) {
 			localBase += '/';
 		}
-			
-		var fields = Context.getBuildFields();
 		
 		var packs:Map<String,AssetCollection> = new Map();
 		

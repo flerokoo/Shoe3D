@@ -69,7 +69,6 @@ class TextSprite extends Element2D
 	
 	var ir:ImmediateRenderObject;	
 	public function updateText() {
-		trace("UPD");
 		_glyphs = [];		
 		var line:Line = { width: 0, text: '', num: 0 };
 		_lines = [line];
@@ -136,7 +135,6 @@ class TextSprite extends Element2D
 				}
 				line.width += glyph.xAdvance;
 				line.text += glyph.char;
-				//TODO add kerning
 				_glyphs.push(glyph);
 				
 			} else {
@@ -451,7 +449,6 @@ class TextSprite extends Element2D
 		}*/
 		
 		if ( _pairs == null || _pairs.length <= 0 ) return;
-		trace("KIK");
 		var gi = 0;
 		var linei= 0;
 		var pairi = 0;
@@ -491,8 +488,7 @@ class TextSprite extends Element2D
 					geom = pair.mesh.geometry;
 					
 				}
-				
-				trace(gl.char, lastX, gl.xAdvance );	
+					
 				var yy = linei * (_lineSpacing + _font.lineHeight ) + gl.yOffset;
 				var xx = lastX + gl.xOffset + alignX;
 								

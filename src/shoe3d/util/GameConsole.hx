@@ -6,6 +6,7 @@ import shoe3d.core.game.GameObject;
 import shoe3d.core.input.Key;
 import shoe3d.core.input.KeyboardEvent;
 import shoe3d.core.Time;
+import shoe3d.System;
 
 /**
  * ...
@@ -15,6 +16,7 @@ import shoe3d.core.Time;
 @:keep
 class GameConsole
 {
+	public static var system:Class<System> = System;
 	public static var last:Dynamic;
 	static var commands:Map<String,Function>;
 	

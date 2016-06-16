@@ -162,13 +162,9 @@ class Glyph
 			vmin: y / page.height,
 			vmax: (y + height) / page.height
 		};
-		
-		if ( "M".fastCodeAt(0) == charCode ) {
-			trace( x, y, width, height );
-		}
-		
+				
 		uv = UVTools.UVfromRectangle( new Rectangle(x, y, width, height), page.width, page.height);
-		trace("ADD SUPPORT FOR TEXDEF");
+		// TODO ADD SUPPORT FOR TEXDEFS
 	}
 	
     @:allow(shoe3d) function setKerning (nextCharCode :Int, amount :Int)    {
