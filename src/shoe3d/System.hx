@@ -60,6 +60,15 @@ class System
 		_loop = new MainLoop();
 		_loop._frame.connect( clearInfoBox );
 		_loop.start();
+		
+		#if Actuate
+		WindowManager.hidden.change.connect( function( cur, prev ) {
+			if ( cur == true ) 
+				motion.Actuate.pauseAll()
+			else
+				motion.Actuate.resumeAll();
+		});
+		#end
 	}
 	
 	static private function clearInfoBox( ?dt:Float ) 

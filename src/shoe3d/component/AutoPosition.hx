@@ -2,6 +2,7 @@ package shoe3d.component;
 import shoe3d.core.game.Component;
 import shoe3d.util.signal.Sentinel;
 import shoe3d.util.SMath;
+import three.Vector3;
 
 /**
  * ...
@@ -20,12 +21,14 @@ class AutoPosition extends Component
 	public var scaleOffsetXRatio:Float = 0;
 	public var scaleOffsetYRatio:Float = 0;
 	
-	public function new() 
+	public function new( posX:Float = 0, posY:Float = 0 ) 
 	{
 		super();
+		this.posX = posX;
+		this.posY = posY;
 	}
 	
-	override public function onAdded() 
+	override public function onStart() 
 	{
 		super.onAdded();
 		conn = System.window.resize.connect( reoverlay );
@@ -40,13 +43,22 @@ class AutoPosition extends Component
 	
 	public function reoverlay():AutoPosition
 	{
-		if ( owner == null ) return this;
+		if ( owner == null ) return this;	
+		if ( owner.parent == null && owner.layer == null ) return this;
 		
-		owner.transform.position.set(
-			System.window.width * posX + SMath.lerp( scaleOffsetXRatio, xOffset, xOffset * System.screen.scale),
-			System.window.height * posY + SMath.lerp( scaleOffsetYRatio, yOffset, yOffset * System.screen.scale),
-			0
-			);
+		var base = owner.parent != null ? owner.parent.transform : owner.layer.scene;
+		
+		if( base != null ) {			
+			var targetPos = base.worldToLocal( new Vector3(
+				System.window.width * posX + SMath.lerp( scaleOffsetXRatio, xOffset, xOffset * System.screen.scale),
+				System.window.height * posY + SMath.lerp( scaleOffsetYRatio, yOffset, yOffset * System.screen.scale),
+				0
+			) );
+			owner.transform.position.x = targetPos.x;
+			owner.transform.position.y = targetPos.y;
+			
+		}
+		
 		
 		owner.transform.scale.set( 
 			SMath.lerp( scaleXRatio, 1, System.screen.scale ),

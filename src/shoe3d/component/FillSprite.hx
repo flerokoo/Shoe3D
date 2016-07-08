@@ -1,7 +1,9 @@
 package shoe3d.component;
+import shoe3d.component.Element2D;
 import shoe3d.core.game.Component;
 import shoe3d.util.SMath;
 import three.Color;
+import three.Colors;
 import three.Geometry;
 import three.Mesh;
 import three.MeshBasicMaterial;
@@ -26,7 +28,7 @@ class FillSprite extends Element2D
 	{
 		super();
 		geom = new PlaneGeometry(width, height, 1, 1);
-		material = new MeshBasicMaterial( { transparent: false, side: Side.DoubleSide } );	
+		material = new MeshBasicMaterial( { side: Side.DoubleSide, transparent: true } );	
 		mesh = new Mesh( geom, material );	
 		
 		this.width = width;
@@ -46,7 +48,7 @@ class FillSprite extends Element2D
 	
 	function redefineSprite()
 	{	
-
+		
 		var w = width;
 		var h = height;		
 		
@@ -64,6 +66,9 @@ class FillSprite extends Element2D
 		geom.vertices[2].set( 0, h, 0 );
 		geom.vertices[3].set( w, h, 0 );
 
+		
+		
+		
 		/*uvs[0][0].set( 0, 1 );
 		uvs[0][1].set(0, 0 );
 		uvs[0][2].set( 1, 1 );
@@ -117,4 +122,11 @@ class FillSprite extends Element2D
 		material.color = new Color( value );
 		return color;
 	}
+	
+	override function setPremultipliedAlpha(alpha:Float):Element2D 
+	{
+		material.opacity = alpha;
+		return this;
+	}
+	
 }

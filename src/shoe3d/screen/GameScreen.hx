@@ -15,6 +15,7 @@ import three.Scene;
  * @author as
  */
 @:allow("shoe3d")
+@:keepSub
 class GameScreen
 {	
 	public var layers(default,null):Array<Layer>;

@@ -2,6 +2,7 @@ package shoe3d.core;
 import ext.RenderStats;
 import js.Browser;
 import js.html.DivElement;
+import shoe3d.screen.ScreenManager;
 import three.OrthographicCamera;
 import three.PerspectiveCamera;
 import three.WebGLRenderer;
@@ -39,8 +40,9 @@ class RenderManager
 		renderer.setClearColor(clearColor);
 		renderer.clear( );
 		if ( System.screen._currentScreen != null ) {
-			for ( layer in System.screen._currentScreen.layers )
-				layer.render( renderer );
+			if( System.screen._currentScreen.layers != null )
+				for ( layer in System.screen._currentScreen.layers )
+					layer.render( renderer );
 					//if( layer.camera != null /*&& layer.visible*/ )
 						//renderer.render( layer, layer.camera );
 		}

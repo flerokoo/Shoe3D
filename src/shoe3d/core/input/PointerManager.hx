@@ -82,7 +82,7 @@ class PointerManager
 	{
 		//var lastHit:Element2D = null;
 		//var chains:Array<Array<Element2D>> = [];
-		if ( System.screen._currentScreen != null ) { 
+		if ( System.screen._currentScreen != null && System.screen._currentScreen.layers != null) { 
 			var li = System.screen._currentScreen.layers.length - 1;
 			while( li >= 0 )
 			{

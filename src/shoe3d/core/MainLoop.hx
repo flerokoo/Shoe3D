@@ -82,14 +82,15 @@ class MainLoop
 		if ( ScreenManager._currentScreen != null ) 
 		{
 			ScreenManager._currentScreen.onUpdate();
-			for ( layer in ScreenManager._currentScreen.layers ) 
-			{
-				for ( i in layer.children )
+			if( ScreenManager._currentScreen.layers != null )
+				for ( layer in ScreenManager._currentScreen.layers ) 
 				{
-					Element2D.lastAlpha = 1;
-					updateGameObject( i );
+					for ( i in layer.children )
+					{
+						Element2D.lastAlpha = 1;
+						updateGameObject( i );
+					}
 				}
-			}
 		
 					
 			middleTime = Time.now();
