@@ -45,7 +45,7 @@ class ScreenManager
 		//defaultTransition.setHolder(_base);
 		//System._baseScene.add( _base );
 		
-		System.window._prePublicResize.connect( recalcScale );
+		System.window._prePublicResize.connect( recalcScale );		
 	}
 	
 	static function recalcScale()

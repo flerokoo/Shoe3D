@@ -136,8 +136,7 @@ class ImageSprite extends Element2D
 	{ 
 		owner.transform.remove( mesh );
 	}
-	
-	
+		
 	public override function contains( x:Float, y:Float ):Bool
 	{
 		if ( texDef == null ) return false;

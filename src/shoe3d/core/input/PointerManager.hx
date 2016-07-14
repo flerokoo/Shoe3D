@@ -19,7 +19,7 @@ class PointerManager
 
     public var x (get, null) :Float;
     public var y (get, null) :Float;
-
+	
 	private static var _sharedEvent = new PointerEvent();
     private static var _scratchPoint = new Vector2();
 

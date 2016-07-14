@@ -34,6 +34,8 @@ class Element2D extends Component
 	public var _pointerIn:SingleSignal<PointerEvent>;
 	public var _pointerOut:SingleSignal<PointerEvent>;	
 	public var pointerEnabled:Bool = true;
+	
+	private var _globalAlpha:Float = 1;
 	private var _hovering:Bool = false;
 	private var _hoverConnection:Sentinel;
 	
@@ -96,14 +98,29 @@ class Element2D extends Component
 	
 	function setPremultipliedAlpha( alpha:Float ):Element2D
 	{
+		
 		return this;
 	}
 	
 	override public function onUpdate()
 	{
 		setLevel( lastLevel++ );
-		lastAlpha *= alpha._;
-		setPremultipliedAlpha( lastAlpha );
+		//lastAlpha *= alpha._;
+		//setPremultipliedAlpha( lastAlpha );
+		
+		if ( alpha._ == 0 ) {
+			_globalAlpha = 0;
+			setPremultipliedAlpha(0);
+		} else {
+			var upper = getParentElement2D();
+			if ( upper == null ) {
+				_globalAlpha = alpha._;
+				setPremultipliedAlpha( alpha._ );
+			} else {
+				_globalAlpha = upper._globalAlpha * alpha._;
+				setPremultipliedAlpha( _globalAlpha );
+			}
+		}
 	}
 	
 	public function getParentElement2D():Element2D

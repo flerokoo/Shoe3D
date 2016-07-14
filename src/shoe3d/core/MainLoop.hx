@@ -190,7 +190,8 @@ class MainLoop
 	}
 	
 	public function updateGameObject( go:GameObject ) 
-	{
+	{	
+		
 		for ( i in go.components ) {
 			
 			if ( ! i._started ) {
@@ -200,11 +201,12 @@ class MainLoop
 				
 			
 			i.onUpdate();
-		}
-			
+		}			
 		
-		for ( child in go.children )		
+		for ( child in go.children ) {	
+		
 			updateGameObject( child );
+		}
 		
 	}
 	

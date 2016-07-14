@@ -124,7 +124,7 @@ class FillSprite extends Element2D
 	}
 	
 	override function setPremultipliedAlpha(alpha:Float):Element2D 
-	{
+	{		
 		material.opacity = alpha;
 		return this;
 	}

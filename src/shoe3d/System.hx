@@ -54,7 +54,9 @@ class System
 		StorageSystem.init();
 		
 		ScreenManager.setSize( originalWidth, originalHeight );
+		ScreenManager.recalcScale();
 		window.updateLayout();
+		
 		
 		
 		_loop = new MainLoop();

@@ -23,6 +23,8 @@ class InputManager
 	public static var touch(default, null):TouchManager;
 	public static var keyboard(default, null):KeyboardManager;
 	
+	public static var pointerEnabled:Bool = true;
+	
 	static var _canvas:CanvasElement;
 	static var _div:DivElement;
 	static var _lastTouchTime:Float = 0;
@@ -39,6 +41,7 @@ class InputManager
 		// MOUSE SYSTEM
 		var onMouse = function(event:MouseEvent) 
 		{
+			if ( ! pointerEnabled ) return;
 			if ( event.timeStamp - _lastTouchTime < 1000 )
 			{
                 // filter events emulated by browser: http://www.w3.org/TR/touch-events/#mouse-events
@@ -80,6 +83,7 @@ class InputManager
 			touch.maxPoints = isStandartTouch ? 4 : (untyped Browser.navigator).msMaxTouchPoints ;
 			
 			var onTouch = function ( e:Dynamic ) {
+				if ( ! pointerEnabled ) return;
 				var changedTouches:Array<Dynamic> = isStandartTouch ? e.changedTouches : [e];
 				var bounds = e.target.getBoundingClientRect();
 				_lastTouchTime = e.timeStamp;

@@ -273,7 +273,7 @@ class GameObject implements ComponentContainer implements GameObjectContainer
 			i.setLayerReferenceRecursive( l );
 	}
 	
-	public function setPos( x:Float, y:Float, z:Float ) 
+	public function setPos( x:Float, y:Float, z:Float = 0 ) 
 	{
 		transform.position.set(x, y, z);
 		return this;
