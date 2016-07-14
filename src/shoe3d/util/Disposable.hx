@@ -7,6 +7,6 @@ package shoe3d.util;
 interface Disposable
 {
 
-	public function dispose();
+	public function dispose():Void;
 	
 }

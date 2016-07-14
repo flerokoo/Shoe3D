@@ -1,4 +1,5 @@
 package shoe3d.util.signal;
+import shoe3d.util.Disposable;
 import shoe3d.util.signal.Sentinel;
 
 /**
@@ -76,5 +77,7 @@ class Signal
 	{
 		return _head == DUMMY;
 	}
+	
+	
 	
 }

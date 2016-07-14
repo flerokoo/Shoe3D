@@ -5,7 +5,7 @@ package shoe3d.util.signal;
  * @author as
  */
 
-class Sentinel
+class Sentinel implements Disposable
 {
 
 	public var isOnce(default, null):Bool = false;

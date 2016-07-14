@@ -20,7 +20,7 @@ class Layer implements GameObjectContainer
 	public var scene(default,null):Scene;
 	public var camera(default, null):Camera;
 	public var children(default, null):Array<GameObject>;
-	//public var visible:Bool = true;	
+	public var visible:Bool = true;	
 	
 	public function new( ?name:String ) 
 	{

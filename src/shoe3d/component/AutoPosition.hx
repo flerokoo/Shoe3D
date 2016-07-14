@@ -18,8 +18,8 @@ class AutoPosition extends Component
 	public var yOffset:Float = 0;
 	public var scaleXRatio:Float = 1;
 	public var scaleYRatio:Float = 1;
-	public var scaleOffsetXRatio:Float = 0;
-	public var scaleOffsetYRatio:Float = 0;
+	public var scaleOffsetXRatio:Float = 1;
+	public var scaleOffsetYRatio:Float = 1;
 	
 	public function new( posX:Float = 0, posY:Float = 0 ) 
 	{
@@ -54,6 +54,11 @@ class AutoPosition extends Component
 				System.window.height * posY + SMath.lerp( scaleOffsetYRatio, yOffset, yOffset * System.screen.scale),
 				0
 			) );
+			
+			if ( owner.name == 'closeButton') {
+				trace( targetPos );
+			}
+			
 			owner.transform.position.x = targetPos.x;
 			owner.transform.position.y = targetPos.y;
 			

@@ -13,6 +13,7 @@ import shoe3d.core.Time;
 import shoe3d.core.WindowManager;
 import shoe3d.screen.ScreenManager;
 import shoe3d.util.GameConsole;
+import shoe3d.util.HtmlUtils;
 import shoe3d.util.promise.Promise;
 import shoe3d.util.StringHelp;
 import shoe3d.util.Value;
@@ -44,6 +45,7 @@ class System
 	
 	public static function init( originalWidth:Int = 640, originalHeight = 800) 
 	{
+		HtmlUtils.fixAndroidMath();
 		//_baseScene = new Scene();
 		GameConsole.init();
 		WindowManager.init();
@@ -163,7 +165,7 @@ class System
 	#end
 	
 	
-	public static var root(get, null):GameObject;		
-	static function get_root():GameObject  return ScreenManager._base;
+	//public static var root(get, null):GameObject;		
+	//static function get_root():GameObject  return ScreenManager._base;
 	
 }

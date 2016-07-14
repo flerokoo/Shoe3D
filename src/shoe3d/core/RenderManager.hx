@@ -39,10 +39,10 @@ class RenderManager
 	{		
 		renderer.setClearColor(clearColor);
 		renderer.clear( );
-		if ( System.screen._currentScreen != null ) {
+		if ( System.screen._currentScreen != null  ) {
 			if( System.screen._currentScreen.layers != null )
 				for ( layer in System.screen._currentScreen.layers )
-					layer.render( renderer );
+					if( layer.visible ) layer.render( renderer );
 					//if( layer.camera != null /*&& layer.visible*/ )
 						//renderer.render( layer, layer.camera );
 		}

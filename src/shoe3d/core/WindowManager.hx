@@ -23,11 +23,14 @@ class WindowManager
 	public static var width(get, null):Int = 640;
 	public static var height(get, null):Int = 800;
 	public static var hidden(default, null):Value<Bool>;
+	public static var fullscreen(default, null):Value<Bool>;
+	
 	
 	
 	public static function init() 
 	{
 		hidden = new Value( false );
+		fullscreen = new Value( false );
 		_prePublicResize = new ZeroSignal();
 		resize = new ZeroSignal();
 		orientation = new Value( Portrait );
@@ -59,13 +62,27 @@ class WindowManager
 			Log.sys( "No Visibility API. Using pageshow/pagehide fallback" );
 		}
 		
-
+		// FULLSCREEN CHANGE
+		HtmlUtils.addVendorListener(Browser.document, "fullscreenchange", function (_) {
+            updateFullscreen();
+        }, false);
+		
+		
+		
 		hidden.change.connect( function( a, b ) {
 			SoundManager.muted = hidden._ ;
 		} );
 		
+		
+		
 		updateOrientation();	
 		
+	}
+	
+	private static function updateFullscreen() {
+		var state :Dynamic = HtmlUtils.loadFirstExtension(
+            ["fullscreen", "fullScreen", "isFullScreen"], Browser.document).value;
+        fullscreen._ = (state == true); // state will be null if fullscreen not supported
 	}
 
 	private static function onResize()
@@ -196,6 +213,23 @@ class WindowManager
 		updateLayout();
 	}
 	
+	static public function requestFullscreen (enable :Bool = true)
+    {
+        if (enable) { 
+            var documentElement = Browser.document.documentElement;
+            var requestFullscreen = HtmlUtils.loadFirstExtension(
+               ["requestFullscreen", "requestFullScreen"], documentElement).value;
+            if (requestFullscreen != null) {
+                Reflect.callMethod(documentElement, requestFullscreen, []);
+            }
+        } else {
+            var cancelFullscreen = HtmlUtils.loadFirstExtension(
+                ["cancelFullscreen", "cancelFullScreen"], Browser.document).value;
+            if (cancelFullscreen != null) {
+                Reflect.callMethod(Browser.document, cancelFullscreen, []);
+            }
+        }
+    }
 	
 }
 
