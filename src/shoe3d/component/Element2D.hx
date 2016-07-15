@@ -3,7 +3,9 @@ import shoe3d.core.game.Component;
 import shoe3d.core.game.GameObject;
 import shoe3d.core.input.EventSource;
 import shoe3d.core.input.PointerEvent;
+import shoe3d.util.Log;
 import shoe3d.util.math.Rectangle;
+import shoe3d.util.Pointable;
 import shoe3d.util.signal.Sentinel;
 import shoe3d.util.signal.SingleSignal;
 import shoe3d.util.Value;
@@ -13,7 +15,7 @@ import three.Mesh;
  * ...
  * @author as
  */
-class Element2D extends Component
+class Element2D extends Component implements Pointable
 {
 	@:allow(shoe3d) private static var lastLevel = 0;
 	@:allow(shoe3d) private static var lastAlpha = 1.0;

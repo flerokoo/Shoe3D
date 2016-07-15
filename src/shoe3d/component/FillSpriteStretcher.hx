@@ -24,7 +24,7 @@ class FillSpriteStretcher extends Component
 	function stretch() {
 		var fs = owner.get(FillSprite);
 		if ( fs != null ) {
-			fs.width = System.window.width;
+			fs.width = System.window.width * .5;
 			fs.height = System.window.height;
 		}
 	}

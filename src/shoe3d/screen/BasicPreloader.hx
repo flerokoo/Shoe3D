@@ -36,6 +36,7 @@ class BasicPreloader extends GameScreen
 		
 		init();
 		progress.change.connect( function ( n, p) {
+			n = Math.max(n, p);
 			spr.owner.transform.position.set( (1-WIDTH_PERCENT)/2 * System.window.width , System.window.height / 2, 0 );
 			spr.width = n * System.window.width * WIDTH_PERCENT;
 			spr2.owner.transform.position.set( (1-WIDTH_PERCENT)/2 * System.window.width , System.window.height / 2, 0 );
@@ -60,7 +61,7 @@ class BasicPreloader extends GameScreen
 		progress._ = 0;
 		loading = true;
 		
-		return System.loadFolderFromAssets( 
+		return System.loadFolderFromAssets(
 			folder, 
 			function(a:AssetPack) {
 				loading = false;

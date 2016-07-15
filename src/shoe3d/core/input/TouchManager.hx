@@ -1,4 +1,5 @@
 package shoe3d.core.input;
+import shoe3d.util.Log;
 import shoe3d.util.signal.SingleSignal;
 
 /**

@@ -68,6 +68,7 @@ class MouseManager
 
             prepare(viewX, viewY, toButton(buttonCode));
             System.input.pointer.submitDown(viewX, viewY, _source);
+			// TODO: maybe add check if event is stopeed?
             down.emit(_sharedEvent);
         }
     }

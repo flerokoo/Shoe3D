@@ -1,5 +1,8 @@
 package shoe3d.core.input;
 import shoe3d.component.Element2D;
+import shoe3d.core.Layer2D;
+import shoe3d.util.Log;
+import shoe3d.util.Pointable;
 import shoe3d.util.signal.SingleSignal;
 import three.Vector2;
 
@@ -66,19 +69,22 @@ class PointerManager
 		var result = getHitAndChain( viewX, viewY );
 	
 		
-		prepare(viewX, viewY, result != null ? result.hit : null , source);
+		prepare(viewX, viewY, result != null ? result.hit : null, result != null ? result.layer : null,  source);
 		//for ( chain in chains )
 		if( result != null )
 			for ( e in result.chain ) 
 			{
-				e.onPointerDown( _sharedEvent );
+				e.onPointerDown( _sharedEvent );				
 				if ( _sharedEvent._stopped ) return;
 			}
-				
-		down.emit( _sharedEvent );
+		
+		// layer is Layer2D, it's checked in gitHitAndChain, also result.chain.length is >0
+		if ( result != null && ! _sharedEvent._stopped ) result.layer.onPointerDown( _sharedEvent );
+			
+		if( ! _sharedEvent._stoppedToStage ) down.emit( _sharedEvent );
 	}
 	
-	function getHitAndChain( viewX:Float, viewY:Float ) : { hit:Element2D, chain:Array<Element2D> }
+	function getHitAndChain( viewX:Float, viewY:Float ) : { hit:Element2D, chain:Array<Element2D>, layer:Layer2D }
 	{
 		//var lastHit:Element2D = null;
 		//var chains:Array<Array<Element2D>> = [];
@@ -106,7 +112,7 @@ class PointerManager
 							} while (e != null );
 							//chains.push( chain );
 							//break;
-							return { hit: hit, chain: chain };
+							return { hit: hit, chain: chain, layer: cast(layer,Layer2D) };
 						}
 						n--;
 					}					
@@ -124,8 +130,7 @@ class PointerManager
 		
 		var result = getHitAndChain( viewX, viewY );
 	
-		
-		prepare(viewX, viewY, result != null ? result.hit : null , source);
+		prepare(viewX, viewY, result != null ? result.hit : null, result != null ? result.layer : null,  source);
 		
 		if( result != null )
 			for ( e in result.chain ) 
@@ -133,7 +138,11 @@ class PointerManager
 				e.onPointerMove( _sharedEvent );
 				if ( _sharedEvent._stopped ) return;
 			}
-		move.emit( _sharedEvent );
+		
+		if ( result != null && ! _sharedEvent._stopped ) result.layer.onPointerMove( _sharedEvent );
+		
+		
+		if( ! _sharedEvent._stoppedToStage ) move.emit( _sharedEvent );
 	}
 	
 	function submitUp(viewX :Float, viewY :Float, source :EventSource)
@@ -147,22 +156,26 @@ class PointerManager
 		
 		var result = getHitAndChain( viewX, viewY );		
 		
-		prepare(viewX, viewY, result != null ? result.hit : null, source);
+		prepare(viewX, viewY, result != null ? result.hit : null, result != null ? result.layer : null,  source);
 		//for ( chain in chains )
 		if( result != null )
 			for ( e in result.chain ) 
 			{
-				e.onPointerUp( _sharedEvent );
+				e.onPointerUp( _sharedEvent );				
 				if ( _sharedEvent._stopped ) return;
 			}
-		up.emit(_sharedEvent);
+			
+		if ( result != null && ! _sharedEvent._stopped ) result.layer.onPointerUp( _sharedEvent );
+			
+			
+		if( ! _sharedEvent._stoppedToStage ) up.emit(_sharedEvent);
 	}
 	
-    private function prepare (viewX :Float, viewY :Float, hit :Element2D, source :EventSource)
+    private function prepare (viewX :Float, viewY :Float, hit :Element2D, layer:Layer2D, source :EventSource)
     {
         _x = viewX;
         _y = viewY;
-        _sharedEvent.set(_sharedEvent.id+1, viewX, viewY, hit, source);
+        _sharedEvent.set(_sharedEvent.id+1, viewX, viewY, hit, layer, source);
     }
 	
 
