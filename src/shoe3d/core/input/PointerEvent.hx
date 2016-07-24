@@ -38,7 +38,7 @@ class PointerEvent
         _stopped = true;
     }
 	
-	inline public function stopPropagationToStage ()
+	inline public function preventGlobalEvent ()
     {
         _stoppedToStage = true;
     }	

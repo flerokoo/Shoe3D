@@ -1,4 +1,5 @@
 package shoe3d.core.game;
+import shoe3d.util.Disposable;
 
 /**
  * ...
@@ -7,7 +8,7 @@ package shoe3d.core.game;
 @:autoBuild(shoe3d.core.ComponentBuilder.build())
 @:componentBase
 @:allow(shoe3d)
-class Component
+class Component implements Disposable
 {
 
 	public var owner:GameObject;
@@ -45,6 +46,11 @@ class Component
 	}
 	
 	public function onStop() 
+	{
+		
+	}
+	
+	public function dispose() 
 	{
 		
 	}

@@ -12,6 +12,9 @@ class AutoPosition extends Component
 {
 	var conn:Sentinel;
 	
+	public var scaleEnabled:Bool = true;
+	public var positionEnabled:Bool = true;
+	
 	public var posX:Float = 0.5;
 	public var posY:Float = 0.5;
 	public var xOffset:Float = 0;
@@ -21,18 +24,26 @@ class AutoPosition extends Component
 	public var scaleOffsetXRatio:Float = 1;
 	public var scaleOffsetYRatio:Float = 1;
 	
-	public function new( posX:Float = 0, posY:Float = 0 ) 
+	private var _dirty:Bool = true;
+	
+	public function new( positionEnabled:Bool = true, scaleEnabled:Bool = true ) 
 	{
 		super();
-		this.posX = posX;
-		this.posY = posY;
+		this.positionEnabled = positionEnabled;
+		this.scaleEnabled = scaleEnabled;
+		
 	}
 	
 	override public function onStart() 
 	{
 		super.onAdded();
-		conn = System.window.resize.connect( reoverlay );
+		conn = System.window.resize.connect( setDirty );
 		reoverlay();
+	}
+	
+	function setDirty() 
+	{
+		_dirty = true;
 	}
 	
 	override public function onRemoved() 
@@ -48,96 +59,126 @@ class AutoPosition extends Component
 		
 		var base = owner.parent != null ? owner.parent.transform : owner.layer.scene;
 		
-		if( base != null ) {			
+
+		
+		
+		
+		if( positionEnabled && base != null ) {			
 			var targetPos = base.worldToLocal( new Vector3(
 				System.window.width * posX + SMath.lerp( scaleOffsetXRatio, xOffset, xOffset * System.screen.scale),
 				System.window.height * posY + SMath.lerp( scaleOffsetYRatio, yOffset, yOffset * System.screen.scale),
 				0
 			) );
 			
-			if ( owner.name == 'closeButton') {
-				trace( targetPos );
-			}
+			
 			
 			owner.transform.position.x = targetPos.x;
 			owner.transform.position.y = targetPos.y;
 			
 		}
 		
+		if( scaleEnabled ) {
+			owner.transform.scale.set( 
+				SMath.lerp( scaleXRatio, 1, System.screen.scale ),
+				SMath.lerp( scaleYRatio, 1, System.screen.scale ),
+				1
+				);
+		} 
 		
-		owner.transform.scale.set( 
-			SMath.lerp( scaleXRatio, 1, System.screen.scale ),
-			SMath.lerp( scaleYRatio, 1, System.screen.scale ),
-			1
-			);
-			
+		owner.transform.updateMatrixWorld( true );
+		
+		/*if ( owner.name == 'restscaler') {
+			trace("__________SCALER__________");
+			trace(owner.transform.position);
+			trace(owner.transform.scale);
+		}
+		
+		if ( owner.name == 'shopButton') {
+			trace("__________BTN__________");
+			trace(posX, posY);
+			trace(xOffset, yOffset);
+			trace(owner.transform.position);
+		}*/
+		
+		_dirty = false;
+		
 		return this;
+		
 	}
 	
 	public function setScaleRatio( x:Float, y:Float )
 	{
+		scaleEnabled = true;
 		scaleXRatio = x;
 		scaleYRatio = y;
-		reoverlay();
+		_dirty = true;
 		return this;
 	}
 	
 	public function setOffsetScaleRatio( x:Float, y:Float ) 
 	{
+		positionEnabled = true;
 		scaleOffsetXRatio = x;
 		scaleOffsetYRatio = y;
-		reoverlay();
+		_dirty = true;
 		return this;
 	}
 	
 	public function setOffsets(x:Float, y:Float )
 	{
+		positionEnabled = true;
 		xOffset = x;
 		yOffset = y;
-		reoverlay();
+		_dirty = true;
 		return this;
 	}
 	
 	
 	public function left()
 	{
+		positionEnabled = true;
 		posX = 0;
-		reoverlay();
+		_dirty = true;
 		return this;
 	}
 	
 	public function right()
 	{
+		positionEnabled = true;
 		posX = 1;
-		reoverlay();
+		_dirty = true;
 		return this;
 	}
 	
 	public function top()
 	{
+		positionEnabled = true;
 		posY = 1;
-		reoverlay();
+		_dirty = true;
 		return this;
 	}
 	
 	public function bottom()
 	{
+		positionEnabled = true;
 		posY = 0;
-		reoverlay();
+		_dirty = true;
 		return this;
 	}
 	
 	public function centerX()
 	{
+		positionEnabled = true;
 		posX = 0.5;
-		reoverlay();
+		_dirty = true;
 		return this;
 	}
 	
 	public function centerY()
 	{
+		positionEnabled = true;
 		posY = 0.5;
-		reoverlay();
+		_dirty = true;
 		return this;
 	}
 	
@@ -150,17 +191,37 @@ class AutoPosition extends Component
 	
 	public function setPos( posX:Float, posY:Float, xOffset:Float = 0, yOffset:Float = 0 )
 	{
+		positionEnabled = true;
 		this.posX = posX;
 		this.posY = posY;
 		this.xOffset = xOffset;
 		this.yOffset = yOffset;
-		reoverlay();
+		_dirty = true;
 		return this;
 	}
 	
 	public static function container()
 	{
 		return new AutoPosition().setAsOnScreenContainer();
+	}
+	
+	public function setScaleEnabled( bool:Bool ) 
+	{
+		scaleEnabled = bool;
+		_dirty = true;
+		return this;
+	}
+	
+	public function setPosEnabled( bool:Bool ) 
+	{
+		positionEnabled = bool;
+		_dirty = true;
+		return this;
+	}
+	
+	override public function onUpdate() 
+	{
+		if ( _dirty ) reoverlay();
 	}
 	
 }

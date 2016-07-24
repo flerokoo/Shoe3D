@@ -17,6 +17,7 @@ class ScreenManager
 	private static var _targetScreen:GameScreen = null;
 	public static var defaultTransition:Transition;
 	private static var _transitions:Map<String,Transition>;
+	private static var _prepared:Map<String,GameScreen>;
 	private static var _screens:Map<String,Class<GameScreen>>;
 	private static var _base:GameObject;
 	
@@ -40,6 +41,7 @@ class ScreenManager
 	{
 		_transitions = new Map();
 		_screens = new Map();
+		_prepared = new Map();
 		_base = new GameObject();
 		defaultTransition = new Transition();
 		//defaultTransition.setHolder(_base);
@@ -53,6 +55,12 @@ class ScreenManager
 		scale = Math.min(  System.window.width / width,  System.window.height / height );
 	}
 	
+	public static function prepare( name:String ) 
+	{
+		if ( _screens[name] == null ) return;
+		_prepared[name] = Type.createInstance( _screens.get( name ), [] );
+	}
+	
 	public static function show( name:String, ?changeFn:Void->Void ) 
 	{
 		#if debug
@@ -60,7 +68,8 @@ class ScreenManager
 		#else
 		if ( ! _screens.exists( name ) ) return;
 		#end
-		_targetScreen = Type.createInstance( _screens.get( name ), [] );
+		_targetScreen = _prepared[name] == null ? Type.createInstance( _screens.get( name ), [] ) : _prepared[name];
+		_prepared[name] = null;
 		if ( _currentScreen != null ) 
 		{			
 			var transition:Transition = _transitions.exists( _currentScreenName + ">>" + name ) 

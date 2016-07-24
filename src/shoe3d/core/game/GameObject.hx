@@ -241,6 +241,14 @@ class GameObject implements ComponentContainer implements GameObjectContainer
 		transform.remove( child.transform );
 	}
 	
+	public function removeChildAt( i:Int ) {
+		var c = children[i];
+		children.splice( i, 1 );
+		c.parent = null;
+		c.setLayerReferenceRecursive( null );
+		transform.remove( c.transform );
+	}
+	
 	public function getChild( i:Int )
 	{
 		if ( children[i] == null ) throw 'No child at specified index i=' + i;
@@ -334,5 +342,6 @@ class GameObject implements ComponentContainer implements GameObjectContainer
 	}
 	
 	public var numComponents(get, null):Int;	function get_numComponents() return components.length;
+	public var numChildren(get, null):Int;	function get_numChildren() return children.length;
 	
 }

@@ -49,7 +49,7 @@ class MainLoop
 			if ( ! hidden ) skipFrame();
 		} );
 		
-		
+
 	}
 	
 	public function start() 

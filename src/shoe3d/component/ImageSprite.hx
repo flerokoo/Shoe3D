@@ -49,7 +49,7 @@ class ImageSprite extends Element2D
 		
 		texDef = Res.getTexDef( textureName );
 		geom = new PlaneGeometry(0, 0, 1, 1);
-		material = new MeshBasicMaterial( { transparent: true, side: Side.DoubleSide } );	
+		material = new MeshBasicMaterial( { transparent: true, side: Side.DoubleSide, depthTest: false, depthWrite: false } );	
 		mesh = new Mesh( geom, material );		
 		redefineSprite();			
 	}

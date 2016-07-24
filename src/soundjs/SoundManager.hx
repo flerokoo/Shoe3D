@@ -14,5 +14,12 @@ extern class SoundManager
 	public static function on( event:String, listener:Dynamic ):Dynamic;
 	public static function off( event:String, listener:Dynamic ):Dynamic;
 	public static function createInstance( id:String, ?startTime:Float, ?duration:Float ):AbstractSoundInstance;
+	/**
+	 * 
+	 * @param	id
+	 * @param	playProps { delay, offset, loop(-1 for infinite), volume, pan, startTime, duration }
+	 * @return
+	 */
+	public static function play( id:String, playProps:Dynamic ):AbstractSoundInstance;
 	
 }

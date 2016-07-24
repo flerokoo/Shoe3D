@@ -1,6 +1,7 @@
 package shoe3d.core;
 import shoe3d.core.input.PointerEvent;
 import shoe3d.util.Assert;
+import shoe3d.util.Log;
 import shoe3d.util.Pointable;
 import shoe3d.util.signal.Sentinel;
 import shoe3d.util.signal.SingleSignal;
@@ -76,6 +77,10 @@ class Layer2D extends Layer implements Pointable
 	{
 		if ( camera == null ) return;
 		renderer.sortObjects = false;
+		//renderer.setDepthTest( false );
+		//renderer.setDepthWrite( false );
+		//Log.log( renderer);
+		//throw "ERR";
 		renderer.clearDepth();
 		renderer.render( scene, camera );
 	}

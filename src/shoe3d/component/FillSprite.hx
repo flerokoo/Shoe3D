@@ -28,7 +28,7 @@ class FillSprite extends Element2D
 	{
 		super();
 		geom = new PlaneGeometry(width, height, 1, 1);
-		material = new MeshBasicMaterial( { side: Side.DoubleSide, transparent: true } );	
+		material = new MeshBasicMaterial( { side: Side.DoubleSide, transparent: true, depthTest: false, depthWrite: false  } );	
 		mesh = new Mesh( geom, material );	
 		
 		this.width = width;

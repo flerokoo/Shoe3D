@@ -104,7 +104,7 @@ class NicePreloader extends GameScreen
 					System.window.requestFullscreen();
 					#end
 				} ) )
-				.add( new AutoPosition( 0.5, POS_Y_RELATIVE ) );
+				.add( new AutoPosition(  ).setPos(0.5, POS_Y_RELATIVE) );
 			go.transform.add( playButton );
 			
 			layer.addChild( go );
