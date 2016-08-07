@@ -192,6 +192,7 @@ class GameConsole
 	static public function init() 
 	{
 		commands = new Map();
+		return true;
 	}
 	
 }

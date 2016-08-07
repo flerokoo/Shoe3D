@@ -3,6 +3,7 @@ import ext.RenderStats;
 import js.Browser;
 import js.html.DivElement;
 import shoe3d.screen.ScreenManager;
+import shoe3d.util.Log;
 import three.OrthographicCamera;
 import three.PerspectiveCamera;
 import three.WebGLRenderer;
@@ -27,13 +28,58 @@ class RenderManager
 		container = Browser.document.createDivElement();
 		Browser.document.body.appendChild( container );			
 		
-		renderer = new WebGLRenderer({antialias:false});
-		renderer.setSize( 800, 600);			
-		container.appendChild( renderer.domElement );
+		if( checkWebGLSupport() ) {			
+			renderer = new WebGLRenderer({antialias:false});
+			renderer.setSize( 800, 600);			
+			container.appendChild( renderer.domElement );
+			renderer.autoClear = false;	
+			return true;
+		} else {
+			throw 'WebGL is not supported';
+			return false;
+		}
+	
 		
-		
-		renderer.autoClear = false;				
 	}
+	
+	static public function checkWebGLSupport():Bool
+	{
+		if ( ! Reflect.hasField( Browser.window, "WebGLRenderingContext" ) ) {
+			showMessage('Your browser is not supported. <br/>Please, try with another one.<br/><a href="http://get.webgl.org">More info</a>');
+			return false;
+		} else {
+			var canv = Browser.document.createCanvasElement();
+			var cont = canv.getContext("webgl");
+			if ( cont == null ) {
+				showMessage('Ooops, something wrong with your browser.<br/><a href="http://get.webgl.org/troubleshooting">More info</a>');
+				return false;
+			} else {
+				return true;
+			}
+		}
+	}
+	
+	static function showMessage(text:String) {
+		var element = Browser.document.createDivElement();
+		element.id = 'webgl-error-message';
+		element.style.fontFamily = 'monospace';
+		element.style.fontSize = '13px';
+		element.style.fontWeight = 'normal';
+		element.style.textAlign = 'center';
+		element.style.background = '#fff';
+		element.style.color = '#000';
+		element.style.padding = '1.5em';
+		element.style.width = '100%';
+		element.style.height = '100%';
+		element.style.margin = '0';
+		element.style.position = "absolute";
+		element.style.backgroundColor = "#ADA7A7";
+		element.style.color = "#3C2626";
+		element.innerHTML = text;
+		Browser.document.body.appendChild( element );		
+		
+	}
+	
 	
 	private static function render() 
 	{		

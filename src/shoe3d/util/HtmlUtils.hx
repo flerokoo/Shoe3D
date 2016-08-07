@@ -1,4 +1,5 @@
 package shoe3d.util;
+import js.Boot;
 import js.html.EventTarget;
 #if !macro
 import js.Browser;
@@ -100,4 +101,5 @@ class HtmlUtils
             }
         }
 	}
+
 }

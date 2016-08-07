@@ -149,6 +149,7 @@ class InputManager
 		}
 		Browser.window.addEventListener("keydown", onKey, false);
         Browser.window.addEventListener("keyup", onKey, false);
+		return true;
 	}
 	
 	private static inline function getX (event :Dynamic, bounds :Dynamic) :Float

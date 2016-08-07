@@ -3,6 +3,7 @@ import js.html.Element;
 import shoe3d.core.game.Component;
 import shoe3d.core.input.PointerEvent;
 import shoe3d.util.SMath;
+import soundjs.SoundManager;
 
 /**
  * ...
@@ -17,6 +18,10 @@ class ScaleButton extends Component
 	var isDown = false;
 	var fn:PointerEvent->Void = null;
 	var targetScale = 1.0;
+	
+	var downSound:String;
+	var upSound:String;
+	
 	public var active:Bool = true;
 	
 	public function new( ?fn:PointerEvent->Void, activeStateScale = 0.9 ) 
@@ -36,6 +41,7 @@ class ScaleButton extends Component
 	
 	function down( e:PointerEvent ) 
 	{
+		if ( downSound != null ) SoundManager.play( downSound );
 		isDown = true;
 		targetScale = activeStateScale;
 		//Actuate.tween( owner.transform.scale, 0.18, { x: activeStateScale, y:activeStateScale } ).ease( Quad.easeOut );	
@@ -51,6 +57,7 @@ class ScaleButton extends Component
 	{
 		if ( isDown ) 
 		{
+			if ( upSound != null ) SoundManager.play( upSound );
 			isDown = false;
 			if ( fn != null) fn(e);
 			//Actuate.tween( owner.transform.scale, 0.18, { x: 1, y:1 } ).ease( Quad.easeOut );
@@ -62,6 +69,7 @@ class ScaleButton extends Component
 	{
 		if ( isDown ) 
 		{
+			if ( upSound != null ) SoundManager.play( upSound );
 			//Actuate.tween( owner.transform.scale, 0.18, { x: 1, y:1 } ).ease( Quad.easeOut );
 			targetScale = 1;
 		}
@@ -71,5 +79,13 @@ class ScaleButton extends Component
 	{
 		
 	}
+	
+	public function setSounds( ?dwn:String, ?up:String ) {
+		downSound = dwn;
+		upSound = up;
+		return this;
+	}
+	
+	
 	
 }

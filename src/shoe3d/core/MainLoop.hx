@@ -46,6 +46,7 @@ class MainLoop
 		} 
 
 		System.window.hidden.change.connect( function(hidden, _) {
+			// skip first frame after show up
 			if ( ! hidden ) skipFrame();
 		} );
 		

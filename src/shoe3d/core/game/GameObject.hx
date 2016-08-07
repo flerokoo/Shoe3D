@@ -10,6 +10,7 @@ import three.Object3D;
 #end
 
 import shoe3d.core.game.Component;
+import shoe3d.util.Disposable;
 /**
  * ...
  * @author as
@@ -22,7 +23,7 @@ import shoe3d.core.game.Component;
 @:keep
 #end
 @:final
-class GameObject implements ComponentContainer implements GameObjectContainer
+class GameObject implements ComponentContainer implements GameObjectContainer implements Disposable
 {
 	
 	public var components(default,null):Array<Component>;
@@ -339,6 +340,25 @@ class GameObject implements ComponentContainer implements GameObjectContainer
 	{
 		transform.rotateZ( a );
 		return this;
+	}
+	
+	public function dispose() 
+	{
+		if ( parent != null )
+			parent.removeChild( this )
+		else if ( layer != null )
+			layer.removeChild( this );
+			
+		for ( i in components )
+			i.dispose();
+			
+		disposeChildren();
+	}
+	
+	public function disposeChildren() 
+	{
+		for ( i in children )
+			i.dispose();
 	}
 	
 	public var numComponents(get, null):Int;	function get_numComponents() return components.length;

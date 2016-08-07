@@ -23,6 +23,7 @@ class StorageSystem
 		} else {
 			Log.sys("No local storage");
 		}
+		return true;
 	}
 	
 	public static function set (key :String, value :Dynamic) :Bool   {

@@ -42,6 +42,7 @@ class Time
 			Log.sys( "No window.performance, using system date" );
 		}			
 		_lastUpdateTime = _gameStartTime = now();
+		return true;
 	}
 	
 	public static function update() {

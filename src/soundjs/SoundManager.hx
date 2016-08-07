@@ -20,6 +20,6 @@ extern class SoundManager
 	 * @param	playProps { delay, offset, loop(-1 for infinite), volume, pan, startTime, duration }
 	 * @return
 	 */
-	public static function play( id:String, playProps:Dynamic ):AbstractSoundInstance;
+	public static function play( id:String, ?playProps:Dynamic ):AbstractSoundInstance;
 	
 }

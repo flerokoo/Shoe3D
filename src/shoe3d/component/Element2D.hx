@@ -275,4 +275,20 @@ class Element2D extends Component implements Pointable
 		if ( _pointerOut == null ) _pointerOut = new SingleSignal();
 		return _pointerOut;
 	}
+	
+	override public function dispose() 
+	{
+		alpha = null;
+				
+		_pointerUp = null;
+		_pointerDown = null;
+		_pointerMove = null;
+		_pointerIn = null;
+		_pointerOut = null;	
+		pointerEnabled = null;
+		if ( _hoverConnection != null ) _hoverConnection.dispose();
+		_hoverConnection = null;
+		
+		super.dispose();
+	}
 }

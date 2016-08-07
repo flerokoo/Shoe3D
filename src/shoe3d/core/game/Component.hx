@@ -52,7 +52,8 @@ class Component implements Disposable
 	
 	public function dispose() 
 	{
-		
+		if ( owner != null )
+			owner.remove( this );
 	}
 	
     private function get_name () :String

@@ -25,7 +25,8 @@ class Disposer extends Component
 	override public function dispose()
 	{
 		for ( d in a ) d.dispose();
-		a  = [];
+		a  = null;
+		super.dispose();
 		return this;
 	}
 	

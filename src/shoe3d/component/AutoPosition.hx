@@ -47,9 +47,15 @@ class AutoPosition extends Component
 	}
 	
 	override public function onRemoved() 
-	{
-		super.onRemoved();
+	{		
 		if ( conn != null ) conn.dispose();
+		super.onRemoved();
+	}
+	
+	override public function dispose() 
+	{
+		conn.dispose();
+		super.dispose();
 	}
 	
 	public function reoverlay():AutoPosition

@@ -69,14 +69,25 @@ class WindowManager
 		
 		
 		
+		
+		var wasMutedBeforeHide = false;
 		hidden.change.connect( function( a, b ) {
-			SoundManager.muted = hidden._ ;
+			
+			if ( a ) { // hidden 
+				wasMutedBeforeHide = SoundManager.muted;
+				SoundManager.muted = true;
+			}
+			
+			if ( ! a ) { //shown				
+				SoundManager.muted = wasMutedBeforeHide;
+			}			
+			
 		} );
 		
 		
 		
 		updateOrientation();	
-		
+		return true;
 	}
 	
 	private static function updateFullscreen() {

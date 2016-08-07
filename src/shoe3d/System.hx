@@ -47,13 +47,14 @@ class System
 	{
 		HtmlUtils.fixAndroidMath();
 		//_baseScene = new Scene();
-		GameConsole.init();
-		WindowManager.init();
-		RenderManager.init();
-		ScreenManager.init();
-		Time.init();		
-		InputManager.init();
-		StorageSystem.init();
+		var ready = true;
+		ready = ready && GameConsole.init();
+		ready = ready && WindowManager.init();
+		ready = ready && RenderManager.init();
+		ready = ready && ScreenManager.init();
+		ready = ready && Time.init();		
+		ready = ready && InputManager.init();
+		ready = ready && StorageSystem.init();
 		
 		ScreenManager.setSize( originalWidth, originalHeight );
 		ScreenManager.recalcScale();
@@ -63,7 +64,7 @@ class System
 		
 		_loop = new MainLoop();
 		_loop._frame.connect( clearInfoBox );
-		_loop.start();
+		if( ready ) _loop.start();
 		
 		#if Actuate
 		WindowManager.hidden.change.connect( function( cur, prev ) {
