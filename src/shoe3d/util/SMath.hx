@@ -11,6 +11,10 @@ class SMath
 	public static inline var TWO_PI:Float = PI * 2 ;
 	public static inline var toRADIANS:Float = PI / 180;
 	public static inline var toDEGREES:Float = 180 / PI;
+	public static inline var INT_MAX:Int = 2147483647;
+	public static inline var INT_MIN:Int = -2147483647;
+	public static inline var FLOAT_MAX:Float = 1.79769313486231e+308;
+	public static inline var FLOAT_MIN:Float = -1.79769313486231e+308;
 	
 	public static inline var B = 4 / PI;
 	public static inline var C = -4 / (PI*PI);
