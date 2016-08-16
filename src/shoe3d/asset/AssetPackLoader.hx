@@ -92,6 +92,7 @@ class AssetPackLoader
 
 	public function start( ?onComplete:AssetPack->Void, ?onProgress:Float->Void ):Promise<AssetPack>
 	{
+		if ( _entries.length == 0 ) throw 'Cant load empty pack';
 		if ( _loading ) throw 'This asset pack is already loading';
 		_loading = true;
 		_onCompleteCallback = onComplete;

@@ -26,6 +26,7 @@ class RenderManager
 	private static function init() 
 	{		
 		container = Browser.document.createDivElement();
+		container.id = "game";
 		Browser.document.body.appendChild( container );			
 		
 		if( checkWebGLSupport() ) {			

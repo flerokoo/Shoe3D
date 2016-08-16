@@ -129,6 +129,8 @@ class WindowManager
 	private static function updateLayout () 
 	{
 		resetStyle();
+		//html element
+		Browser.document.body.parentElement.style.height = "100%";
 		
 		var canvas:CanvasElement = RenderManager.renderer.domElement;
 		var div:DivElement = RenderManager.container;
@@ -154,6 +156,8 @@ class WindowManager
 			div.style.height = height+ "px";
 			RenderManager.renderer.setSize( width, height );
 			Browser.document.body.style.padding = "0.06px";
+			Browser.document.body.style.height = "100%";
+			
 			
 			var marginTop = Math.floor( Math.max( 0, (Browser.window.innerHeight - height ) / 2 ) );
 			div.style.margin = marginTop + "px auto 0";			

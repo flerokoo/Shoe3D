@@ -23,6 +23,10 @@ class Log
 		_sys.push( msg );
 	}
 	
+	public static function info(msg:Dynamic) {
+		untyped __js__("console").info(msg);
+	}
+	
 	public static function printSys() 
 	{
 		for ( i in _sys )
@@ -32,6 +36,7 @@ class Log
 	#else
 	public static inline function warn( msg:String ) { }
 	public static inline function log( msg:String ) { }
+	public static inline function info( msg:String ) { }
 	public static function sys(msg:String) {}	
 	public static function printSys() {}	
 	#end

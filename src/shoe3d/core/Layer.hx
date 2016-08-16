@@ -2,6 +2,7 @@ package shoe3d.core;
 
 
 import shoe3d.core.game.GameObject;
+import shoe3d.util.Value;
 import three.Camera;
 import three.OrthographicCamera;
 import three.PerspectiveCamera;
@@ -21,12 +22,19 @@ class Layer implements GameObjectContainer
 	public var camera(default, null):Camera;
 	public var children(default, null):Array<GameObject>;
 	public var visible:Bool = true;	
+	public var fov(default,null):Value<Float>;
 	
 	public function new( ?name:String ) 
 	{
 		this.name = name;
 		scene = new Scene();
 		children = [];
+		fov = new Value(70.0);
+		
+		var changeFn = function(a, b) reconfigureCamera();
+		
+		fov.change.connect( changeFn );
+		
 		System.window._prePublicResize.connect( reconfigureCamera );
 	}
 	
@@ -37,6 +45,7 @@ class Layer implements GameObjectContainer
 			if ( Std.is( camera, PerspectiveCamera ) )
 			{
 				var pc = cast(camera, PerspectiveCamera);
+				pc.fov = fov._;
 				pc.aspect = System.window.width / System.window.height;
 				pc.updateProjectionMatrix();
 			}

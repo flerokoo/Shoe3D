@@ -30,6 +30,11 @@ class GameScreen
 		
 	}
 	
+	public function onCreate() 
+	{
+		
+	}	
+	
 	public function onShow() 
 	{
 		

@@ -60,6 +60,7 @@ class ScreenManager
 	{
 		if ( _screens[name] == null ) return;
 		_prepared[name] = Type.createInstance( _screens.get( name ), [] );
+		_prepared[name].onCreate();
 	}
 	
 	public static function show( name:String, ?changeFn:Void->Void ) 
@@ -69,7 +70,12 @@ class ScreenManager
 		#else
 		if ( ! _screens.exists( name ) ) return;
 		#end
-		_targetScreen = _prepared[name] == null ? Type.createInstance( _screens.get( name ), [] ) : _prepared[name];
+		if ( _prepared[name] != null ) {
+			_targetScreen = _prepared[name];
+		} else {
+			_targetScreen = Type.createInstance( _screens.get( name ), [] );
+			_targetScreen.onCreate();
+		}		
 		_prepared[name] = null;
 		if ( _currentScreen != null ) 
 		{			

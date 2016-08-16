@@ -15,13 +15,45 @@ class CameraCopter extends Component
 	public var camera:Camera;
 	public var speedMultiplier:Float;
 	
-	public function new( cam:Camera, speedMul:Float = 1 ) 
+	
+	public function new( cam:Camera, speedMul:Float = 1, allowMouse:Bool = true ) 
 	{
 		super();
 		
 		Assert.that(cam != null, "Camera shouldn't be null" );
 		camera = cam;
 		speedMultiplier = speedMul;
+		
+		if ( allowMouse ) {
+			var prevPoint:Vector3;
+			
+			System.input.pointer.down.connect( function(e) {
+				prevPoint = new Vector3( e.viewX, e.viewY );
+				
+			} );
+			
+			System.input.pointer.move.connect( function(e) {
+				if ( prevPoint != null ) {
+					var newPount = new Vector3( e.viewX, e.viewY );
+					
+					var dx = newPount.x - prevPoint.x;
+					var dy = newPount.y - prevPoint.y;
+					
+					var vert = camera.worldToLocal( untyped camera.position.clone().add( new Vector3(0, 1, 0) ) );
+					
+					
+					camera.rotateX( -dy/300 * Math.PI/2 );
+					camera.rotateOnAxis( vert, -dx/300 * Math.PI/2 );
+					
+					prevPoint = newPount;
+				}
+			});
+			
+			System.input.pointer.up.connect( function(e) {
+				prevPoint = null;
+			});
+		}
+		
 	}
 	
 	override public function onUpdate() 
