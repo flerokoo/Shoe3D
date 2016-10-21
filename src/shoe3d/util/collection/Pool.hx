@@ -41,6 +41,9 @@ class Pool<A>
     public function put (object :A)
     {
         Assert.that(object != null);
+		#if debug
+		Assert.that( _freeObjects.indexOf(object) < 0, "This object is already in the pool, you motherfucker!" );
+		#end
         if (_freeObjects.length < _capacity) {
             _freeObjects.push(object);
         }
@@ -82,6 +85,8 @@ class Pool<A>
         _capacity = capacity;
         return this;
     }
+	
+	
 
     private var _allocator :Void -> A;
     private var _freeObjects :Array<A>;

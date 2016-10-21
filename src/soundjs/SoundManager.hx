@@ -8,6 +8,13 @@ import three.EventDispatcher;
 @:native("createjs.Sound")
 extern class SoundManager 
 {
+	/*
+	 * 
+	 *  DO NOT USE THIS CLASS DIRECTLY
+	 * 	Instead, use System.sound
+	 * 
+	 * 
+	 */ 
 	public static var muted:Bool;
 	public static function registerSound( src:String, id:String):Dynamic;
 	public static function removeSound( id:String ):Dynamic;

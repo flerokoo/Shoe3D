@@ -13,12 +13,13 @@ class Disposer extends Component
 	
 	public function new() 
 	{
+		super();
 		a = [];
 	}
 	
 	public function add( d:Disposable ) 
 	{
-		a.push(d)
+		a.push(d);
 		return this;
 	}
 	
@@ -27,7 +28,6 @@ class Disposer extends Component
 		for ( d in a ) d.dispose();
 		a  = null;
 		super.dispose();
-		return this;
 	}
 	
 	public function remove( d:Disposable )

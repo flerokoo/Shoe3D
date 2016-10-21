@@ -8,6 +8,7 @@ import shoe3d.core.game.GameObject;
 import shoe3d.core.InputManager;
 import shoe3d.core.MainLoop;
 import shoe3d.core.RenderManager;
+import shoe3d.core.SoundSystem;
 import shoe3d.core.StorageSystem;
 import shoe3d.core.Time;
 import shoe3d.core.WindowManager;
@@ -33,6 +34,7 @@ class System
 	public static var renderer(default, null) = RenderManager;
 	public static var input(default, null) = InputManager;
 	public static var storage(default, null) = StorageSystem;
+	public static var sound(default, null) = SoundSystem;
 	public static var updateInfoEveryNthFrame:Int = 6;
 	
 	private static var _infoFrameCounter:Int = 0;
@@ -42,6 +44,46 @@ class System
 	
 	//private static var _baseScene:Scene;
 	
+	
+	/*
+	    MODIFY SimpleActuator.hx constrtuctor so it can work within engine's loop
+
+	  	#if sh3d  @:access(shoe3d)	#end
+		public function new (target:Dynamic, duration:Float, properties:Dynamic) {
+		
+		active = true;
+		propertyDetails = new Array <PropertyDetails> ();
+		sendChange = false;
+		paused = false;
+		cacheVisible = false;
+		initialized = false;
+		setVisible = false;
+		toggleVisible = false;
+		
+		#if (flash || nme || openfl)
+		startTime = Lib.getTimer () / 1000;
+		#else
+		startTime = Timer.stamp ();
+		#end
+		
+		super (target, duration, properties);
+		
+		if (!addedEvent) {
+			
+			addedEvent = true;
+			
+			#if (flash || nme || openfl)
+			Lib.current.stage.addEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
+			#elseif sh3d
+			shoe3d.System._loop._frame.connect( stage_onEnterFrame );
+			#else
+			timer = new Timer (Std.int(1000 / 60));
+			timer.run = stage_onEnterFrame;
+			#end
+			
+		}
+
+	 */ 
 	
 	public static function init( originalWidth:Int = 640, originalHeight = 800) 
 	{
@@ -55,6 +97,7 @@ class System
 		ready = ready && Time.init();		
 		ready = ready && InputManager.init();
 		ready = ready && StorageSystem.init();
+		ready = ready && SoundSystem.init();
 		
 		ScreenManager.setSize( originalWidth, originalHeight );
 		ScreenManager.recalcScale();
@@ -170,3 +213,5 @@ class System
 	//static function get_root():GameObject  return ScreenManager._base;
 	
 }
+
+

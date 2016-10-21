@@ -198,7 +198,9 @@ class Element2D extends Component implements Pointable
             return;
         }
         _hoverConnection = System.input.pointer.move.connect(function (event) {
+			
             // Return early if this sprite was in the event chain
+			
             var hit = event.hit;
             while (hit != null) {
                 if (hit == this) {
@@ -206,7 +208,6 @@ class Element2D extends Component implements Pointable
                 }
                 hit = hit.getParentElement2D();
             }
-
             // This sprite is not under the pointer
             if (_pointerOut != null && _hovering) {
                 _pointerOut.emit(event);

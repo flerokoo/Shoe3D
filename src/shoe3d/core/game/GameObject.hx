@@ -10,6 +10,7 @@ import three.Object3D;
 #end
 
 import shoe3d.core.game.Component;
+import shoe3d.util.Assert;
 import shoe3d.util.Disposable;
 /**
  * ...
@@ -228,6 +229,9 @@ class GameObject implements ComponentContainer implements GameObjectContainer im
 #end
 	public function addChild( child:GameObject ) 
 	{
+		#if debug
+		Assert.that( children.indexOf(child) < 0, "Provided GameObject is already a child" );
+		#end
 		children.push( child );
 		child.parent = this;
 		child.setLayerReferenceRecursive( layer );

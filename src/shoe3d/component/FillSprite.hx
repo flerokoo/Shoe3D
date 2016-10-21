@@ -2,6 +2,7 @@ package shoe3d.component;
 import shoe3d.component.Element2D;
 import shoe3d.core.game.Component;
 import shoe3d.util.SMath;
+import three.Blending;
 import three.Color;
 import three.Colors;
 import three.Geometry;
@@ -28,7 +29,7 @@ class FillSprite extends Element2D
 	{
 		super();
 		geom = new PlaneGeometry(width, height, 1, 1);
-		material = new MeshBasicMaterial( { side: Side.DoubleSide, transparent: true, depthTest: false, depthWrite: false  } );	
+		material = new MeshBasicMaterial( { side: Side.DoubleSide, transparent: true, depthTest: false, depthWrite: false  } );
 		mesh = new Mesh( geom, material );	
 		
 		this.width = width;
