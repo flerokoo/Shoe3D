@@ -15,8 +15,8 @@ class AutoPosition extends Component
 	public var scaleEnabled:Bool = true;
 	public var positionEnabled:Bool = true;
 	
-	public var posX:Float = 0.5;
-	public var posY:Float = 0.5;
+	public var posX:Float = 0.0;
+	public var posY:Float = 0.0;
 	public var xOffset:Float = 0;
 	public var yOffset:Float = 0;
 	public var scaleXRatio:Float = 1;
