@@ -24,7 +24,7 @@ class WindowManager
 	public static var height(get, null):Int = 800;
 	public static var hidden(default, null):Value<Bool>;
 	public static var fullscreen(default, null):Value<Bool>;
-	
+	public static var targetOrientation:Orientation;
 	
 	
 	public static function init() 
@@ -36,6 +36,7 @@ class WindowManager
 		orientation = new Value( Portrait );
 		
 		Browser.window.addEventListener( "orientationchange", function(_) callLater( onOrientationChange ) );
+		Browser.window.addEventListener( "orientationchange", function(_) untyped __js__("console.log('ori'+window.screen.orientation.angle)") );
 		Browser.window.addEventListener( "resize", function(_) callLater( onResize ) );
 		
 		
@@ -90,7 +91,8 @@ class WindowManager
 		return true;
 	}
 	
-	private static function updateFullscreen() {
+	private static function updateFullscreen() 
+	{
 		var state :Dynamic = HtmlUtils.loadFirstExtension(
             ["fullscreen", "fullScreen", "isFullScreen"], Browser.document).value;
         fullscreen._ = (state == true); // state will be null if fullscreen not supported
@@ -244,8 +246,28 @@ class WindowManager
                 Reflect.callMethod(Browser.document, cancelFullscreen, []);
             }
         }
+		
+		if( targetOrientation != null ) {
+			var orientation = HtmlUtils.loadFirstExtension(["orientation"], Browser.window.screen).value;
+			if ( orientation != null ) {
+				orientation.lock( targetOrientation == Landscape ? "landscape" : "portrait" );
+			} else {
+				Log.sys("Orientation API is not supported");
+			}
+		}
+		
     }
 	
+	static public function setTargetOrientation( o:Orientation, showOnScreenMessageWhenAPIUnavaible:Bool = false ) 
+	{
+		targetOrientation = o;
+		// TODO make orientation unlockable (when passed o == null)
+		if ( showOnScreenMessageWhenAPIUnavaible ) {
+			// TODO show div with "rotate you screen dumbass" message when orientation api is not available
+			Log.warn("Rotate-your-phone-dumbass-message not implemented");
+		}
+		
+	}
 }
 
 enum Orientation { Portrait; Landscape; }

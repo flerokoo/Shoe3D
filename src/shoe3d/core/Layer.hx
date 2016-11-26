@@ -22,7 +22,8 @@ class Layer implements GameObjectContainer
 	public var camera(default, null):Camera;
 	public var children(default, null):Array<GameObject>;
 	public var visible:Bool = true;	
-	public var fov(default,null):Value<Float>;
+	public var fov(default, null):Value<Float>;
+	public var clearDepthBeforeRender:Bool = false;
 	
 	public function new( ?name:String ) 
 	{
@@ -103,7 +104,8 @@ class Layer implements GameObjectContainer
 	public function render( renderer:WebGLRenderer)
 	{
 		if ( camera == null ) return;
-		renderer.sortObjects = true;
+		renderer.sortObjects = false;
+		if ( clearDepthBeforeRender ) renderer.clearDepth();
 		renderer.render( scene, camera );
 	}
 	

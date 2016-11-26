@@ -20,7 +20,7 @@ class Transition
 		//_holder.remove( currentScreen.scene );
 		//_holder.add( targetScreen.scene );
 		
-		targetScreen.onHide();
+		if( currentScreen != null ) currentScreen.onHide();
 		if ( fn != null ) fn();
 		targetScreen.onShow();
 		

@@ -92,4 +92,14 @@ class SMath
 	{
 		return a + Math.random() * (b - a);
 	}
+	
+	/**
+	 * 
+	 * @param	t Parameter [0,1]
+	 */
+	static public inline function parabolicFactor( t:Float, clamp:Bool = true ) 
+	{
+		if ( clamp ) t = SMath.clamp01(t);
+		return -4 * t * t + 4 * t;
+	}
 }

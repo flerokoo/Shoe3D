@@ -19,8 +19,13 @@ class SoundSystem
 		});
 		return true;
 	}
-	
-	public static function play( id:String, volume:Float, loop:Int = 1 ) {
+	/**
+	 * 
+	 * @param	id
+	 * @param	volume 0-1
+	 * @param	loop infinite: < 0; once: 0 (defualt)
+	 */
+	public static function play( id:String, volume:Float = 1, loop:Int = 0 ) {
 		return SoundManager.play( id, { volume:volume, loop:loop } );		
 	}
 	

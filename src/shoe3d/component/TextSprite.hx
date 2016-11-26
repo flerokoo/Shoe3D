@@ -69,6 +69,7 @@ class TextSprite extends Element2D
 	
 	var ir:ImmediateRenderObject;	
 	public function updateText() {
+		_bounds = new Rectangle();
 		_glyphs = [];		
 		var line:Line = { width: 0, text: '', num: 0 };
 		_lines = [line];
@@ -98,6 +99,7 @@ class TextSprite extends Element2D
 				Log.warn('No character in font: ${_text.charCodeAt(gi)}' );
 			}				
 		}
+		_bounds.width = _maxLineWidth;
 		// EXP START
 		// extract required glyphs and calculating lines
 		/*var len = _text.length, gi = 0;
@@ -290,6 +292,7 @@ class TextSprite extends Element2D
 		
 		_textDirty = false;
 		_layoutDirty = true;
+		return this;
 		
 	}
 	
@@ -620,4 +623,7 @@ class TextSprite extends Element2D
 		return _lineSpacing = value;
 	}
 	
+	override public function getBounds():Rectangle 	{
+		return _bounds;
+	}
 }
