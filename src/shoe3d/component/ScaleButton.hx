@@ -22,7 +22,11 @@ class ScaleButton extends Component
 	var downSound:String;
 	var upSound:String;
 	
+	public static var defaultDownSound:String;
+	public static var defaultUpSound:String;
+	
 	public var active:Bool = true;
+	public var defaultSoundsDisabled:Bool = false;
 	
 	public function new( ?fn:PointerEvent->Void, activeStateScale = 0.9 ) 
 	{
@@ -41,7 +45,10 @@ class ScaleButton extends Component
 	
 	function down( e:PointerEvent ) 
 	{
-		if ( downSound != null ) SoundManager.play( downSound );
+		if ( downSound != null  ) 
+			SoundManager.play( downSound )
+		else if ( defaultDownSound != null  && ! defaultSoundsDisabled) 
+			System.sound.play( defaultDownSound );
 		isDown = true;
 		targetScale = activeStateScale;
 		//Actuate.tween( owner.transform.scale, 0.18, { x: activeStateScale, y:activeStateScale } ).ease( Quad.easeOut );	
@@ -57,7 +64,10 @@ class ScaleButton extends Component
 	{
 		if ( isDown ) 
 		{
-			if ( upSound != null ) SoundManager.play( upSound );
+			if ( upSound != null ) 
+				SoundManager.play( upSound )
+			else if ( defaultUpSound != null && ! defaultSoundsDisabled ) 
+				System.sound.play(defaultUpSound);
 			isDown = false;
 			if ( fn != null) fn(e);
 			//Actuate.tween( owner.transform.scale, 0.18, { x: 1, y:1 } ).ease( Quad.easeOut );
@@ -83,9 +93,19 @@ class ScaleButton extends Component
 	public function setSounds( ?dwn:String, ?up:String ) {
 		downSound = dwn;
 		upSound = up;
+		disableDefaultSounds();
 		return this;
 	}
 	
+	public static function setDefaultSounds( ?dwn:String, ?up:String ) {
+		defaultDownSound = dwn;
+		defaultUpSound = up;
+	} 
+	
+	public function disableDefaultSounds() {
+		defaultSoundsDisabled = true;
+		return this;
+	}
 	
 	
 }

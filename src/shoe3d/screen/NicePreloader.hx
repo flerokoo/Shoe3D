@@ -103,7 +103,7 @@ class NicePreloader extends GameScreen
 					#if !debug
 					System.window.requestFullscreen();
 					#end
-				} ) )
+				} ).disableDefaultSounds() )
 				.add( new AutoPosition(  ).setPos(0.5, POS_Y_RELATIVE) );
 			go.transform.add( playButton );
 			
