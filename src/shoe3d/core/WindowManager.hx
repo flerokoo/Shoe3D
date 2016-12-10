@@ -36,7 +36,6 @@ class WindowManager
 		orientation = new Value( Portrait );
 		
 		Browser.window.addEventListener( "orientationchange", function(_) callLater( onOrientationChange ) );
-		Browser.window.addEventListener( "orientationchange", function(_) untyped __js__("console.log('ori'+window.screen.orientation.angle)") );
 		Browser.window.addEventListener( "resize", function(_) callLater( onResize ) );
 		
 		
@@ -250,7 +249,10 @@ class WindowManager
 		if( targetOrientation != null ) {
 			var orientation = HtmlUtils.loadFirstExtension(["orientation"], Browser.window.screen).value;
 			if ( orientation != null ) {
-				orientation.lock( targetOrientation == Landscape ? "landscape" : "portrait" );
+				orientation.lock( targetOrientation == Landscape ? "landscape" : "portrait").then( 
+					function(e) Log.sys("Locked orientation"), 
+					function(e) Log.sys("Orientation lock error: " + e) 
+				);
 			} else {
 				Log.sys("Orientation API is not supported");
 			}
