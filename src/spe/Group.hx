@@ -23,5 +23,6 @@ extern class Group
 	public function triggerPoolEmitter( numEmitters:Int, ?position:Vector3 ):Group;
 	
 	public var mesh:Mesh;
+	public var scale:Float;
 	
 }

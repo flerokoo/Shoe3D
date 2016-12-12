@@ -52,4 +52,17 @@ class Res
 		return null;	
 	}
 	
+	public static function getFile( name:String ):File
+	{
+		if ( _packMap == null ) throw 'No asset packs';
+		for ( i in _packMap )
+		{
+			var ret = i.getFile( name, false );
+			if ( ret != null) return ret;
+		}
+		
+		throw 'No file $name found';
+		return null;	
+	}
+	
 }

@@ -27,4 +27,11 @@ extern class Emitter
 		?distribution:EmitterDistribution,
 		?randomise:Bool
 	};
+	
+	public var velocity: {
+		?value: Vector3,
+		?spread:Vector3,
+		?distribution:EmitterDistribution,
+		?randomise:Bool
+	};
 }
