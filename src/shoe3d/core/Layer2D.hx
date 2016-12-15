@@ -81,14 +81,14 @@ class Layer2D extends Layer implements Pointable
 		//renderer.setDepthWrite( false );
 		//Log.log( renderer);
 		//throw "ERR";
-		if( clearDepthBeforeRender ) renderer.clearDepth();
+		if( clearDepthBeforeRender  ) renderer.clearDepth();
 		renderer.render( scene, camera );
 	}
 	
 	public function new(?name) 
 	{
-		clearDepthBeforeRender = true;
 		super(name);
+		clearDepthBeforeRender = true;		
 	}
 	
 	override public function setCamera( cam:Camera )
