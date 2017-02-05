@@ -16,12 +16,12 @@ class Res
 	public static function registerPack( pack:AssetPack, ?name:String ) 
 	{
 		if ( _packMap == null ) _packMap = new Map();
-		if ( StringTools.replace( name, ' ', '' ) == '' ) {
+		if ( name == null || StringTools.replace( name, ' ', '' ) == '' ) {
 			var gen = getRandomName();
 			Log.warn("No name for asset pack provided. Generated name: " + gen );
-			packMap.set( gen, pack );	
+			_packMap.set( gen, pack );	
 		} else {
-			packMap.set( name, pack );
+			_packMap.set( name, pack );
 		}		
 	}
 	

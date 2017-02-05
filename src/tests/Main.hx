@@ -77,8 +77,7 @@ class Main
 			System.renderer.showStats();		
 			System.screen.addScreen( "game", TestScreen );
 			System.screen.addScreen( "game2", TestScreen2 );
-			System.screen.show( "game" );
-			System.start();			
+			System.screen.show( "game" );				
 		});
 		
 		
