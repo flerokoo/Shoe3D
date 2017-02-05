@@ -90,6 +90,7 @@ class GameObject implements ComponentContainer implements GameObjectContainer im
 		_compMap = new Map();
 		#if !macro
 		transform = new Object3D();
+		transform.data = { gameObject: this };
 		#end
 		
 	}	

@@ -8,6 +8,10 @@ import js.html.*;
 @:native("THREE.Object3D")
 extern class Object3D
 {
+	
+	/** SHOE3D data holder */
+	var data:Dynamic;
+	
 	function new() : Void;
 
 	/**

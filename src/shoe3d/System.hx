@@ -136,12 +136,7 @@ class System
 		#end
 	}
 	
-	public static function start() 
-	{
-		
-		
-	}
-	
+
 	public static function showFPSMeter() 
 	{
 		if ( _info == null ) showInfoBox();
