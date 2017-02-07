@@ -1,5 +1,6 @@
 package shoe3d.component;
 import shoe3d.core.game.Component;
+import shoe3d.core.game.GameObject;
 import shoe3d.util.Disposable;
 
 /**
@@ -38,5 +39,15 @@ class Disposer extends Component
 	override public function onRemoved()
 	{
 		dispose();
+	}
+	
+	public static function getFrom( e:GameObject ):Disposer
+	{
+		var disp = e.get(Disposer);
+		if ( disp == null ) {
+			disp = new Disposer();
+			e.add( disp );
+		}
+		return disp;
 	}
 }

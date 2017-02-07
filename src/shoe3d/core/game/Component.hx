@@ -1,5 +1,6 @@
 package shoe3d.core.game;
 import shoe3d.util.Disposable;
+import shoe3d.util.Log;
 
 /**
  * ...
@@ -26,10 +27,16 @@ class Component implements Disposable
 	}
 	
 	public function onLateUpdate() {
-		
+		#if !shoe3d_enable_late_update
+		Log.warn("Use -D shoe3d_enable_late_update to enable onLateUpdate()");
+		#end
 	}
 	
 	public function onStart() {
+		
+	}
+	
+	public function onAfterStart() {
 		
 	}
 	

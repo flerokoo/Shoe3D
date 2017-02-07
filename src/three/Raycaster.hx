@@ -16,4 +16,5 @@ extern class Raycaster
 	function set(origin:Vector3, direction:Vector3) : Void;
 	function intersectObject(object:Object3D, ?recursive:Bool) : Array<Intersection>;
 	function intersectObjects(objects:Array<Object3D>, ?recursive:Bool) : Array<Intersection>;
+	public function setFromCamera( coords:Vector2, camera:Camera ): Void;
 }

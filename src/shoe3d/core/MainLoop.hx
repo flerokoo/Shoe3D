@@ -175,11 +175,6 @@ class MainLoop
 	public function lateUpdateGameObject( go:GameObject )
 	{
 		for ( i in go.components ) {
-			
-			if ( ! i._started ) {
-				i.onStart();
-				i._started = true;
-			}
 				
 			i.onLateUpdate();
 		}
@@ -198,6 +193,7 @@ class MainLoop
 			if ( ! i._started ) {
 				i.onStart();
 				i._started = true;
+				i.onAfterStart();
 			}
 				
 			
