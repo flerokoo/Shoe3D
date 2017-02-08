@@ -28,7 +28,7 @@ class ParticleSystem extends Component
 	public var startData(default, null):Map<String, {v:Vector3, p:Vector3}>;
 	public var rememberStartPositionsAndVelocities:Bool = false;
 	
-	public function new( groupParams:GroupParameters, rememberStartPositionsAndVelocities:Bool = false ) 
+	public function new( groupParams:GroupParameters, rememberStartPositionsAndVelocities:Bool = true ) 
 	{
 		super();
 		
@@ -70,7 +70,7 @@ class ParticleSystem extends Component
 		return emitters[name];
 	}
 	
-	public static function fromJSON( json:String, rememberStartPositionsAndVelocities:Bool = false ):ParticleSystem
+	public static function fromJSON( json:String, rememberStartPositionsAndVelocities:Bool = true ):ParticleSystem
 	{
 		var out = null;		
 		try {			
@@ -87,6 +87,8 @@ class ParticleSystem extends Component
 			for ( i in Reflect.fields( o ) ) 
 			{
 				var fields = Reflect.fields( Reflect.field(o, i) );
+	
+				
 				if ( fields.length == 3 ) 
 				{
 					if ( fields.indexOf("x") > -1 && fields.indexOf("y") > -1 )
@@ -108,6 +110,12 @@ class ParticleSystem extends Component
 							Reflect.field( Reflect.field(o, i), "g" ),
 							Reflect.field( Reflect.field(o, i), "b" )
 							));
+					if ( fields.indexOf("hex") > -1 ) 
+						Reflect.setField( o, i, new Color(
+								Std.parseInt( Reflect.field( Reflect.field(o,i), "hex") )
+							));
+					
+					
 						
 				}
 				else if ( fields.length > 0 && i.length > 1 && i != "texture" )
@@ -123,6 +131,8 @@ class ParticleSystem extends Component
 			
 		var ps = new ParticleSystem( out.group, rememberStartPositionsAndVelocities );
 		
+		Log.log(out.emitters);
+		
 		for ( i in Reflect.fields(out.emitters) ) {
 			var em = new Emitter( Reflect.field( out.emitters, i ) );
 			ps.addEmitter( i, em );
@@ -131,7 +141,7 @@ class ParticleSystem extends Component
 		return ps;
 	}
 	
-	public static function fromPack( pack:AssetPack, filename:String, rememberStartPositionsAndVelocities:Bool = false ):ParticleSystem 
+	public static function fromPack( pack:AssetPack, filename:String, rememberStartPositionsAndVelocities:Bool = true ):ParticleSystem 
 	{
 		return ParticleSystem.fromJSON( pack.getFile( filename ).content, rememberStartPositionsAndVelocities );
 	}
@@ -182,6 +192,17 @@ class ParticleSystem extends Component
 		return this;
 	}
 	
+	public function enable()
+	{
+		for ( i in emitters )
+			i.enable();
+	}
+	
+	public function disable()
+	{
+		for ( i in emitters )
+			i.disable();
+	}
 	
 	override public function dispose() 
 	{

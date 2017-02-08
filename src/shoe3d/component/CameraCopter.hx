@@ -93,7 +93,7 @@ class CameraCopter extends Component
 	
 	override public function onUpdate() 
 	{
-		/*if ( System.input.keyboard.isDown( Numpad4 ) )
+		if ( System.input.keyboard.isDown( Numpad4 ) )
 			camera.translateX( -0.1 * speedMultiplier );
 				
 		if ( System.input.keyboard.isDown( Numpad6 ) )
@@ -115,7 +115,7 @@ class CameraCopter extends Component
 			camera.rotateY( Math.PI * 0.01 );
 			
 		if ( System.input.keyboard.isDown( Numpad9 ) )
-			camera.rotateY( -Math.PI * 0.01 );*/
+			camera.rotateY( -Math.PI * 0.01 );
 			
 		var speed = System.input.keyboard.isDown(Shift) ? 3 : 1;	
 			
