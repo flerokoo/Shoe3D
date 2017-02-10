@@ -168,21 +168,29 @@ class GameConsole
 		return GameConsole;
 	}
 	
-	static public function traverseScene():Class<GameConsole> {
+	static public function traverseScene( printComponents:Bool = false ):Class<GameConsole> {
 		var trav:GameObject->Int->Void = null;
+		
 		trav = function( go:GameObject, level:Int = 0 ) {
 			var str = '';
 			for ( i in 0...level ) str += '->';
-			Browser.window.console.log( str + ' ' + go.name );
+			if ( printComponents ) {
+				Browser.window.console.groupCollapsed( ' %c $str ${go.name==""?"%noname%":go.name}', 'padding-left: ${level*10}px; color: lightblue' );
+				for ( i in go.components ) Browser.window.console.log( i.name );
+				Browser.window.console.groupEnd();
+			} else {
+				Browser.window.console.log( ' %c $str ${go.name==""?"%noname%":go.name}', 'padding-left: ${level*10}px; color: lightblue' );
+			}
 			level ++;
 			for ( i in go.children ) trav( i, level );
 		}
 		
 		for ( l in System.screen._currentScreen.layers )
 		{
-			Browser.window.console.log( '==LAYER== (' + l.name +')');
+			Browser.window.console.groupCollapsed( '%c LAYER ${l.name}', "padding: 3px 10px; color: orange");
 			for ( i in l.children )
 				trav( i , 1);
+			Browser.window.console.groupEnd();
 		}
 		
 		

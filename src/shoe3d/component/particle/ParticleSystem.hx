@@ -65,8 +65,6 @@ class ParticleSystem extends Component
 				p:  untyped emitter.position.value.clone(),
 				v:  untyped emitter.velocity.value.clone()
 			});
-		Log.pretty( name );
-		Log.log( emitter.position );
 		return this;
 	}
 	
@@ -97,7 +95,7 @@ class ParticleSystem extends Component
 				var foundVectorOrColor = false;
 				if ( fields.length == 3 ) 
 				{
-					if ( fields.indexOf("x") > -1 && fields.indexOf("y") > -1 )
+					if ( fields.indexOf("x") > -1 && fields.indexOf("y") > -1 ) {
 						if( fields.indexOf("z") > -1 )
 							Reflect.setField( o, i, new Vector3(
 								Reflect.field( Reflect.field( o, i ), "x" ), 
@@ -110,22 +108,30 @@ class ParticleSystem extends Component
 								Reflect.field( Reflect.field( o, i ), "y" )
 								));
 								
-					if ( fields.indexOf("r") > -1 && fields.indexOf("g") > -1 && fields.indexOf("b") > -1 ) 
+						foundVectorOrColor = true;
+					}
+								
+					if ( fields.indexOf("r") > -1 && fields.indexOf("g") > -1 && fields.indexOf("b") > -1 ) { 
+						foundVectorOrColor = true;
 						Reflect.setField( o, i, new Color(
 							Reflect.field( Reflect.field(o, i), "r" ),
 							Reflect.field( Reflect.field(o, i), "g" ),
 							Reflect.field( Reflect.field(o, i), "b" )
 							));
-					if ( fields.indexOf("hex") > -1 ) 
+					}
+					
+					if ( fields.indexOf("hex") > -1 )  {
 						Reflect.setField( o, i, new Color(
 								Std.parseInt( Reflect.field( Reflect.field(o,i), "hex") )
 							));
+						foundVectorOrColor = true;
+					}
 					
 					
 						
 				}
 				
-				if ( fields.length > 0 && i.length > 1 && i != "texture" )
+				if ( ! foundVectorOrColor && fields.length > 0 && i.length > 1 && i != "texture" )
 				{
 					createRealVectorsAndColors( Reflect.field( o, i ) );
 				}
@@ -162,13 +168,13 @@ class ParticleSystem extends Component
 		for ( i in 0...path.length ) {
 			if( i < path.length -1 ) {
 				var field = Reflect.field( last, path[i] );
-				Assert.that( field != null, 'Field $field from path $path not found' );
+				Assert.that( field != null, 'Field ${path[i]} from path $path not found' );
 				last = field;
 			} else {
 				Reflect.setProperty( last, path[i], val);
 			}
 		}	
-		
+		return this;
 	}
 	
 	override public function onAdded() 
