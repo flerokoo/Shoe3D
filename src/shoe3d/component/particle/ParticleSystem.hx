@@ -65,6 +65,8 @@ class ParticleSystem extends Component
 				p:  untyped emitter.position.value.clone(),
 				v:  untyped emitter.velocity.value.clone()
 			});
+		Log.pretty( name );
+		Log.log( emitter.position );
 		return this;
 	}
 	
@@ -92,7 +94,7 @@ class ParticleSystem extends Component
 			{
 				var fields = Reflect.fields( Reflect.field(o, i) );
 	
-				
+				var foundVectorOrColor = false;
 				if ( fields.length == 3 ) 
 				{
 					if ( fields.indexOf("x") > -1 && fields.indexOf("y") > -1 )
@@ -122,7 +124,8 @@ class ParticleSystem extends Component
 					
 						
 				}
-				else if ( fields.length > 0 && i.length > 1 && i != "texture" )
+				
+				if ( fields.length > 0 && i.length > 1 && i != "texture" )
 				{
 					createRealVectorsAndColors( Reflect.field( o, i ) );
 				}
@@ -135,7 +138,6 @@ class ParticleSystem extends Component
 			
 		var ps = new ParticleSystem( out.group, mobileScale, rememberStartPositionsAndVelocities );
 		
-		Log.log(out.emitters);
 		
 		for ( i in Reflect.fields(out.emitters) ) {
 			var em = new Emitter( Reflect.field( out.emitters, i ) );
@@ -148,6 +150,25 @@ class ParticleSystem extends Component
 	public static function fromPack( pack:AssetPack, filename:String, mobileScale:Bool = true, rememberStartPositionsAndVelocities:Bool = true ):ParticleSystem 
 	{
 		return ParticleSystem.fromJSON( pack.getFile( filename ).content, mobileScale, rememberStartPositionsAndVelocities );
+	}
+	
+	public function setEmitterParam( em:String, path:Array<String>, val:Dynamic ) 
+	{
+		Assert.that( path != null && path.length > 0 );
+		var emitter = emitters[em];
+		Assert.that(emitter != null, 'Emitter $em not found');
+		
+		var last:Dynamic = emitter;
+		for ( i in 0...path.length ) {
+			if( i < path.length -1 ) {
+				var field = Reflect.field( last, path[i] );
+				Assert.that( field != null, 'Field $field from path $path not found' );
+				last = field;
+			} else {
+				Reflect.setProperty( last, path[i], val);
+			}
+		}	
+		
 	}
 	
 	override public function onAdded() 

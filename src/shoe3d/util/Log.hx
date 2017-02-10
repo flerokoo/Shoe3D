@@ -7,7 +7,7 @@ package shoe3d.util;
 @:allow(shoe3d) 
 class Log
 {
-	static var _color:String = 'color: #4D1E1F;';
+	static var _color:String = 'color: #FF2291;';
 	static var _bg:String = 'background: transparent;';
 	static var _bold:String = '';
 	static var _customParams:String = '';
