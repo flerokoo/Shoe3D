@@ -28,19 +28,23 @@ class ParticleSystem extends Component
 	public var startData(default, null):Map<String, {v:Vector3, p:Vector3}>;
 	public var rememberStartPositionsAndVelocities:Bool = false;
 	
-	public function new( groupParams:GroupParameters, rememberStartPositionsAndVelocities:Bool = true ) 
+	public function new( groupParams:GroupParameters, mobileScale:Bool = true, rememberStartPositionsAndVelocities:Bool = true ) 
 	{
 		super();
 		
+		
 		// fix scale for mobile
-		if ( groupParams.scale != null )
-			groupParams.scale *= js.Browser.window.devicePixelRatio;
-		else
-			groupParams.scale = 300 * js.Browser.window.devicePixelRatio;
+		if( mobileScale ) {
+			if ( groupParams.scale != null )
+				groupParams.scale *= js.Browser.window.devicePixelRatio;
+			else
+				groupParams.scale = 300 * js.Browser.window.devicePixelRatio ;
+		}
 		
 		
 		group = new Group( groupParams );
 		emitters = new Map();
+		
 		
 		
 		this.rememberStartPositionsAndVelocities = rememberStartPositionsAndVelocities;
@@ -70,7 +74,7 @@ class ParticleSystem extends Component
 		return emitters[name];
 	}
 	
-	public static function fromJSON( json:String, rememberStartPositionsAndVelocities:Bool = true ):ParticleSystem
+	public static function fromJSON( json:String, mobileScale:Bool = true, rememberStartPositionsAndVelocities:Bool = true ):ParticleSystem
 	{
 		var out = null;		
 		try {			
@@ -129,7 +133,7 @@ class ParticleSystem extends Component
 		createRealVectorsAndColors( out.group );
 		createRealVectorsAndColors( out.emitters );
 			
-		var ps = new ParticleSystem( out.group, rememberStartPositionsAndVelocities );
+		var ps = new ParticleSystem( out.group, mobileScale, rememberStartPositionsAndVelocities );
 		
 		Log.log(out.emitters);
 		
@@ -141,9 +145,9 @@ class ParticleSystem extends Component
 		return ps;
 	}
 	
-	public static function fromPack( pack:AssetPack, filename:String, rememberStartPositionsAndVelocities:Bool = true ):ParticleSystem 
+	public static function fromPack( pack:AssetPack, filename:String, mobileScale:Bool = true, rememberStartPositionsAndVelocities:Bool = true ):ParticleSystem 
 	{
-		return ParticleSystem.fromJSON( pack.getFile( filename ).content, rememberStartPositionsAndVelocities );
+		return ParticleSystem.fromJSON( pack.getFile( filename ).content, mobileScale, rememberStartPositionsAndVelocities );
 	}
 	
 	override public function onAdded() 

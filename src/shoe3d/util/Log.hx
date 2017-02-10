@@ -20,11 +20,11 @@ class Log
 		return Log;
 	}
 	
+	
 	static function processColor( clr:String ) 
 	{
 		if ( StringTools.startsWith(clr, '0x') )
 			clr = '#' + clr.substr( 2 );
-		if ( clr.length == 6 ) clr = '#' + clr;
 		return clr;
 	}
 	
@@ -75,6 +75,26 @@ class Log
 		untyped __js__("console").log( '%c' + msg, _color + _bg + _bold + _customParams  );
 	}
 	
+	public static inline function header( msg:String, color:String = 'white' ) 
+	{ 
+		var params = [
+			'background: linear-gradient(#D33106, #571402)'
+			, 'border: 1px solid #3E0E02'
+			, 'color: ${processColor(color)}'
+			, 'display: block'
+			, 'text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3)'
+			, 'box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 5px 3px -5px rgba(0, 0, 0, 0.5), 0 -13px 5px -10px rgba(255, 255, 255, 0.4) inset'
+			, 'line-height: 40px'
+			, 'text-align: center'
+			, 'font-weight: bold'
+			, 'width: 100%'
+			, 'margin: 0 auto'
+			, 'padding: 8px 60px'
+			, 'font-size: 20px'
+		].join(';');
+		untyped __js__("console").log( '%c' + msg, params  );
+	}
+	
 	public static function info(msg:Dynamic) 
 	{
 		untyped __js__("console").info(msg);
@@ -91,6 +111,7 @@ class Log
 	public static inline function log( msg:String ) { }
 	public static inline function pretty( msg:String ) { }
 	public static inline function info( msg:String ) { }
+	public static inline function header( msg:String, color:String = '' ) { }
 	public static function sys(msg:String) {}	
 	public static function printSys() {}	
 	#end
