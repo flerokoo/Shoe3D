@@ -93,7 +93,7 @@ class PointerManager
 			while( li >= 0 )
 			{
 				var layer = System.screen._currentScreen.layers[li];
-				if ( Std.is(layer, Layer2D) && cast( layer, Layer2D ).pointerEnabled ) {					
+				if ( Std.is(layer, Layer2D) && cast( layer, Layer2D ).pointerEnabled && cast( layer, Layer2D ).visible ) {					
 					var chain = [];
 					var hit:Element2D = null;
 					var n = layer.children.length - 1;
