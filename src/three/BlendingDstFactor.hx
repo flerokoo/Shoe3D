@@ -3,7 +3,7 @@ package three;
 import js.html.*;
 
 // custom blending destination factors
-@:native("THREE.BlendingDstFactor")
+@:native("THREE")
 extern enum BlendingDstFactor
 {
 	ZeroFactor;

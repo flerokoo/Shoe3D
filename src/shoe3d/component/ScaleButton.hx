@@ -51,6 +51,7 @@ class ScaleButton extends Component
 			System.sound.play( defaultDownSound );
 		isDown = true;
 		targetScale = activeStateScale;
+		e.stopPropagation();
 		//Actuate.tween( owner.transform.scale, 0.18, { x: activeStateScale, y:activeStateScale } ).ease( Quad.easeOut );	
 	}
 	
@@ -72,6 +73,7 @@ class ScaleButton extends Component
 			if ( fn != null) fn(e);
 			//Actuate.tween( owner.transform.scale, 0.18, { x: 1, y:1 } ).ease( Quad.easeOut );
 			targetScale = 1;
+			e.stopPropagation();
 		}
 	}
 	
