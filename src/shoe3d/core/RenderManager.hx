@@ -51,6 +51,9 @@ class RenderManager
 		} else {
 			var canv = Browser.document.createCanvasElement();
 			var cont = canv.getContext("webgl");
+			
+			if ( cont == null ) cont = canv.getContext("experimental-webgl");
+						
 			if ( cont == null ) {
 				showMessage('Ooops, something wrong with your browser.<br/><a href="http://get.webgl.org/troubleshooting">More info</a>');
 				return false;

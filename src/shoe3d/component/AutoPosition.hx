@@ -15,8 +15,8 @@ class AutoPosition extends Component
 	public var scaleEnabled:Bool = true;
 	public var positionEnabled:Bool = true;
 	
-	public var posX:Float = 0.0;
-	public var posY:Float = 0.0;
+	public var posX(default, set):Float = 0.0;	
+	public var posY(default, set):Float = 0.0;
 	public var xOffset:Float = 0;
 	public var yOffset:Float = 0;
 	public var scaleXRatio:Float = 1;
@@ -228,6 +228,18 @@ class AutoPosition extends Component
 	override public function onUpdate() 
 	{
 		if ( _dirty ) reoverlay();
+	}
+	
+	function set_posX(value:Float):Float 
+	{
+		_dirty =  true;
+		return posX = value;
+	}
+	
+	function set_posY(value:Float):Float 
+	{
+		_dirty = true;
+		return posY = value;
 	}
 	
 }

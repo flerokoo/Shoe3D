@@ -216,7 +216,7 @@ extern class Geometry
 	 */
 	function computeBoundingSphere() : Void;
 
-	function merge(geometry:Geometry, matrix:Matrix, materialIndexOffset:Float) : Void;
+	function merge(geometry:Geometry, ?matrix:Matrix, ?materialIndexOffset:Float) : Void;
 
 	/**
 	 * Checks for duplicate vertices using hashmap.

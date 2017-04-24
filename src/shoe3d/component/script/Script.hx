@@ -32,7 +32,9 @@ class Script extends Component
 	override public function onUpdate() 
 	{
 		if ( _running ) {
-			if ( _action.update( Time.dt ) ) {				
+			var flag = _action.update( Time.dt );
+			
+			if ( flag ) {			
 				_running = false;
 				onComplete.emit();
 			}
@@ -43,5 +45,6 @@ class Script extends Component
 	{
 		_action.start();
 		_running = true;
+		return this;
 	}
 }

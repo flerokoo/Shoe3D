@@ -56,7 +56,7 @@ class Layer implements GameObjectContainer
 				cam.left = 0;
 				cam.right = System.window.width;
 				cam.top = 0;
-				cam.left = System.window.height;
+				cam.bottom = System.window.height;
 				cam.updateProjectionMatrix();
 				
 			}

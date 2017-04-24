@@ -18,6 +18,7 @@ class ActuateAction implements Action
 	var _par:Dynamic;
 	var _complete:Bool = false;
 	var _ease:IEasing = Cubic.easeOut;
+	var _onUpd:Void->Void = null;
 	public function new( obj:Dynamic, duration:Float, params:Dynamic ) 
 	{
 		_obj = obj;
@@ -31,10 +32,20 @@ class ActuateAction implements Action
 		return this;
 	}
 	
+	public function onUpdate( fn:Void->Void )
+	{
+		_onUpd = fn;
+		return this;
+	}
+	
 	public function start():Void
 	{
 		_complete = false;
-		Actuate.tween( _obj, _dur, _par ).onComplete( complete ).ease( _ease );
+		var tween = Actuate.tween( _obj, _dur, _par )
+			.onComplete( complete )
+			.ease( _ease );
+		if ( _onUpd != null )
+			tween.onUpdate( _onUpd );
 	}
 	
 	function complete()

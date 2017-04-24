@@ -1,5 +1,6 @@
 package shoe3d.component.script.action;
 import shoe3d.util.Assert;
+import shoe3d.util.Log;
 
 /**
  * ...
@@ -26,14 +27,14 @@ class Sequence implements Action
 
 	
 	public function update( dt:Float ):Bool
-	{
-		
-		if ( actions[_idx].update( dt ) ) {
-			_idx++;
-			if ( _idx >= actions.length ) return true;
+	{		
+		if ( actions[_idx].update( dt ) ) {			
+			_idx++;		
+			if ( _idx >= actions.length ) {	
+				return true;
+			}
 			actions[_idx].start();
 		}
-		
 		return false;
 	}
 	
