@@ -14,13 +14,13 @@ Framework i use to make WebGL games. Utilizes three.js for rendering and SPE.js 
 
 Some day...
 
-## Examples
-
-Games build with this framework:
-
+## Example games
 
 #### [Juggle Town](https://www.youtube.com/watch?v=q-AoEeA231w&feature=youtu.be)
 ![](http://shodiev.ru/games/juggletown/thumb.png)
 
 #### [Endless Hallway](https://www.youtube.com/watch?v=ZS5KA8Joz70)
 ![](http://shodiev.ru/games/endlesshallway/thumb.png)
+
+## Credits
+Special thanks to the creator of Flambe, Bruno Garcia.
