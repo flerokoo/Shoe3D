@@ -6,6 +6,6 @@ Framework i use to make WebGL games. Utilizes three.js for rendering.
 
 Games build with this framework:
 
-[One] http://shodiev.ru/demo/kick/
+[One](http://shodiev.ru/demo/kick/)
 
 
