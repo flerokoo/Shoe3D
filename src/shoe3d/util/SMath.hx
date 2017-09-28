@@ -93,6 +93,11 @@ class SMath
 		return a + Math.random() * (b - a);
 	}
 	
+	public static inline function randInt(a:Int, b:Int ):Int
+	{
+		return a + Math.round(Math.random() * (b-a));
+	}
+	
 	/**
 	 * 
 	 * @param	t Parameter [0,1]

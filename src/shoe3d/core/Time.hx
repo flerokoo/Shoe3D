@@ -3,6 +3,7 @@ import haxe.Timer;
 import js.Browser;
 import shoe3d.util.HtmlUtils;
 import shoe3d.util.Log;
+import shoe3d.util.signal.SingleSignal;
 import shoe3d.util.SMath;
 
 /**
@@ -18,7 +19,7 @@ class Time
 	public static var timeSinceScreenShow(default, null):Float;
 	public static var now(default, null):Void->Float;	
 	public static var timeScale(default, set):Float = 1;
-	
+	public static var tick:SingleSignal<Float>;
 	
 	private static var _gameStartTime:Float;
 	private static var _lastUpdateTime:Float;
@@ -42,6 +43,7 @@ class Time
 			Log.sys( "No window.performance, using system date" );
 		}			
 		_lastUpdateTime = _gameStartTime = now();
+		tick = new SingleSignal();
 		return true;
 	}
 	
@@ -55,7 +57,9 @@ class Time
 		if ( dt > 1 ) dt = 1;
 		if ( dt < 0 ) dt = 0;
 		
+		
 		_lastUpdateTime = cur;
+		tick.emit( dt );
 		
 	}
 	

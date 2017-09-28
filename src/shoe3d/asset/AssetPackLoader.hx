@@ -52,7 +52,8 @@ class AssetPackLoader
 	public function add( name:String, url:String, bytes:Int, ?format:AssetFormat )
 	{
 		if ( format == null ) format = getFormat( url );
-		if ( getFormat( name ) != RAW ) name = Tools.getFileNameWithoutExtension( name );
+		//if ( getFormat( name ) != RAW ) name = Tools.getFileNameWithoutExtension( name );
+		if ( format != RAW ) name = Tools.getFileNameWithoutExtension( name );
 		var ext = name.getUrlExtension();
 		
 		// TODO Придумать какой-то другой способ отличать геометрию от сцены и от просто json

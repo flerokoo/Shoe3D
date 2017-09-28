@@ -8,17 +8,22 @@ import shoe3d.core.Time;
 class Delay implements Action
 {
 
+	var _fn:Void->Float;
 	var _delay:Float = 0.0;
 	var _cur:Float = 0;
 	
-	public function new( delay:Float ) 
+	public function new( delay:Dynamic ) 
 	{
-		_delay = delay;
+		if( Std.is(delay, Float) ) {
+			_delay = delay;
+		} else {
+			_fn = delay;
+		}
 	}
 	
 	public function start()
 	{
-		_cur = _delay;
+		_cur = _fn == null ? _delay : _fn();
 	}
 	
 	public function update(dt:Float )

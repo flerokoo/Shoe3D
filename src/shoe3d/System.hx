@@ -136,6 +136,16 @@ class System
 		#end
 	}
 	
+	
+	public static function pause() 
+	{
+		_loop.paused = true;
+	}
+	
+	public static function unpause()
+	{
+		_loop.paused = false;
+	}
 
 	public static function showFPSMeter() 
 	{

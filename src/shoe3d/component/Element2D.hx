@@ -61,6 +61,16 @@ class Element2D extends Component implements Pointable
 	{
 		anchorX = x;
 		anchorY = y;
+		//updateAnchor();
+		return this;
+	}
+	
+	public function setAnchorRelative(x:Float = 0, y:Float = 0)
+	{
+		throw 'Not working rn';
+		var bounds = getBounds();		
+		anchorX = x * bounds.width;
+		anchorY = y * bounds.height;
 		return this;
 	}
 	

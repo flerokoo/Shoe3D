@@ -31,6 +31,7 @@ class MainLoop
 	public var fpsHistory:Array<Float> = [];
 	public var FPS(default, null):Float;
 	public var averageFPS(default, null):Float = -1000;
+	public var paused:Bool = false;
 	
 	
 	
@@ -68,7 +69,7 @@ class MainLoop
 	{
 		var startTime;
 		var middleTime;
-		if ( System.window.hidden._ ) return;
+		if ( System.window.hidden._ || paused ) return;
 		if ( _skipFrame ) {
 			_skipFrame = false;			
 			return;

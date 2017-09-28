@@ -101,7 +101,7 @@ class NicePreloader extends GameScreen
 				.add( new ScaleButton( function(e) { 
 					onStartReal();
 					#if !debug
-					System.window.requestFullscreen();
+					//System.window.requestFullscreen();
 					#end
 				} ).disableDefaultSounds() )
 				.add( new AutoPosition(  ).setPos(0.5, POS_Y_RELATIVE) );

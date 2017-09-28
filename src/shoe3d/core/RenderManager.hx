@@ -30,7 +30,7 @@ class RenderManager
 		Browser.document.body.appendChild( container );			
 		
 		if( checkWebGLSupport() ) {			
-			renderer = new WebGLRenderer({antialias:false});
+			renderer = new WebGLRenderer({antialias:true});
 			renderer.setSize( 800, 600);			
 			container.appendChild( renderer.domElement );
 			renderer.autoClear = false;	

@@ -3,6 +3,8 @@ import shoe3d.component.Element2D;
 import shoe3d.core.game.Component;
 import shoe3d.core.game.GameObject;
 import shoe3d.util.Assert;
+import shoe3d.util.signal.DoubleSignal;
+import shoe3d.util.signal.SingleSignal;
 
 /**
  * ...
@@ -21,6 +23,9 @@ class SubstateManager extends Component
 
 	public var substates(default, null):Map<String,Substate>;
 	public var currentSubstate(default, null):Substate = null;	
+	public var currentSubstateName(default, null):String = '';
+	public var onShow(default, null):SingleSignal<String>;
+	
 	
 	var _waitingSubstateToHide:Bool = false;
 	var _showSubstateAfterCurrentSubstateHide:String = null;
@@ -29,6 +34,7 @@ class SubstateManager extends Component
 	{
 		super();
 		substates = new Map();
+		onShow = new SingleSignal();
 	}
 	
 	public function addSubstate( sub:Substate, name:String )
@@ -68,6 +74,8 @@ class SubstateManager extends Component
 		} else {			
 			owner.addChild( sub.owner );
 			sub.onShow();
+			onShow.emit( name );
+			currentSubstateName = name;
 			sub.owner.get(Element2D).pointerEnabled = true;
 			currentSubstate = sub;
 		}
@@ -88,6 +96,7 @@ class SubstateManager extends Component
 		currentSubstate.owner.get(Element2D).pointerEnabled = false;
 		owner.removeChild( currentSubstate.owner );		
 		currentSubstate = null;
+		currentSubstateName = '';
 		_waitingSubstateToHide = false;
 	}
 	
@@ -96,6 +105,7 @@ class SubstateManager extends Component
 		owner.removeChild( currentSubstate.owner );		
 		currentSubstate = null;
 		_waitingSubstateToHide = false;
+		currentSubstateName = '';
 		
 		if ( _showSubstateAfterCurrentSubstateHide != null ) {
 			show( _showSubstateAfterCurrentSubstateHide );

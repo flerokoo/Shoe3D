@@ -144,7 +144,10 @@ class WindowManager
 			
 			
 			var ratio = Browser.window.devicePixelRatio ;
-			if ( Math.max( Browser.window.innerWidth, Browser.window.innerHeight) * ratio > 2300 && isMobile ) ratio = 1;
+			if ( Math.max( Browser.window.innerWidth, Browser.window.innerHeight) * ratio > 2300 && isMobile ) {
+				Log.sys("Falling back to devicePixelRatio=1");
+				//ratio = 1;
+			}
 			RenderManager.renderer.setSize( Browser.window.innerWidth * ratio, Browser.window.innerHeight * ratio );	
 			
 			div.style.width = canvas.style.width = Browser.window.innerWidth + "px";

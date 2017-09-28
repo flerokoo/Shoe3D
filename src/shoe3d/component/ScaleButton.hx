@@ -24,6 +24,7 @@ class ScaleButton extends Component
 	
 	public static var defaultDownSound:String;
 	public static var defaultUpSound:String;
+	public static var defaultSoundVolume:Float = 1;
 	
 	public var active:Bool = true;
 	public var defaultSoundsDisabled:Bool = false;
@@ -48,7 +49,7 @@ class ScaleButton extends Component
 		if ( downSound != null  ) 
 			SoundManager.play( downSound )
 		else if ( defaultDownSound != null  && ! defaultSoundsDisabled) 
-			System.sound.play( defaultDownSound );
+			System.sound.play( defaultDownSound, defaultSoundVolume );
 		isDown = true;
 		targetScale = activeStateScale;
 		e.stopPropagation();
@@ -68,7 +69,7 @@ class ScaleButton extends Component
 			if ( upSound != null ) 
 				SoundManager.play( upSound )
 			else if ( defaultUpSound != null && ! defaultSoundsDisabled ) 
-				System.sound.play(defaultUpSound);
+				System.sound.play(defaultUpSound, defaultSoundVolume);
 			isDown = false;
 			if ( fn != null) fn(e);
 			//Actuate.tween( owner.transform.scale, 0.18, { x: 1, y:1 } ).ease( Quad.easeOut );
