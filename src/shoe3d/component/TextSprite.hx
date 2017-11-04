@@ -2,7 +2,7 @@ package shoe3d.component;
 import com.Main;
 import js.Browser;
 import js.html.Float32Array;
-import js.html.svg.Color;
+//import js.html.svg.Color;
 import shoe3d.asset.Font;
 import shoe3d.component.Element2D;
 import shoe3d.util.Log;

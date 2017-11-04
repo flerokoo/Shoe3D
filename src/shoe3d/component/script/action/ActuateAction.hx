@@ -1,6 +1,5 @@
 package shoe3d.component.script.action;
 import motion.Actuate;
-import motion.actuators.GenericActuator.IGenericActuator;
 import motion.easing.Cubic;
 import motion.easing.IEasing;
 import motion.easing.Linear;

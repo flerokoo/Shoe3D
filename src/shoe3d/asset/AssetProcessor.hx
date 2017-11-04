@@ -67,8 +67,8 @@ class AssetProcessor
 			packName += '/';
 		}
 		
-		for ( name in FileSystem.readDirectory( localBase + packName ) ) {
-			if ( FileSystem.isDirectory( localBase + packName + name ) ) {
+		for (name in FileSystem.readDirectory(localBase + packName)) {
+			if ( FileSystem.isDirectory(localBase + packName + name) ) {
 				processPackRecursive( localBase, packName + name, out, packPath + name + "/");
 			} else {
 				

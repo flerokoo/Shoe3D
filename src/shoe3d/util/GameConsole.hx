@@ -18,7 +18,7 @@ class GameConsole
 {
 	public static var system:Class<System> = System;
 	public static var last:Dynamic;
-	static var commands:Map<String,Function>;
+	static var commands:Map<String, Void->Void>;
 	
 	/*public var a = 1;
 	
