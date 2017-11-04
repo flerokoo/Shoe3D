@@ -4,9 +4,9 @@ Framework i use to make WebGL games. Utilizes three.js for rendering and SPE.js 
 
 ## Features
 
-* Unity-like gameObject-component system
-* Easy to work with pointer/keyboard input
-* Automatic compile-time asset managing 
+* Unity-like GameObject-component system
+* Easy work with pointer/keyboard input
+* Automatic compile-time asset management 
 * Wide variety of helper classes
 * Supports UI/2D rendering (unlike three.js)
 
@@ -15,6 +15,9 @@ Framework i use to make WebGL games. Utilizes three.js for rendering and SPE.js 
 Some day...
 
 ## Example games
+
+#### [3D Solitaire](https://play.famobi.com/3d-solitaire)
+![](http://shodiev.ru/img/games/solitaire.jpg)
 
 #### [Juggle Town](https://www.youtube.com/watch?v=q-AoEeA231w&feature=youtu.be)
 ![](http://shodiev.ru/games/juggletown/thumb.png)
