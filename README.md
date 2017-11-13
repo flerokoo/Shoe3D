@@ -1,29 +1,7 @@
 # Shoe3D
 
-Framework i use to make WebGL games. Utilizes three.js for rendering and SPE.js for GPU-powered particles.
+Framework for making WebGL games.
 
-## Features
+## This repository is not maintained anymore. Go [here](https://github.com/flerokoo/Shoe3D-Boilerplate-Code) for new version of this framework (plus, a bunch of boilerplate code)
 
-* Unity-like GameObject-component system
-* Easy work with pointer/keyboard input
-* Automatic compile-time asset management 
-* Wide variety of helper classes
-* Supports UI/2D rendering (unlike three.js)
 
-## API
-
-Some day...
-
-## Example games
-
-#### [3D Solitaire](https://play.famobi.com/3d-solitaire)
-![](http://shodiev.ru/img/games/solitaire.jpg)
-
-#### [Juggle Town](https://www.youtube.com/watch?v=q-AoEeA231w&feature=youtu.be)
-![](http://shodiev.ru/games/juggletown/thumb.png)
-
-#### [Endless Hallway](https://www.youtube.com/watch?v=ZS5KA8Joz70)
-![](http://shodiev.ru/games/endlesshallway/thumb.png)
-
-## Credits
-Special thanks to the creator of Flambe, Bruno Garcia.
